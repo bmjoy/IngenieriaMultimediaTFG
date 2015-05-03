@@ -27,11 +27,11 @@ public class DebugTools : MonoBehaviour
   void Awake()
   {
     // Inicializacion de la instancia del singleton
-    if (instance == null)
+    if(instance == null)
     {
       instance = this;
     }
-    else if (instance != this)
+    else if(instance != this)
     {
       Destroy(gameObject);
     }
@@ -45,11 +45,16 @@ public class DebugTools : MonoBehaviour
 
   void Update()
   {
-    for (int i = 0; i < lineRendererList.Count; i++)
+    if(Input.GetKeyDown(KeyCode.R))
     {
-      LineObject l = lineRendererList[i];
-      l.line.SetPosition(0, l.parent.transform.position);
+      Application.LoadLevel(Application.loadedLevelName);
     }
+
+//    for (int i = 0; i < lineRendererList.Count; i++)
+//    {
+//      LineObject l = lineRendererList[i];
+//      l.line.SetPosition(0, l.parent.transform.position);
+//    }
   }
   
   // Dibuja una linea 3D pero solo sobre un eje indicado
@@ -59,7 +64,7 @@ public class DebugTools : MonoBehaviour
     Vector3 end = start + direction;
     Color lineColor;
     // Cancela los otros ejes
-    if (axis == 'x')
+    if(axis == 'x')
     {
       end = Vector3.Scale(end, new Vector3(1, 0, 0));
       lineColor = Color.red;

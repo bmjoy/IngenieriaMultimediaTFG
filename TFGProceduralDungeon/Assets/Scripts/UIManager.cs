@@ -39,4 +39,14 @@ public class UIManager : MonoBehaviour
   {
     Application.LoadLevel("TestGameplay");
   }
+
+  public void LoadTestEnemies()
+  {
+    Application.LoadLevel("TestEnemies");
+  }
+
+  public void LoadTestLevelGeneration()
+  {
+    Application.LoadLevel("TestLevelGeneration");
+  }
 }

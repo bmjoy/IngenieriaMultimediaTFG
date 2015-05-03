@@ -20,10 +20,10 @@ public class CameraMovement : MonoBehaviour
   void Update()
   {
     // Posicion de la camara con respecto al jugador
-    if(player != null)
-    {
-      transform.position = new Vector3(player.transform.position.x, transform.position.y, transform.position.z);
-    }
+    //if(player != null)
+    //{
+    //  transform.position = new Vector3(player.transform.position.x, transform.position.y, transform.position.z);
+    //}
 
     // Altura/rotacion de la camara
     if(Input.GetKey(KeyCode.PageUp) && transform.rotation.eulerAngles.x < 60f)

@@ -5,6 +5,8 @@ public class Player : MovingObject
 {
   private Animator animator;
   private float maxWalkSpeed = 2.0f;
+  private float maxRunSpeed = 3.0f;
+  private bool running = false;
   private bool rightDir = true; // Para girar el sprite en la direccion correcta
   private bool startJump = false; // Pasa que el FixedUpdate aplique la fuerza
   private bool onGround = true; // Indica si el jugador esta en le suelo (no saltando o cayendo)
@@ -23,12 +25,28 @@ public class Player : MovingObject
 
   void Update()
   {
+    // Si se pulsa Shift la velocidad cambia
+
+    if(Input.GetKeyDown(KeyCode.LeftShift))
+    {
+      running = true;
+    }
+    if(Input.GetKeyUp(KeyCode.LeftShift))
+    {
+      running = false;
+    }
+
+    float speed = maxWalkSpeed;
+    if(running)
+    {
+      speed = maxRunSpeed;
+    }
     // Get the horizontal and vertical axis.
     // By default they are mapped to the arrow keys.
     // The value is in the range -1 to 1
     float hAxis = Input.GetAxis("Horizontal");
-    float hWalkSpeed = hAxis * maxWalkSpeed;
-    float vWalkSpeed = Input.GetAxis("Vertical") * maxWalkSpeed;
+    float hWalkSpeed = hAxis * speed;
+    float vWalkSpeed = Input.GetAxis("Vertical") * speed;
     // Move translation along the object's x/z-axis
     transform.Translate(hWalkSpeed * Time.deltaTime, 0, 0);
     transform.Translate(0, 0, vWalkSpeed * Time.deltaTime);
@@ -41,16 +59,16 @@ public class Player : MovingObject
     //    sprite.transform.LookAt(lookAtPosition);
 
     // On 0 movement won't flip sprite
-    if (hAxis != 0)
+    if(hAxis != 0)
     {
       bool goingRight = true;
-      if (Input.GetAxis("Horizontal") < 0)
+      if(Input.GetAxis("Horizontal") < 0)
       {
         goingRight = false;
       }
 
       // Change direction of the sprite
-      if (goingRight != rightDir)
+      if(goingRight != rightDir)
       {
         transform.localScale = Vector3.Scale(transform.localScale, new Vector3(-1, 1, 1));
         rightDir = goingRight;
@@ -58,11 +76,11 @@ public class Player : MovingObject
     }
 
     // SALTO. Solo cuando esta en el suelo
-    if (rigidBody.velocity.y == 0)
+    if(rigidBody.velocity.y == 0)
     {
       onGround = true;
     }
-    if (onGround && Input.GetKeyDown(KeyCode.Space))
+    if(onGround && Input.GetKeyDown(KeyCode.Space))
     {
       // Activamos el flag y la fisica se hace en FixedUpdate
       startJump = true;
@@ -71,11 +89,11 @@ public class Player : MovingObject
 
     // ANIMACIONES
     // Threshold speed for walk/idle animation
-    if (!this.animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerAttack01") &&
-      !this.animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerAttack02"))
+    if(!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerAttack01") &&
+      !animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerAttack02"))
     {
       float tSpeed = maxWalkSpeed * 0.5f;
-      if (Mathf.Abs(vWalkSpeed) > tSpeed || Mathf.Abs(hWalkSpeed) > tSpeed)
+      if(Mathf.Abs(vWalkSpeed) > tSpeed || Mathf.Abs(hWalkSpeed) > tSpeed)
       {
         animator.Play("PlayerWalk");
       }
@@ -86,11 +104,11 @@ public class Player : MovingObject
     }
 
     // Attack
-    if (Input.GetKeyDown(KeyCode.Z))
+    if(Input.GetKeyDown(KeyCode.Z))
     {
       animator.Play("PlayerAttack01");
     }
-    else if (Input.GetKeyDown(KeyCode.X))
+    else if(Input.GetKeyDown(KeyCode.X))
     {
       animator.Play("PlayerAttack02");
     }
@@ -98,7 +116,7 @@ public class Player : MovingObject
 
   void FixedUpdate()
   {
-    if (startJump)
+    if(startJump)
     {
       startJump = false;
       rigidBody.velocity *= 0;
