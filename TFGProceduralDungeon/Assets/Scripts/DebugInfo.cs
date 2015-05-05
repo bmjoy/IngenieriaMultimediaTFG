@@ -35,7 +35,7 @@ public class DebugInfo : MonoBehaviour
 
   void Update()
   {
-    if (Input.GetKeyDown(KeyCode.F1))
+    if (Input.GetKeyDown(KeyCode.F2))
     {
       active = !active;
       goDebugInfo.SetActive(active);

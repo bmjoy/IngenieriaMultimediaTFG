@@ -47,18 +47,24 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\AudioManager.cs" />
+     <Compile Include="Assets\Scripts\CameraFree.cs" />
      <Compile Include="Assets\Scripts\CameraMovement.cs" />
      <Compile Include="Assets\Scripts\DebugInfo.cs" />
      <Compile Include="Assets\Scripts\DebugTools.cs" />
-     <Compile Include="Assets\Scripts\Enemy.cs" />
+     <Compile Include="Assets\Scripts\DungeonGenerators\BSP\BSPNode.cs" />
+     <Compile Include="Assets\Scripts\DungeonGenerators\BSP\BSPTree.cs" />
+     <Compile Include="Assets\Scripts\DungeonGenerators\BSP\Digger.cs" />
+     <Compile Include="Assets\Scripts\DungeonGenerators\BSP\Grid.cs" />
+     <Compile Include="Assets\Scripts\DungeonGenerators\BSP\RoomCreator.cs" />
+     <Compile Include="Assets\Scripts\DungeonGenerators\DungeonGenerator.cs" />
      <Compile Include="Assets\Scripts\EnemyBat.cs" />
      <Compile Include="Assets\Scripts\EnemyCrab.cs" />
      <Compile Include="Assets\Scripts\GameManager.cs" />
-     <Compile Include="Assets\Scripts\Loader.cs" />
      <Compile Include="Assets\Scripts\MovingObject.cs" />
      <Compile Include="Assets\Scripts\Player.cs" />
+     <Compile Include="Assets\Scripts\UIHelper.cs" />
      <Compile Include="Assets\Scripts\UIManager.cs" />
-     <Compile Include="Assets\Scripts\Wall.cs" />
+     <Compile Include="Assets\Scripts\UIMenuHelp.cs" />
      <None Include="Assets\Models\Chest WoW Style_0\readme.txt" />
      <None Include="Assets\Fonts\OFL.txt" />
  <Reference Include="UnityEngine.UI">

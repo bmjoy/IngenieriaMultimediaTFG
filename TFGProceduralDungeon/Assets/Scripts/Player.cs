@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class Player : MovingObject
+public class Player : MonoBehaviour
 {
   private Animator animator;
   private float maxWalkSpeed = 2.0f;
@@ -10,14 +10,12 @@ public class Player : MovingObject
   private bool rightDir = true; // Para girar el sprite en la direccion correcta
   private bool startJump = false; // Pasa que el FixedUpdate aplique la fuerza
   private bool onGround = true; // Indica si el jugador esta en le suelo (no saltando o cayendo)
-  private GameObject playerCamera; // Camara que sigue al jugador
   private GameObject sprite; // Objecto hijo sprite
   private Rigidbody rigidBody; // Al que aplicar fuerza para salto
 
   void Start()
   {
     //animator = GetComponent<Animator>();
-    playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
     sprite = GameObject.Find("PlayerSprite");
     animator = sprite.GetComponent<Animator>();
     rigidBody = GetComponent<Rigidbody>();

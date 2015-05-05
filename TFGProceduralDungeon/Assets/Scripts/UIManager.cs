@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class UIManager : MonoBehaviour
 {
-  GameObject menuTests;
-  GameObject menuMain;
+  private GameObject menuTests;
+  private GameObject menuMain;
 
   private void Start()
   {
