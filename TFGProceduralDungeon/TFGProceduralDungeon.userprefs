@@ -1,13 +1,10 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\DebugInfo.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\TestGenerators\TestGenerators.cs">
     <Files>
-      <File FileName="Assets\Scripts\DungeonGenerators\BSP\BSPTree.cs" Line="11" Column="26" />
-      <File FileName="Assets\Scripts\DungeonGenerators\BSP\RoomCreator.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\DungeonGenerators\BSP\Grid.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\DebugTools.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\DebugInfo.cs" Line="4" Column="1" />
-      <File FileName="Assets\Scripts\DungeonGenerators\DungeonGenerator.cs" Line="76" Column="45" />
+      <File FileName="Assets\Scripts\TestGenerators\BSP\GeneratorBSP.cs" Line="19" Column="27" />
+      <File FileName="Assets\Scripts\TestGenerators\BSP\BSPNode.cs" Line="96" Column="5" />
+      <File FileName="Assets\Scripts\TestGenerators\TestGenerators.cs" Line="47" Column="4" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

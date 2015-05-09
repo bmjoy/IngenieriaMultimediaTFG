@@ -6,6 +6,14 @@ TagManager:
   tags:
   - Wall
   - Door
+  - Enemy
+  - Damage
+  - GenSection
+  - BaseRoom
+  - FloorTile
+  - WallTile
+  - Digger
+  - Floor
   layers:
   - Default
   - TransparentFX

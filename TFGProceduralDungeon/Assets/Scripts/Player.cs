@@ -3,20 +3,40 @@ using System.Collections;
 
 public class Player : MonoBehaviour
 {
-  private Animator animator;
+  // Se instancia para crear una zona de daño delante del jugador cuando este ataca
+  public GameObject playerAttack;
+  private GameObject playerAttackInstance;
+
+  // STATS del personaje
+  public int life = 3;
+  public bool invincible = false;
+
+  private int hitGraceTime = 1; // Segundos invencible despues de ser golpeado
   private float maxWalkSpeed = 2.0f;
   private float maxRunSpeed = 3.0f;
   private bool running = false;
+  private bool attacking = false;
+  private float direction = 1; // 1 derecha, -1 izquierda (en eje x)
   private bool rightDir = true; // Para girar el sprite en la direccion correcta
   private bool startJump = false; // Pasa que el FixedUpdate aplique la fuerza
   private bool onGround = true; // Indica si el jugador esta en le suelo (no saltando o cayendo)
-  private GameObject sprite; // Objecto hijo sprite
+
+  private SpriteRenderer spriteRenderer; // Para aplicar efectos directamente
+  private Animator animator;
   private Rigidbody rigidBody; // Al que aplicar fuerza para salto
+
+  public bool Attacking
+  {
+    get
+    {
+      return attacking;
+    }
+  }
 
   void Start()
   {
-    //animator = GetComponent<Animator>();
-    sprite = GameObject.Find("PlayerSprite");
+    GameObject sprite = GameObject.Find("PlayerSprite");
+    spriteRenderer = sprite.GetComponent<SpriteRenderer>();
     animator = sprite.GetComponent<Animator>();
     rigidBody = GetComponent<Rigidbody>();
   }
@@ -24,7 +44,6 @@ public class Player : MonoBehaviour
   void Update()
   {
     // Si se pulsa Shift la velocidad cambia
-
     if(Input.GetKeyDown(KeyCode.LeftShift))
     {
       running = true;
@@ -49,7 +68,6 @@ public class Player : MonoBehaviour
     transform.Translate(hWalkSpeed * Time.deltaTime, 0, 0);
     transform.Translate(0, 0, vWalkSpeed * Time.deltaTime);
 
-
     // Orienta el sprite hacia la camara, pero solo en el eje x
     // esto ademas lo invierte?
     //    Vector3 lookAtPosition = playerCamera.transform.position;
@@ -60,9 +78,11 @@ public class Player : MonoBehaviour
     if(hAxis != 0)
     {
       bool goingRight = true;
+      direction = 1f;
       if(Input.GetAxis("Horizontal") < 0)
       {
         goingRight = false;
+        direction = -1f;
       }
 
       // Change direction of the sprite
@@ -70,6 +90,7 @@ public class Player : MonoBehaviour
       {
         transform.localScale = Vector3.Scale(transform.localScale, new Vector3(-1, 1, 1));
         rightDir = goingRight;
+      
       }
     }
 
@@ -105,11 +126,37 @@ public class Player : MonoBehaviour
     if(Input.GetKeyDown(KeyCode.Z))
     {
       animator.Play("PlayerAttack01");
+      if(!attacking)
+      {
+        StartCoroutine(Attack());
+      }
+
     }
     else if(Input.GetKeyDown(KeyCode.X))
     {
       animator.Play("PlayerAttack02");
+      if(!attacking)
+      {
+        StartCoroutine(Attack());
+      }
     }
+
+    if(playerAttackInstance != null)
+    {
+      playerAttackInstance.transform.position = new Vector3(transform.position.x + (direction * 0.4f), transform.position.y, transform.position.z);
+    }
+  }
+
+  private IEnumerator Attack()
+  {
+    attacking = true;
+    // Instanciamos la caja de daño al lado del Player
+    Vector3 position;
+    position = new Vector3(transform.position.x + (direction * 0.4f), transform.position.y, transform.position.z);
+    playerAttackInstance = (GameObject)Instantiate(playerAttack, position, Quaternion.identity);
+    yield return new WaitForSeconds(0.3f);
+    Destroy(playerAttackInstance);
+    attacking = false;
   }
 
   void FixedUpdate()
@@ -120,6 +167,43 @@ public class Player : MonoBehaviour
       rigidBody.velocity *= 0;
       rigidBody.AddForce(Vector3.up * 150);
     }
+  }
+
+  void OnCollisionEnter(Collision collision)
+  {
+    if(collision.gameObject.tag == "Enemy" && !invincible)
+    {
+      life--;
+      if(life <= 0) // Game Over
+      {
+        Debug.Log("Game Over!");
+        life = 3;
+      }
+      else // Tiempo de gracia invencible
+      {
+        StartCoroutine(OnPlayerDamaged());
+      }
+    }
+  }
+
+  // Alterna el SpriteRenderer para producir efecto
+  void BlinkSprite()
+  {
+    spriteRenderer.enabled = !spriteRenderer.enabled;
+  }
+
+  // Espera un tiempo de gracia durante el cual el 
+  IEnumerator OnPlayerDamaged()
+  {
+    invincible = true;
+    // Activa el parpadeo del sprite durante el tiempo de gracia
+    // Parpadeo de sprite cuando es invencible
+    InvokeRepeating("BlinkSprite", 0f, 0.1f);
+    yield return new WaitForSeconds(hitGraceTime);
+    // Restaura
+    CancelInvoke(); // ATENCION: Detiene todos los InvokeRepeating
+    spriteRenderer.enabled = !spriteRenderer.enabled;
+    invincible = false;
   }
 
   // Uso trigger para que no interactue fisicamente con la puerta
