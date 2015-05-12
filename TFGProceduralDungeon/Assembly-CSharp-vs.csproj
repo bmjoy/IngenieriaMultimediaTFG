@@ -49,6 +49,7 @@
      <Compile Include="Assets\Scripts\AudioManager.cs" />
      <Compile Include="Assets\Scripts\CameraFree.cs" />
      <Compile Include="Assets\Scripts\CameraMovement.cs" />
+     <Compile Include="Assets\Scripts\CameraShake.cs" />
      <Compile Include="Assets\Scripts\DebugInfo.cs" />
      <Compile Include="Assets\Scripts\DebugTools.cs" />
      <Compile Include="Assets\Scripts\DungeonGenerator.cs" />
@@ -60,6 +61,7 @@
      <Compile Include="Assets\Scripts\MovingObject.cs" />
      <Compile Include="Assets\Scripts\ParticleSystemAutodestroy.cs" />
      <Compile Include="Assets\Scripts\Player.cs" />
+     <Compile Include="Assets\Scripts\SceneTransition.cs" />
      <Compile Include="Assets\Scripts\TestGenerators\BSP\BSPNode.cs" />
      <Compile Include="Assets\Scripts\TestGenerators\BSP\BSPTree.cs" />
      <Compile Include="Assets\Scripts\TestGenerators\BSP\Digger.cs" />
@@ -75,10 +77,10 @@
      <Compile Include="Assets\Scripts\TestGenerators\GrowingTree\DungeonWall.cs" />
      <Compile Include="Assets\Scripts\TestGenerators\GrowingTree\GeneratorGrowingTree.cs" />
      <Compile Include="Assets\Scripts\TestGenerators\TestGenerators.cs" />
-     <Compile Include="Assets\Scripts\TestGenerators\Vector2i.cs" />
      <Compile Include="Assets\Scripts\UIHelper.cs" />
      <Compile Include="Assets\Scripts\UIManager.cs" />
      <Compile Include="Assets\Scripts\UIMenuHelp.cs" />
+     <Compile Include="Assets\Scripts\Vector2i.cs" />
      <None Include="Assets\Models\Chest WoW Style_0\readme.txt" />
      <None Include="Assets\Fonts\OFL.txt" />
  <Reference Include="UnityEngine.UI">

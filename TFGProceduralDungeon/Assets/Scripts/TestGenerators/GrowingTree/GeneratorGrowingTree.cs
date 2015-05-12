@@ -10,9 +10,13 @@ public class GeneratorGrowingTree : MonoBehaviour
   public float generationStepDelay;
   public DungeonPassage passagePrefab;
   public DungeonWall wallPrefab;
+  public bool randomIndex = false; // Indica si se selecciona una celda aleatoria en cada paso
+  // Quad que muestra visualmente la posicion del generador en cada momento
+  private GameObject helper;
 
   private Coroutine routine;
   private DungeonCell[,] cells;
+
 
   public bool ContainsCoordinates(Vector2i coordinate)
   {
@@ -24,10 +28,10 @@ public class GeneratorGrowingTree : MonoBehaviour
     return cells[coordinates.x, coordinates.z];
   }
 
-  public void Generate(int width, int height)
+  public void Generate(float delay, bool random)
   {
     Cleanup();
-    routine = StartCoroutine(CreateDungeon(width, height));
+    routine = StartCoroutine(CreateDungeon(delay, random));
   }
 
   public void Cleanup()
@@ -36,28 +40,65 @@ public class GeneratorGrowingTree : MonoBehaviour
     {
       StopCoroutine(routine);
     }
+    if (helper != null)
+    {
+      Destroy(helper);
+    }
   }
 
-  public IEnumerator CreateDungeon(int width, int height)
+  private void UpdateHelper(Vector3 position)
   {
-    size.x = 20;
-    size.z = 20;
+    helper.transform.position = position;
+    helper.transform.Translate(0, 0.1f, 0);
+  }
+
+  public IEnumerator CreateDungeon(float d, bool r)
+  {
+    size.x = 10;
+    size.z = 10;
+
+    generationStepDelay = d;
+    randomIndex = r;
 
     WaitForSeconds delay = new WaitForSeconds(generationStepDelay);
     cells = new DungeonCell[size.x, size.z];
     List<DungeonCell> activeCells = new List<DungeonCell>();
     Vector2i randomCoor = new Vector2i(Random.Range(0, size.x), Random.Range(0, size.z));
     activeCells.Add(CreateCell(randomCoor));
+    // Creamos el helper para ver por donde se va generando
+    helper = GameObject.CreatePrimitive(PrimitiveType.Cube);
+    helper.transform.localScale = new Vector3(1f, 0.1f, 1f);
+    helper.GetComponent<Renderer>().material.color = Color.yellow;
+
     while (activeCells.Count > 0)
     {
       yield return delay;
       DoNextGenerationStep(activeCells);
     }
+
+    Destroy(helper);
+  }
+
+  // Devuelve el indice de la celda del paso actual
+  private int GetNextIndex(List<DungeonCell> activeCells)
+  {
+    // Por defecto se selecciona la celda mas reciente de la lista (Recursive Backtracker)
+    int index = activeCells.Count - 1;
+
+    // Selecciona un indice aleatorio (algoritmo de Prim)
+    if (randomIndex)
+    {
+      index = Random.Range(0, index);
+    }
+
+    return index;
   }
 
   private void DoNextGenerationStep(List<DungeonCell> activeCells)
   {
-    int currentIndex = activeCells.Count - 1;
+    int currentIndex = GetNextIndex(activeCells);
+    UpdateHelper(activeCells[currentIndex].transform.position);
+
     DungeonCell currentCell = activeCells[currentIndex];
     if (currentCell.IsFullyInitialized)
     {

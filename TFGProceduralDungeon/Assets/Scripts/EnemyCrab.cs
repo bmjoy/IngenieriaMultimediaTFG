@@ -36,7 +36,9 @@ public class EnemyCrab : Enemy
   // Recibe daño
   void Damage()
   {
-    Instantiate(deathEffectPrefab, transform.position, Quaternion.identity);
+    Vector3 spawnPosition = transform.position;
+    spawnPosition.y += 0.3f;
+    Instantiate(deathEffectPrefab, spawnPosition, Quaternion.identity);
     Destroy(this.gameObject);
   }
 

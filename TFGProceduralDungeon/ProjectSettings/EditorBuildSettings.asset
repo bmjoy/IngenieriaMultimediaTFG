@@ -5,13 +5,21 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/Scenes/Settings.unity
+  - enabled: 1
+    path: Assets/Scenes/Splash.unity
   - enabled: 1
     path: Assets/Scenes/MainMenu.unity
-  - enabled: 0
-    path: Assets/Scenes/LevelDungeon.unity
   - enabled: 1
-    path: Assets/Scenes/Tests/TestGameplay.unity
+    path: Assets/Scenes/Intro.unity
+  - enabled: 1
+    path: Assets/Scenes/MapScreen.unity
+  - enabled: 1
+    path: Assets/Scenes/DungeonLevel.unity
+  - enabled: 1
+    path: Assets/Scenes/Ending.unity
+  - enabled: 1
+    path: Assets/Scenes/Tests/TestLevelGeneration.unity
   - enabled: 1
     path: Assets/Scenes/Tests/TestEnemies.unity
+  - enabled: 0
+    path: Assets/Scenes/Tests/TestGameplay.unity

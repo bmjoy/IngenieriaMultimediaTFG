@@ -14,8 +14,14 @@ public class TestGenerators : MonoBehaviour
   // OPCIONES DE LOS TEST
   private int selectedAlg = 0;
   // Los distintos generadores para los test
+  public GameObject settingsSize;
   public int DUNGEON_WIDTH = 100;
   public int DUNGEON_HEIGHT = 100;
+
+  // Growing Tree
+  public GameObject settingsGT;
+  private float delay = 0f;
+  private bool random = false;
 
   // Automata celular
   public GameObject settingsCA; // Instancia del panel de opciones
@@ -26,6 +32,16 @@ public class TestGenerators : MonoBehaviour
   public GameObject settingsBSP;
 
   // Setters para los sliders de los test
+  public void SetDelay(float value)
+  {
+    delay = value;
+  }
+
+  public void SetRandom(bool value)
+  {
+    random = value;
+  }
+
   public void SetDungeonWidth(float value)
   {
     DUNGEON_WIDTH = (int)value;
@@ -56,24 +72,29 @@ public class TestGenerators : MonoBehaviour
   {
     selectedAlg = (int)selection;
 
+    settingsSize.SetActive(false);
+    settingsGT.SetActive(false);
     settingsCA.SetActive(false);
     settingsBSP.SetActive(false);
-    switch(selectedAlg)
+    switch (selectedAlg)
     {
       case 0: // Growing Tree
+        settingsGT.SetActive(true);
         break;
       case 1: // Cellular Automata3
         settingsCA.SetActive(true);
+        settingsSize.SetActive(true);
         break;
       case 2: // BSP Tree
         settingsBSP.SetActive(true);
+        settingsSize.SetActive(true);
         break;
     }
   }
   // Boton de comenzar a ejecutar el algoritmo
   public void OnRun()
   {
-    switch(selectedAlg)
+    switch (selectedAlg)
     {
       case 0: // Growing Tree
         GenerateDungeonGrowingTree();
@@ -87,21 +108,21 @@ public class TestGenerators : MonoBehaviour
     }
   }
 
-  private void Cleanup()
+  public void Cleanup()
   {
-    if(instanceGeneratorGT != null)
+    if (instanceGeneratorGT != null)
     {
       instanceGeneratorGT.Cleanup();
       Destroy(instanceGeneratorGT.gameObject);
     }
-    
-    if(instanceGeneratorCA != null)
+
+    if (instanceGeneratorCA != null)
     {
       instanceGeneratorCA.Cleanup();
       Destroy(instanceGeneratorCA.gameObject);
     }
-    
-    if(instanceGeneratorBSP != null)
+
+    if (instanceGeneratorBSP != null)
     {
       instanceGeneratorBSP.Cleanup();
       Destroy(instanceGeneratorBSP.gameObject);
@@ -114,7 +135,7 @@ public class TestGenerators : MonoBehaviour
     Cleanup();
     instanceGeneratorGT = Instantiate(prefabGeneratorGT);
     instanceGeneratorGT.name = "GeneratorGrowingTree";
-    instanceGeneratorGT.Generate(DUNGEON_WIDTH, DUNGEON_HEIGHT);
+    instanceGeneratorGT.Generate(delay, random);
   }
 
   // Genera la mazmorra usando el algoritmo de Automata Celular

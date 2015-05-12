@@ -25,6 +25,8 @@ public class Player : MonoBehaviour
   private Animator animator;
   private Rigidbody rigidBody; // Al que aplicar fuerza para salto
 
+  private CameraShake cameraShaker;
+
   public bool Attacking
   {
     get
@@ -39,22 +41,23 @@ public class Player : MonoBehaviour
     spriteRenderer = sprite.GetComponent<SpriteRenderer>();
     animator = sprite.GetComponent<Animator>();
     rigidBody = GetComponent<Rigidbody>();
+    cameraShaker = Camera.main.GetComponent<CameraShake>();
   }
 
   void Update()
   {
     // Si se pulsa Shift la velocidad cambia
-    if(Input.GetKeyDown(KeyCode.LeftShift))
+    if (Input.GetKeyDown(KeyCode.LeftShift))
     {
       running = true;
     }
-    if(Input.GetKeyUp(KeyCode.LeftShift))
+    if (Input.GetKeyUp(KeyCode.LeftShift))
     {
       running = false;
     }
 
     float speed = maxWalkSpeed;
-    if(running)
+    if (running)
     {
       speed = maxRunSpeed;
     }
@@ -75,31 +78,31 @@ public class Player : MonoBehaviour
     //    sprite.transform.LookAt(lookAtPosition);
 
     // On 0 movement won't flip sprite
-    if(hAxis != 0)
+    if (hAxis != 0)
     {
       bool goingRight = true;
       direction = 1f;
-      if(Input.GetAxis("Horizontal") < 0)
+      if (Input.GetAxis("Horizontal") < 0)
       {
         goingRight = false;
         direction = -1f;
       }
 
       // Change direction of the sprite
-      if(goingRight != rightDir)
+      if (goingRight != rightDir)
       {
         transform.localScale = Vector3.Scale(transform.localScale, new Vector3(-1, 1, 1));
         rightDir = goingRight;
-      
+
       }
     }
 
     // SALTO. Solo cuando esta en el suelo
-    if(rigidBody.velocity.y == 0)
+    if (rigidBody.velocity.y == 0)
     {
       onGround = true;
     }
-    if(onGround && Input.GetKeyDown(KeyCode.Space))
+    if (onGround && Input.GetKeyDown(KeyCode.Space))
     {
       // Activamos el flag y la fisica se hace en FixedUpdate
       startJump = true;
@@ -108,11 +111,11 @@ public class Player : MonoBehaviour
 
     // ANIMACIONES
     // Threshold speed for walk/idle animation
-    if(!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerAttack01") &&
+    if (!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerAttack01") &&
       !animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerAttack02"))
     {
       float tSpeed = maxWalkSpeed * 0.5f;
-      if(Mathf.Abs(vWalkSpeed) > tSpeed || Mathf.Abs(hWalkSpeed) > tSpeed)
+      if (Mathf.Abs(vWalkSpeed) > tSpeed || Mathf.Abs(hWalkSpeed) > tSpeed)
       {
         animator.Play("PlayerWalk");
       }
@@ -123,25 +126,25 @@ public class Player : MonoBehaviour
     }
 
     // Attack
-    if(Input.GetKeyDown(KeyCode.Z))
+    if (Input.GetKeyDown(KeyCode.Z))
     {
       animator.Play("PlayerAttack01");
-      if(!attacking)
+      if (!attacking)
       {
         StartCoroutine(Attack());
       }
 
     }
-    else if(Input.GetKeyDown(KeyCode.X))
+    else if (Input.GetKeyDown(KeyCode.X))
     {
       animator.Play("PlayerAttack02");
-      if(!attacking)
+      if (!attacking)
       {
         StartCoroutine(Attack());
       }
     }
 
-    if(playerAttackInstance != null)
+    if (playerAttackInstance != null)
     {
       playerAttackInstance.transform.position = new Vector3(transform.position.x + (direction * 0.4f), transform.position.y, transform.position.z);
     }
@@ -161,7 +164,7 @@ public class Player : MonoBehaviour
 
   void FixedUpdate()
   {
-    if(startJump)
+    if (startJump)
     {
       startJump = false;
       rigidBody.velocity *= 0;
@@ -171,10 +174,11 @@ public class Player : MonoBehaviour
 
   void OnCollisionEnter(Collision collision)
   {
-    if(collision.gameObject.tag == "Enemy" && !invincible)
+    if (collision.gameObject.tag == "Enemy" && !invincible)
     {
+      cameraShaker.Shake(0.4f);
       life--;
-      if(life <= 0) // Game Over
+      if (life <= 0) // Game Over
       {
         Debug.Log("Game Over!");
         life = 3;
@@ -223,7 +227,7 @@ public class Player : MonoBehaviour
     //  {
     //    cameraMove.MoveLeft();
     //  }
-      
+
     //}
   }
 }

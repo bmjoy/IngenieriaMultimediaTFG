@@ -44,7 +44,7 @@ LevelGameManager:
 LightmapSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 5
-  m_GIWorkflowMode: 0
+  m_GIWorkflowMode: 1
   m_LightmapsMode: 1
   m_GISettings:
     serializedVersion: 2
@@ -68,7 +68,8 @@ LightmapSettings:
     m_TextureCompression: 1
     m_FinalGather: 0
     m_FinalGatherRayCount: 1024
-  m_LightmapSnapshot: {fileID: 0}
+  m_LightmapSnapshot: {fileID: 112000000, guid: 715d0e4e335e5bf42a10381977a787e5,
+    type: 2}
   m_RuntimeCPUUsage: 25
 --- !u!196 &5
 NavMeshSettings:
@@ -458,6 +459,7 @@ GameObject:
   - 124: {fileID: 648118011}
   - 81: {fileID: 648118010}
   - 114: {fileID: 648118015}
+  - 114: {fileID: 648118016}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -542,6 +544,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 2029806021}
+--- !u!114 &648118016
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 648118009}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 126cdbc0233c12e4bb0fdb28bb7d295b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shakeAmount: .25
+  decreaseFactor: 1
 --- !u!1 &658068836
 GameObject:
   m_ObjectHideFlags: 0

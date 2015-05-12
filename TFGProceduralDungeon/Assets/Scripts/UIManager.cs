@@ -9,45 +9,43 @@ public class UIManager : MonoBehaviour
 
   private void Start()
   {
-    menuMain = GameObject.Find("MenuMain");
-    menuTests = GameObject.Find("MenuTests");
-    menuTests.SetActive(false);
+    if (Application.loadedLevel == (int)SceneName.MainMenu)
+    {
+      menuMain = GameObject.Find("MenuMain");
+      menuTests = GameObject.Find("MenuTests");
+      menuTests.SetActive(false);
+    }
   }
 
-  public void LoadMainMenu()
+  // Eventos de boton
+  public void OnNewGame()
   {
-    Application.LoadLevel("MainMenu");
+    GameManager.instance.LoadScene(SceneName.Intro);
   }
 
-  public void LoadSettings()
+  public void OnSettings()
   {
-    Application.LoadLevel("Settings");
   }
 
-  public void LoadCredits()
+  public void OnBack()
   {
-    Application.LoadLevel("Credits");
+    GameManager.instance.LoadScene(SceneName.MainMenu);
   }
 
   /*********** TESTS ***********/
-  public void LoadTests()
+  public void ShowTestsMenu()
   {
     menuMain.SetActive(false);
     menuTests.SetActive(true);
   }
 
-  public void LoadTestGameplay()
+  public void OnTestLevelGeneration()
   {
-    Application.LoadLevel("TestGameplay");
+    GameManager.instance.LoadScene(SceneName.TestLevelGeneration);
   }
 
-  public void LoadTestEnemies()
+  public void OnTestEnemies()
   {
-    Application.LoadLevel("TestEnemies");
-  }
-
-  public void LoadTestLevelGeneration()
-  {
-    Application.LoadLevel("TestLevelGeneration");
+    GameManager.instance.LoadScene(SceneName.TestEnemies);
   }
 }

@@ -40,12 +40,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   size:
-    x: 20
-    z: 20
+    x: 10
+    z: 10
   cellPrefab: {fileID: 11400000, guid: 3587d83a9b9913a4b8fe77eb04171729, type: 2}
-  generationStepDelay: 0
+  generationStepDelay: .0500000007
   passagePrefab: {fileID: 11491616, guid: 12640f90f8356c449a67a94c9ff3a0af, type: 2}
   wallPrefab: {fileID: 11400000, guid: 046b9a113dd17cf4591cc009fb45de6e, type: 2}
+  randomIndex: 0
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
