@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class TestGenerators : MonoBehaviour
@@ -10,6 +11,17 @@ public class TestGenerators : MonoBehaviour
   private GeneratorCA instanceGeneratorCA;
   public GeneratorBSP prefabGeneratorBSP; // BSP Tree
   private GeneratorBSP instanceGeneratorBSP;
+
+  private Button stepButton;
+
+  // Valores por defecto de camara segun el test
+  public Camera camera;
+  private Vector3[] cameraDefaults = { 
+                                       new Vector3(0f, 15f, -3f), // Posicion para Growing Tree
+                                       new Vector3(80f, 0f, 0f), // Rotacion para Growing Tree
+                                       new Vector3(20f, 55f, 12f), // Posicion para el resto
+                                       new Vector3(80f, 0f, 0f) // Rotacion para el resto
+                                     };
 
   // OPCIONES DE LOS TEST
   private int selectedAlg = 0;
@@ -27,6 +39,8 @@ public class TestGenerators : MonoBehaviour
   public GameObject settingsCA; // Instancia del panel de opciones
   private int cellularAutomataPasses = 1;
   private int wallProbability = 35;
+  private bool useSeed = false;
+  private int seed = 0;
 
   // BSP Tree
   public GameObject settingsBSP;
@@ -40,6 +54,11 @@ public class TestGenerators : MonoBehaviour
   public void SetRandom(bool value)
   {
     random = value;
+  }
+
+  public void SetSeed(bool value)
+  {
+    useSeed = value;
   }
 
   public void SetDungeonWidth(float value)
@@ -65,6 +84,22 @@ public class TestGenerators : MonoBehaviour
   public void SetBSPRoomSize(float value)
   {
     GeneratorBSP.ROOM_SIZE = value;
+  }
+
+  private void Start()
+  {
+    stepButton = GameObject.Find("ButtonStep").GetComponent<Button>();
+    settingsGT.SetActive(true);
+    settingsCA.SetActive(false);
+    settingsBSP.SetActive(false);
+  }
+
+  private void Update()
+  {
+    if (Input.GetKeyDown(KeyCode.P))
+    {
+      OnStep();
+    }
   }
 
   // Activa las opciones del algoritmo seleccionado
@@ -97,13 +132,48 @@ public class TestGenerators : MonoBehaviour
     switch (selectedAlg)
     {
       case 0: // Growing Tree
+        stepButton.interactable = false;
+        SetCamera();
         GenerateDungeonGrowingTree();
         break;
-      case 1: // Cellular Automata3
+      case 1: // Cellular Automata
+        stepButton.interactable = true;
+        SetCamera();
         GenerateDungeonCA();
         break;
       case 2: // BSP Tree
+        stepButton.interactable = true;
+        SetCamera();
         GenerateDungeonBSP();
+        break;
+    }
+  }
+
+  private void SetCamera()
+  {
+    switch (selectedAlg)
+    {
+      case 0:
+        camera.transform.position = cameraDefaults[0];
+        camera.transform.localEulerAngles = cameraDefaults[1];
+        break;
+      case 1:
+      case 2:
+        camera.transform.position = cameraDefaults[2];
+        camera.transform.localEulerAngles = cameraDefaults[3];
+        break;
+    }
+  }
+
+  public void OnStep()
+  {
+    switch (selectedAlg)
+    {
+      case 1: // Cellular Automata
+        instanceGeneratorCA.doNextStep = true;
+        break;
+      case 2: // BSP Tree
+        instanceGeneratorBSP.doNextStep = true;
         break;
     }
   }
@@ -144,7 +214,25 @@ public class TestGenerators : MonoBehaviour
     Cleanup();
     instanceGeneratorCA = Instantiate(prefabGeneratorCA);
     instanceGeneratorCA.name = "GeneratorCA";
-    instanceGeneratorCA.Generate(DUNGEON_WIDTH, DUNGEON_HEIGHT, cellularAutomataPasses, wallProbability);
+
+    if (useSeed)
+    {
+      Text input = GameObject.Find("TextSeed").GetComponent<Text>();
+      bool result = int.TryParse(input.text, out seed);
+      if (!result) // No se puede parsear el entero, cancelamos la semilla
+      {
+        Debug.Log("Unable to convert input string to int");
+        input.text = "";
+        seed = -1;
+        useSeed = false;
+      }
+    }
+    else
+    {
+      seed = -1;
+    }
+
+    instanceGeneratorCA.Generate(DUNGEON_WIDTH, DUNGEON_HEIGHT, cellularAutomataPasses, wallProbability, seed);
   }
 
   // Genera la mazmorra usando el algoritmo de BSP Tree

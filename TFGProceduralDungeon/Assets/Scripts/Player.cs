@@ -12,12 +12,12 @@ public class Player : MonoBehaviour
   public bool invincible = false;
 
   private int hitGraceTime = 1; // Segundos invencible despues de ser golpeado
-  private float maxWalkSpeed = 2.0f;
-  private float maxRunSpeed = 3.0f;
+  private float maxWalkSpeed = 3.0f;
+  private float maxRunSpeed = 5.0f;
   private bool running = false;
   private bool attacking = false;
-  private float direction = 1; // 1 derecha, -1 izquierda (en eje x)
-  private bool rightDir = true; // Para girar el sprite en la direccion correcta
+  private float direction = -1f; // 1 derecha, -1 izquierda (en eje x)
+  private bool rightDir = false; // Para girar el sprite en la direccion correcta
   private bool startJump = false; // Pasa que el FixedUpdate aplique la fuerza
   private bool onGround = true; // Indica si el jugador esta en le suelo (no saltando o cayendo)
 
@@ -46,6 +46,12 @@ public class Player : MonoBehaviour
 
   void Update()
   {
+    // Input
+    // Cuando esta atacando no se puede mover
+    if (attacking)
+    {
+      return;
+    }
     // Si se pulsa Shift la velocidad cambia
     if (Input.GetKeyDown(KeyCode.LeftShift))
     {
@@ -80,12 +86,12 @@ public class Player : MonoBehaviour
     // On 0 movement won't flip sprite
     if (hAxis != 0)
     {
-      bool goingRight = true;
-      direction = 1f;
-      if (Input.GetAxis("Horizontal") < 0)
+      bool goingRight = false;
+      direction = -1f;
+      if (Input.GetAxis("Horizontal") > 0)
       {
-        goingRight = false;
-        direction = -1f;
+        goingRight = true;
+        direction = 1f;
       }
 
       // Change direction of the sprite
@@ -109,10 +115,10 @@ public class Player : MonoBehaviour
       onGround = false;
     }
 
+
     // ANIMACIONES
     // Threshold speed for walk/idle animation
-    if (!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerAttack01") &&
-      !animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerAttack02"))
+    if (!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerAttack"))
     {
       float tSpeed = maxWalkSpeed * 0.5f;
       if (Mathf.Abs(vWalkSpeed) > tSpeed || Mathf.Abs(hWalkSpeed) > tSpeed)
@@ -128,16 +134,7 @@ public class Player : MonoBehaviour
     // Attack
     if (Input.GetKeyDown(KeyCode.Z))
     {
-      animator.Play("PlayerAttack01");
-      if (!attacking)
-      {
-        StartCoroutine(Attack());
-      }
-
-    }
-    else if (Input.GetKeyDown(KeyCode.X))
-    {
-      animator.Play("PlayerAttack02");
+      animator.Play("PlayerAttack");
       if (!attacking)
       {
         StartCoroutine(Attack());
@@ -153,11 +150,13 @@ public class Player : MonoBehaviour
   private IEnumerator Attack()
   {
     attacking = true;
+    yield return new WaitForSeconds(0.4f);
     // Instanciamos la caja de daño al lado del Player
     Vector3 position;
-    position = new Vector3(transform.position.x + (direction * 0.4f), transform.position.y, transform.position.z);
+    position = new Vector3(transform.position.x + (direction * 0.6f), transform.position.y, transform.position.z);
     playerAttackInstance = (GameObject)Instantiate(playerAttack, position, Quaternion.identity);
-    yield return new WaitForSeconds(0.3f);
+    playerAttackInstance.transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y, 1);
+    yield return new WaitForSeconds(0.5f);
     Destroy(playerAttackInstance);
     attacking = false;
   }

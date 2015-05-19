@@ -19,7 +19,7 @@
 	<DebugType>full</DebugType>
 	<Optimize>false</Optimize>
 	<OutputPath>Temp\bin\Debug\</OutputPath>
-	<DefineConstants>DEBUG;TRACE;UNITY_5_0_1;UNITY_5_0;UNITY_5;ENABLE_LICENSE_RENAME;ENABLE_NEW_BUGREPORTER;ENABLE_2D_PHYSICS;ENABLE_4_6_FEATURES;ENABLE_AUDIO;ENABLE_CACHING;ENABLE_CLOTH;ENABLE_DUCK_TYPING;ENABLE_FRAME_DEBUGGER;ENABLE_GENERICS;ENABLE_HOME_SCREEN;ENABLE_IMAGEEFFECTS;ENABLE_LIGHT_PROBES_LEGACY;ENABLE_MICROPHONE;ENABLE_MULTIPLE_DISPLAYS;ENABLE_NEW_HIERARCHY;ENABLE_PHYSICS;ENABLE_PHYSICS_PHYSX3;ENABLE_PLUGIN_INSPECTOR;ENABLE_SHADOWS;ENABLE_SINGLE_INSTANCE_BUILD_SETTING;ENABLE_SPRITES;ENABLE_TERRAIN;ENABLE_UNITYEVENTS;ENABLE_WEBCAM;ENABLE_WWW;ENABLE_AUDIOMIXER_SUSPEND;ENABLE_NONPRO;INCLUDE_DYNAMIC_GI;INCLUDE_GI;INCLUDE_IL2CPP;PLATFORM_SUPPORTS_MONO;RENDER_SOFTWARE_CURSOR;UNITY_STANDALONE_WIN;UNITY_STANDALONE;ENABLE_SUBSTANCE;ENABLE_TEXTUREID_MAP;ENABLE_RUNTIME_GI;ENABLE_MOVIES;ENABLE_NETWORK;ENABLE_MONO;ENABLE_PROFILER;UNITY_EDITOR;UNITY_EDITOR_64;UNITY_EDITOR_WIN</DefineConstants>
+	<DefineConstants>DEBUG;TRACE;UNITY_5_0_1;UNITY_5_0;UNITY_5;ENABLE_LICENSE_RENAME;ENABLE_NEW_BUGREPORTER;ENABLE_2D_PHYSICS;ENABLE_4_6_FEATURES;ENABLE_AUDIO;ENABLE_CACHING;ENABLE_CLOTH;ENABLE_DUCK_TYPING;ENABLE_FRAME_DEBUGGER;ENABLE_GENERICS;ENABLE_HOME_SCREEN;ENABLE_IMAGEEFFECTS;ENABLE_LIGHT_PROBES_LEGACY;ENABLE_MICROPHONE;ENABLE_MULTIPLE_DISPLAYS;ENABLE_NEW_HIERARCHY;ENABLE_PHYSICS;ENABLE_PHYSICS_PHYSX3;ENABLE_PLUGIN_INSPECTOR;ENABLE_SHADOWS;ENABLE_SINGLE_INSTANCE_BUILD_SETTING;ENABLE_SPRITES;ENABLE_TERRAIN;ENABLE_UNITYEVENTS;ENABLE_WEBCAM;ENABLE_WWW;ENABLE_AUDIOMIXER_SUSPEND;ENABLE_NONPRO;INCLUDE_DYNAMIC_GI;INCLUDE_GI;INCLUDE_IL2CPP;PLATFORM_SUPPORTS_MONO;RENDER_SOFTWARE_CURSOR;UNITY_WEBPLAYER;ENABLE_SUBSTANCE;WEBPLUG;ENABLE_TEXTUREID_MAP;ENABLE_RUNTIME_GI;ENABLE_MOVIES;ENABLE_NETWORK;ENABLE_MONO;ENABLE_PROFILER;UNITY_EDITOR;UNITY_EDITOR_64;UNITY_EDITOR_WIN</DefineConstants>
 	<ErrorReport>prompt</ErrorReport>
 	<WarningLevel>4</WarningLevel>
 	<NoWarn>0169</NoWarn>
@@ -47,39 +47,52 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\AudioManager.cs" />
-     <Compile Include="Assets\Scripts\CameraFree.cs" />
-     <Compile Include="Assets\Scripts\CameraMovement.cs" />
-     <Compile Include="Assets\Scripts\CameraShake.cs" />
-     <Compile Include="Assets\Scripts\DebugInfo.cs" />
-     <Compile Include="Assets\Scripts\DebugTools.cs" />
-     <Compile Include="Assets\Scripts\DungeonGenerator.cs" />
-     <Compile Include="Assets\Scripts\Enemy.cs" />
-     <Compile Include="Assets\Scripts\EnemyBat.cs" />
-     <Compile Include="Assets\Scripts\EnemyCrab.cs" />
-     <Compile Include="Assets\Scripts\EnemyGoblin.cs" />
+     <Compile Include="Assets\Scripts\Camera\CameraFree.cs" />
+     <Compile Include="Assets\Scripts\Camera\CameraLookAt.cs" />
+     <Compile Include="Assets\Scripts\Camera\CameraShake.cs" />
+     <Compile Include="Assets\Scripts\Camera\CameraSwitcher.cs" />
+     <Compile Include="Assets\Scripts\Debug\DebugInfo.cs" />
+     <Compile Include="Assets\Scripts\Debug\DebugTools.cs" />
+     <Compile Include="Assets\Scripts\DungeonGenerator\BSPNode.cs" />
+     <Compile Include="Assets\Scripts\DungeonGenerator\BSPTree.cs" />
+     <Compile Include="Assets\Scripts\DungeonGenerator\Digger.cs" />
+     <Compile Include="Assets\Scripts\DungeonGenerator\DungeonGenerator.cs" />
+     <Compile Include="Assets\Scripts\DungeonGenerator\Grid.cs" />
+     <Compile Include="Assets\Scripts\DungeonGenerator\RoomCreator.cs" />
+     <Compile Include="Assets\Scripts\Enemies\Enemy.cs" />
+     <Compile Include="Assets\Scripts\Enemies\EnemyBat.cs" />
+     <Compile Include="Assets\Scripts\Enemies\EnemyCrab.cs" />
+     <Compile Include="Assets\Scripts\Enemies\EnemyGoblin.cs" />
      <Compile Include="Assets\Scripts\GameManager.cs" />
      <Compile Include="Assets\Scripts\MovingObject.cs" />
+     <Compile Include="Assets\Scripts\ObjectAutodestroy.cs" />
      <Compile Include="Assets\Scripts\ParticleSystemAutodestroy.cs" />
      <Compile Include="Assets\Scripts\Player.cs" />
      <Compile Include="Assets\Scripts\SceneTransition.cs" />
-     <Compile Include="Assets\Scripts\TestGenerators\BSP\BSPNode.cs" />
-     <Compile Include="Assets\Scripts\TestGenerators\BSP\BSPTree.cs" />
-     <Compile Include="Assets\Scripts\TestGenerators\BSP\Digger.cs" />
+     <Compile Include="Assets\Scripts\SpriteLookAtCamera.cs" />
      <Compile Include="Assets\Scripts\TestGenerators\BSP\GeneratorBSP.cs" />
-     <Compile Include="Assets\Scripts\TestGenerators\BSP\Grid.cs" />
-     <Compile Include="Assets\Scripts\TestGenerators\BSP\RoomCreator.cs" />
+     <Compile Include="Assets\Scripts\TestGenerators\BSP\t_BSPNode.cs" />
+     <Compile Include="Assets\Scripts\TestGenerators\BSP\t_BSPTree.cs" />
+     <Compile Include="Assets\Scripts\TestGenerators\BSP\t_Digger.cs" />
+     <Compile Include="Assets\Scripts\TestGenerators\BSP\t_Grid.cs" />
+     <Compile Include="Assets\Scripts\TestGenerators\BSP\t_RoomCreator.cs" />
      <Compile Include="Assets\Scripts\TestGenerators\CellularAutomata\GeneratorCA.cs" />
-     <Compile Include="Assets\Scripts\TestGenerators\CellularAutomata\WallTile.cs" />
-     <Compile Include="Assets\Scripts\TestGenerators\GrowingTree\Direction.cs" />
-     <Compile Include="Assets\Scripts\TestGenerators\GrowingTree\DungeonCell.cs" />
-     <Compile Include="Assets\Scripts\TestGenerators\GrowingTree\DungeonCellEdge.cs" />
-     <Compile Include="Assets\Scripts\TestGenerators\GrowingTree\DungeonPassage.cs" />
-     <Compile Include="Assets\Scripts\TestGenerators\GrowingTree\DungeonWall.cs" />
+     <Compile Include="Assets\Scripts\TestGenerators\CellularAutomata\t_WallTile.cs" />
      <Compile Include="Assets\Scripts\TestGenerators\GrowingTree\GeneratorGrowingTree.cs" />
+     <Compile Include="Assets\Scripts\TestGenerators\GrowingTree\t_DungeonCell.cs" />
+     <Compile Include="Assets\Scripts\TestGenerators\GrowingTree\t_DungeonCellEdge.cs" />
+     <Compile Include="Assets\Scripts\TestGenerators\GrowingTree\t_DungeonDirections.cs" />
+     <Compile Include="Assets\Scripts\TestGenerators\GrowingTree\t_DungeonPassage.cs" />
+     <Compile Include="Assets\Scripts\TestGenerators\GrowingTree\t_DungeonWall.cs" />
      <Compile Include="Assets\Scripts\TestGenerators\TestGenerators.cs" />
-     <Compile Include="Assets\Scripts\UIHelper.cs" />
-     <Compile Include="Assets\Scripts\UIManager.cs" />
-     <Compile Include="Assets\Scripts\UIMenuHelp.cs" />
+     <Compile Include="Assets\Scripts\TextureTiling.cs" />
+     <Compile Include="Assets\Scripts\Traps\TrapAnimation.cs" />
+     <Compile Include="Assets\Scripts\Traps\TrapArrows.cs" />
+     <Compile Include="Assets\Scripts\Traps\TrapRollingRock.cs" />
+     <Compile Include="Assets\Scripts\Traps\TrapSpikes.cs" />
+     <Compile Include="Assets\Scripts\UI\UIHelper.cs" />
+     <Compile Include="Assets\Scripts\UI\UIManager.cs" />
+     <Compile Include="Assets\Scripts\UI\UIMenuHelp.cs" />
      <Compile Include="Assets\Scripts\Vector2i.cs" />
      <None Include="Assets\Models\Chest WoW Style_0\readme.txt" />
      <None Include="Assets\Fonts\OFL.txt" />

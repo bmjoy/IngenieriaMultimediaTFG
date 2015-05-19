@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -6,16 +6,16 @@ public class GeneratorGrowingTree : MonoBehaviour
 {
 
   public Vector2i size;
-  public DungeonCell cellPrefab;
+  public t_DungeonCell cellPrefab;
   public float generationStepDelay;
-  public DungeonPassage passagePrefab;
-  public DungeonWall wallPrefab;
+  public t_DungeonPassage passagePrefab;
+  public t_DungeonWall wallPrefab;
   public bool randomIndex = false; // Indica si se selecciona una celda aleatoria en cada paso
   // Quad que muestra visualmente la posicion del generador en cada momento
   private GameObject helper;
 
   private Coroutine routine;
-  private DungeonCell[,] cells;
+  private t_DungeonCell[,] cells;
 
 
   public bool ContainsCoordinates(Vector2i coordinate)
@@ -23,7 +23,7 @@ public class GeneratorGrowingTree : MonoBehaviour
     return coordinate.x >= 0 && coordinate.x < size.x && coordinate.z >= 0 && coordinate.z < size.z;
   }
 
-  public DungeonCell GetCell(Vector2i coordinates)
+  public t_DungeonCell GetCell(Vector2i coordinates)
   {
     return cells[coordinates.x, coordinates.z];
   }
@@ -61,8 +61,8 @@ public class GeneratorGrowingTree : MonoBehaviour
     randomIndex = r;
 
     WaitForSeconds delay = new WaitForSeconds(generationStepDelay);
-    cells = new DungeonCell[size.x, size.z];
-    List<DungeonCell> activeCells = new List<DungeonCell>();
+    cells = new t_DungeonCell[size.x, size.z];
+    List<t_DungeonCell> activeCells = new List<t_DungeonCell>();
     Vector2i randomCoor = new Vector2i(Random.Range(0, size.x), Random.Range(0, size.z));
     activeCells.Add(CreateCell(randomCoor));
     // Creamos el helper para ver por donde se va generando
@@ -80,7 +80,7 @@ public class GeneratorGrowingTree : MonoBehaviour
   }
 
   // Devuelve el indice de la celda del paso actual
-  private int GetNextIndex(List<DungeonCell> activeCells)
+  private int GetNextIndex(List<t_DungeonCell> activeCells)
   {
     // Por defecto se selecciona la celda mas reciente de la lista (Recursive Backtracker)
     int index = activeCells.Count - 1;
@@ -94,22 +94,22 @@ public class GeneratorGrowingTree : MonoBehaviour
     return index;
   }
 
-  private void DoNextGenerationStep(List<DungeonCell> activeCells)
+  private void DoNextGenerationStep(List<t_DungeonCell> activeCells)
   {
     int currentIndex = GetNextIndex(activeCells);
     UpdateHelper(activeCells[currentIndex].transform.position);
 
-    DungeonCell currentCell = activeCells[currentIndex];
+    t_DungeonCell currentCell = activeCells[currentIndex];
     if (currentCell.IsFullyInitialized)
     {
       activeCells.RemoveAt(currentIndex);
       return;
     }
-    Direction direction = currentCell.RandomUninitializedDirection;
+    t_Direction direction = currentCell.RandomUninitializedDirection;
     Vector2i coordinates = currentCell.coordinates + direction.ToIntVector2();
     if (ContainsCoordinates(coordinates))
     {
-      DungeonCell neighbor = GetCell(coordinates);
+      t_DungeonCell neighbor = GetCell(coordinates);
       if (neighbor == null)
       {
         neighbor = CreateCell(coordinates);
@@ -127,9 +127,9 @@ public class GeneratorGrowingTree : MonoBehaviour
     }
   }
 
-  private DungeonCell CreateCell(Vector2i coordinates)
+  private t_DungeonCell CreateCell(Vector2i coordinates)
   {
-    DungeonCell newCell = Instantiate(cellPrefab) as DungeonCell;
+    t_DungeonCell newCell = Instantiate(cellPrefab) as t_DungeonCell;
     cells[coordinates.x, coordinates.z] = newCell;
     newCell.coordinates = coordinates;
     newCell.name = "Maze Cell " + coordinates.x + ", " + coordinates.z;
@@ -138,21 +138,21 @@ public class GeneratorGrowingTree : MonoBehaviour
     return newCell;
   }
 
-  private void CreatePassage(DungeonCell cell, DungeonCell otherCell, Direction direction)
+  private void CreatePassage(t_DungeonCell cell, t_DungeonCell otherCell, t_Direction direction)
   {
-    DungeonPassage passage = Instantiate(passagePrefab) as DungeonPassage;
+    t_DungeonPassage passage = Instantiate(passagePrefab) as t_DungeonPassage;
     passage.Initialize(cell, otherCell, direction);
-    passage = Instantiate(passagePrefab) as DungeonPassage;
+    passage = Instantiate(passagePrefab) as t_DungeonPassage;
     passage.Initialize(otherCell, cell, direction.GetOpposite());
   }
 
-  private void CreateWall(DungeonCell cell, DungeonCell otherCell, Direction direction)
+  private void CreateWall(t_DungeonCell cell, t_DungeonCell otherCell, t_Direction direction)
   {
-    DungeonWall wall = Instantiate(wallPrefab) as DungeonWall;
+    t_DungeonWall wall = Instantiate(wallPrefab) as t_DungeonWall;
     wall.Initialize(cell, otherCell, direction);
     if (otherCell != null)
     {
-      wall = Instantiate(wallPrefab) as DungeonWall;
+      wall = Instantiate(wallPrefab) as t_DungeonWall;
       wall.Initialize(otherCell, cell, direction.GetOpposite());
     }
   }

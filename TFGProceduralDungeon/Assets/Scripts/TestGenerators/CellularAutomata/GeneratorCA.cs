@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -9,21 +9,23 @@ using System.Collections.Generic;
 // http://www.roguebasin.com/index.php?title=Cellular_Automata_Method_for_Generating_Random_Cave-Like_Levels
 public class GeneratorCA : MonoBehaviour
 {
-  public WallTile wallTilePrefab;
+  public t_WallTile wallTilePrefab;
   private int[,] grid;
   private int passes; // Pases/iteraciones que realizara el algoritmo
   // Dimensiones en tiles
   private int width, height;
   // Porcentaje de probabilidad de aparicion de pared en el tablero inicial
-  private int wallProbability = 35;
-  List<WallTile> wallTileList = new List<WallTile>();
+  private int wallProbability = 40;
+  List<t_WallTile> wallTileList = new List<t_WallTile>();
+
+  public bool doNextStep = false;
 
   private int RandomByProbability(int probability)
   {
     // Si la probabilidad es mayor que el random obtenido,
     // devuelve confirmacion
     int randomN = Random.Range(1, 101);
-    if(probability >= randomN)// 1 - 100
+    if (probability >= randomN)// 1 - 100
     {
       return 1;
     }
@@ -31,22 +33,26 @@ public class GeneratorCA : MonoBehaviour
   }
   public void Cleanup()
   {
-    foreach(WallTile item in wallTileList)
+    foreach (t_WallTile item in wallTileList)
     {
       Destroy(item.gameObject);
     }
   }
 
-  public void Generate(int width, int height, int passes, int wallProbability)
+  public void Generate(int width, int height, int passes, int wallProbability, int seed)
   {
     this.width = width;
     this.height = height;
     this.passes = passes;
     this.wallProbability = wallProbability;
+    if (seed >= 0)
+    {
+      Random.seed = seed;
+    }
 
     // Creamos una nueva rejilla y la rellenamos con ruido aleatorio
     // segun la probabilidad de que aparezca pared
-    wallTileList = new List<WallTile>();
+    wallTileList = new List<t_WallTile>();
     grid = new int[width, height];
 
     StartCoroutine(CreateDungeon());
@@ -59,35 +65,37 @@ public class GeneratorCA : MonoBehaviour
     // Dibujamos y aplicamos el algoritmo
     DrawDungeon();
 
-    while(!Input.GetKeyDown(KeyCode.P))
+    while (!doNextStep)
     {
       yield return null;
     }
 
+    doNextStep = false;
+
     int r, c;
 
-    for(int t = 0; t < passes; t++)
+    for (int t = 0; t < passes; t++)
     {
       r = 0;
-      while(r < height)
+      while (r < height)
       {
         c = 0;
-        while(c < width)
+        while (c < width)
         {
           // Obtenemos numero de paredes adyacentes a esta posicion
           int numWalls = GetAdyacentWalls(c, r);
 
-          if(grid[c, r] == 1) // Ya hay pared
+          if (grid[c, r] == 1) // Ya hay pared
           {
             // Si el numero de paredes adyacentes es >= 4, sigue siendo pared
             // en caso contrario se convierte en espacio
-            if(numWalls < 3)
+            if (numWalls < 3)
             {
               grid[c, r] = 0; // Vacio
               // Cuando un elemento se convierte en vacio, eliminamos el objeto asociado
-              for(int i = 0; i < wallTileList.Count; i++)
+              for (int i = 0; i < wallTileList.Count; i++)
               {
-                if(wallTileList[i].coordinates.x == c && wallTileList[i].coordinates.z == r)
+                if (wallTileList[i].coordinates.x == c && wallTileList[i].coordinates.z == r)
                 {
                   Destroy(wallTileList[i].gameObject);
                   wallTileList.RemoveAt(i);
@@ -98,10 +106,10 @@ public class GeneratorCA : MonoBehaviour
           }
           else // Es vacio, si tiene 5 o mas paredes adyacentes, se convierte en pared
           {
-            if(numWalls >= 5)
+            if (numWalls >= 5)
             {
               grid[c, r] = 1; // Pared
-              WallTile tile = Instantiate(wallTilePrefab, new Vector3((float)c, 0f, (float)r), Quaternion.identity) as WallTile;
+              t_WallTile tile = Instantiate(wallTilePrefab, new Vector3((float)c, 0f, (float)r), Quaternion.identity) as t_WallTile;
               tile.coordinates = new Vector2i(c, r);
               wallTileList.Add(tile);
             }
@@ -117,12 +125,12 @@ public class GeneratorCA : MonoBehaviour
   private void FillRandom()
   {
     int gridMiddle = 0;
-    for(int r = 0; r < height; r++) // c = column, r = row
+    for (int r = 0; r < height; r++) // c = column, r = row
     {
-      for(int c = 0; c < width; c++)
+      for (int c = 0; c < width; c++)
       {
         // Siempre que estemos en el borde creamos pared
-        if(c == 0 || c == width - 1 ||
+        if (c == 0 || c == width - 1 ||
           r == 0 || r == height - 1)
         {
           grid[c, r] = 1;
@@ -131,7 +139,7 @@ public class GeneratorCA : MonoBehaviour
         else
         {
           gridMiddle = (height / 2);
-          if(r == gridMiddle)
+          if (r == gridMiddle)
           {
             grid[c, r] = 0; // Espacio vacio
           }
@@ -158,11 +166,11 @@ public class GeneratorCA : MonoBehaviour
     int count = 0;
 
     // Recorremos las filas de tiles adyacentes y contamos paredes
-    for(iY = startY; iY <= endY; iY++)
+    for (iY = startY; iY <= endY; iY++)
     {
-      for(iX = startX; iX <= endX; iX++)
+      for (iX = startX; iX <= endX; iX++)
       {
-        if(!(iX == x && iY == y) && IsWall(iX, iY))
+        if (!(iX == x && iY == y) && IsWall(iX, iY))
         {
           count++;
         }
@@ -175,11 +183,11 @@ public class GeneratorCA : MonoBehaviour
   private bool IsWall(int x, int y)
   {
     // Fuera del mapa, cuenta como pared
-    if(x < 0 || x >= width || y < 0 || y >= height)
+    if (x < 0 || x >= width || y < 0 || y >= height)
     {
       return true;
     }
-    else if(grid[x, y] == 1) // Dentro de mapa pero es pared
+    else if (grid[x, y] == 1) // Dentro de mapa pero es pared
     {
       return true;
     }
@@ -190,13 +198,13 @@ public class GeneratorCA : MonoBehaviour
   // Crea los objetos/tiles para rellenar las parede de la mazmorra
   private void DrawDungeon()
   {
-    for(int r = 0; r < height; r++) // c = column, r = row
+    for (int r = 0; r < height; r++) // c = column, r = row
     {
-      for(int c = 0; c < width; c++)
+      for (int c = 0; c < width; c++)
       {
-        if(grid[c, r] == 1)
+        if (grid[c, r] == 1)
         {
-          WallTile tile = Instantiate(wallTilePrefab, new Vector3((float)c, 0f, (float)r), Quaternion.identity) as WallTile;
+          t_WallTile tile = Instantiate(wallTilePrefab, new Vector3((float)c, 0f, (float)r), Quaternion.identity) as t_WallTile;
           tile.coordinates = new Vector2i(c, r);
           wallTileList.Add(tile);
         }

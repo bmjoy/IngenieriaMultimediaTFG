@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class GeneratorBSP : MonoBehaviour
@@ -12,11 +12,13 @@ public class GeneratorBSP : MonoBehaviour
   public GameObject floorTile;
   public GameObject wallTile;
   // Plano/rejilla sobre el que realizar las subdivisiones
-  public Grid levelGrid;
+  public t_Grid levelGrid;
 
   private Coroutine routine;
   private int roomID = 0;
-  private BSPTree bspTree;
+  private t_BSPTree bspTree;
+
+  public bool doNextStep = false; // Se activara por tecla o por boton
 
   // Setters para los sliders de los test
   public void SetDungeonWidth(float value)
@@ -37,12 +39,12 @@ public class GeneratorBSP : MonoBehaviour
     // Creamos el cubo inicial
     GameObject rootArea = GameObject.CreatePrimitive(PrimitiveType.Cube);
     rootArea.transform.localScale = new Vector3(DUNGEON_WIDTH, 1, DUNGEON_HEIGHT);
-    //startPlane.tag = "GenSection";
+    rootArea.tag = "GenSection";
     rootArea.transform.position = new Vector3(transform.position.x + rootArea.transform.localScale.x / 2,
             transform.position.y,
             transform.position.z + rootArea.transform.localScale.z / 2);
 
-    levelGrid = new Grid((int)rootArea.transform.localScale.x, (int)rootArea.transform.localScale.z);
+    levelGrid = new t_Grid((int)rootArea.transform.localScale.x, (int)rootArea.transform.localScale.z);
 
     for (int i = 0; i < levelGrid.GetWidth(); i++)
     {
@@ -52,13 +54,51 @@ public class GeneratorBSP : MonoBehaviour
       }
     }
     // Crea el arbol y agrega el primer nodo raiz
-    bspTree = new BSPTree(rootArea);
+    bspTree = new t_BSPTree(rootArea);
 
     // Crea los nodos del arbol subdividiendo el plano inicial
     // finalmente lanza la creacion de las habitaciones, pasillos y paredes de la mazmorra
     routine = StartCoroutine(CreateDungeon());
   }
 
+  private IEnumerator CreateDungeon()
+  {
+    int step = 0;
+    while (step < 7)
+    {
+      if (doNextStep)
+      {
+        Split(bspTree.Root);
+        step++;
+        doNextStep = false;
+      }
+      yield return null;
+    }
+    while (!doNextStep)
+    {
+      yield return null;
+    }
+    // Crea las habitaciones
+    CreateRooms(bspTree.Root);
+
+    // Conecta las habitaciones con pasillos
+    ConnectRooms(bspTree.Root);
+
+    // Limpieza mediante automata celular
+    for (int k = 0; k < 5; k++)
+    {
+      for (int i = 0; i < levelGrid.GetWidth(); i++)
+      {
+        for (int j = 0; j < levelGrid.GetHeight(); j++)
+        {
+          RemoveSingles(i, j);
+        }
+      }
+    }
+    CreateLevel();
+  }
+
+  // Limpia los objetos creados
   public void Cleanup()
   {
     if (routine != null)
@@ -99,44 +139,8 @@ public class GeneratorBSP : MonoBehaviour
     }
   }
 
-  private IEnumerator CreateDungeon()
-  {
-    int step = 0;
-    while (step < 7)
-    {
-      if (Input.GetKeyDown(KeyCode.P))
-      {
-        Split(bspTree.Root);
-        step++;
-      }
-      yield return null;
-    }
-    while (!Input.GetKeyDown(KeyCode.P))
-    {
-      yield return null;
-    }
-    // Crea las habitaciones
-    CreateRooms(bspTree.Root);
-
-    // Conecta las habitaciones con pasillos
-    ConnectRooms(bspTree.Root);
-
-    // Limpieza
-    for (int k = 0; k < 5; k++)
-    {
-      for (int i = 0; i < levelGrid.GetWidth(); i++)
-      {
-        for (int j = 0; j < levelGrid.GetHeight(); j++)
-        {
-          RemoveSingles(i, j);
-        }
-      }
-    }
-    CreateLevel();
-  }
-
   //split the tree
-  public void Split(BSPNode pNode)
+  public void Split(t_BSPNode pNode)
   {
     if (pNode.GetLeftNode() != null)
     {
@@ -154,7 +158,7 @@ public class GeneratorBSP : MonoBehaviour
     }
   }
 
-  public Grid GetGrid()
+  public t_Grid GetGrid()
   {
     return levelGrid;
   }
@@ -164,7 +168,7 @@ public class GeneratorBSP : MonoBehaviour
     levelGrid.SetTile(x, y, value);
   }
 
-  private void AddRoom(BSPNode pNode)
+  private void AddRoom(t_BSPNode pNode)
   {
 
     GameObject aObj = pNode.GetCube();
@@ -174,14 +178,14 @@ public class GeneratorBSP : MonoBehaviour
             (int)(Random.Range(10, aObj.transform.localScale.x - 5)),
             aRoom.transform.localScale.y,
             (int)(Random.Range(10, aObj.transform.localScale.z - 5)));
-    aRoom.GetComponent<RoomCreator>().Setup();
-    aRoom.GetComponent<RoomCreator>().SetID(roomID);
-    aRoom.GetComponent<RoomCreator>().SetParentNode(pNode);
+    aRoom.GetComponent<t_RoomCreator>().Setup();
+    aRoom.GetComponent<t_RoomCreator>().SetID(roomID);
+    aRoom.GetComponent<t_RoomCreator>().SetParentNode(pNode);
     pNode.SetRoom(aRoom);
     roomID++;
   }
 
-  private void CreateRooms(BSPNode pNode)
+  private void CreateRooms(t_BSPNode pNode)
   {
     if (pNode.GetLeftNode() != null)
     {
@@ -201,7 +205,7 @@ public class GeneratorBSP : MonoBehaviour
 
   // Crea los pasillos para conectar las habitaciones
   // Recorre recursivamente el arbol
-  private void ConnectRooms(BSPNode pNode)
+  private void ConnectRooms(t_BSPNode pNode)
   {
     // Recorrido por los nodos de la parte izquierda
     if (pNode.GetLeftNode() != null)
@@ -210,7 +214,7 @@ public class GeneratorBSP : MonoBehaviour
 
       if (pNode.GetRoom() != null)
       {
-        pNode.GetRoom().GetComponent<RoomCreator>().Connect();
+        pNode.GetRoom().GetComponent<t_RoomCreator>().Connect();
         return;
       }
 
@@ -219,7 +223,7 @@ public class GeneratorBSP : MonoBehaviour
     {
       if (pNode.GetRoom() != null)
       {
-        pNode.GetRoom().GetComponent<RoomCreator>().Connect();
+        pNode.GetRoom().GetComponent<t_RoomCreator>().Connect();
         return;
       }
     }
@@ -230,7 +234,7 @@ public class GeneratorBSP : MonoBehaviour
 
       if (pNode.GetRoom() != null)
       {
-        pNode.GetRoom().GetComponent<RoomCreator>().Connect();
+        pNode.GetRoom().GetComponent<t_RoomCreator>().Connect();
         return;
       }
     }
@@ -238,7 +242,7 @@ public class GeneratorBSP : MonoBehaviour
     {
       if (pNode.GetRoom() != null)
       {
-        pNode.GetRoom().GetComponent<RoomCreator>().Connect();
+        pNode.GetRoom().GetComponent<t_RoomCreator>().Connect();
         return;
       }
     }
@@ -248,21 +252,14 @@ public class GeneratorBSP : MonoBehaviour
   {
     int levelWidth = levelGrid.GetWidth();
     int levelHeight = levelGrid.GetHeight();
-    // Creamos el suelo con un quad escalado
-    //    GameObject rootArea = GameObject.CreatePrimitive(PrimitiveType.Quad);
-    //    // Escalamos en x, y (no z) ya que el quad esta rotado 90º
-    //    rootArea.transform.localScale = new Vector3(levelWidth, levelHeight, 1);
-    //    rootArea.transform.Rotate(new Vector3(90, 0, 0));
-    //    rootArea.transform.position = new Vector3(transform.position.x + levelWidth / 2,
-    //                                              1,
-    //                                              transform.position.z + levelHeight / 2);
-    GameObject floor = Instantiate(floorTile);
-    floor.name = "Floor";
-    floor.tag = "Floor";
-    floor.transform.position = new Vector3(transform.position.x + levelWidth / 2, 1, transform.position.z + levelHeight / 2);
-    floor.transform.localScale = new Vector3(levelWidth, levelHeight, 1);
-    // Establecemos el tiling del material con respecto a sus dimensiones, un tile por unidad
-    floor.GetComponent<Renderer>().material.mainTextureScale = new Vector2(levelWidth, levelHeight);
+
+    //GameObject floor = Instantiate(floorTile);
+    //floor.name = "Floor";
+    //floor.tag = "Floor";
+    //floor.transform.position = new Vector3(transform.position.x + levelWidth / 2, 1, transform.position.z + levelHeight / 2);
+    //floor.transform.localScale = new Vector3(levelWidth, levelHeight, 1);
+    //// Establecemos el tiling del material con respecto a sus dimensiones, un tile por unidad
+    //floor.GetComponent<Renderer>().material.mainTextureScale = new Vector2(levelWidth, levelHeight);
 
     for (int i = 0; i < levelWidth; i++)
     {

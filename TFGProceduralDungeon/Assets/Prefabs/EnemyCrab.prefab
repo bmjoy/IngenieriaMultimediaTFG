@@ -26,9 +26,9 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 160752}
-  m_LocalRotation: {x: .207911715, y: 0, z: 0, w: .978147626}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 5, y: 5, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -45,7 +45,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 112
+  m_Constraints: 122
   m_CollisionDetection: 0
 --- !u!65 &6598414
 BoxCollider:
@@ -57,7 +57,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: .200000003, y: .200000003, z: .0500000007}
+  m_Size: {x: .200000003, y: .200000003, z: .100000001}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!95 &9523420
 Animator:
@@ -88,7 +88,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   deathEffectPrefab: {fileID: 172266, guid: 20642e8c8dc9d704a8e88d138ff9841d, type: 2}
-  patrolling: 0
+  patrolling: 1
+  speed: 1
 --- !u!212 &21283784
 SpriteRenderer:
   m_ObjectHideFlags: 1
