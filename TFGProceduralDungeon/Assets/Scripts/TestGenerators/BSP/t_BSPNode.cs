@@ -49,12 +49,13 @@ public class t_BSPNode
     return parentNode;
   }
 
+  // Divide, en el eje x, la seccion nodo
   void SplitX(GameObject section)
   {
     float roomSize = GeneratorBSP.ROOM_SIZE;
     float xSplit = Random.Range(roomSize, section.transform.localScale.x - roomSize);
 
-    if(xSplit > roomSize)
+    if (xSplit > roomSize)
     {
       GameObject cube0 = GameObject.CreatePrimitive(PrimitiveType.Cube);
       cube0.transform.localScale = new Vector3(xSplit, section.transform.localScale.y, section.transform.localScale.z);
@@ -91,13 +92,14 @@ public class t_BSPNode
     }
   }
 
+  // Divide, en el eje z, la seccion nodo
   void SplitZ(GameObject section)
   {
     float roomSize = GeneratorBSP.ROOM_SIZE;
     float zSplit = Random.Range(roomSize, section.transform.localScale.z - roomSize);
     float zSplit1 = section.transform.localScale.z - zSplit;
 
-    if(zSplit > roomSize)
+    if (zSplit > roomSize)
     {
 
       GameObject cube0 = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -147,7 +149,7 @@ public class t_BSPNode
   public void Cut()
   {
     float choice = Random.Range(0, 2);
-    if(choice <= 0.5)
+    if (choice <= 0.5)
     {
       SplitX(cube);
     }

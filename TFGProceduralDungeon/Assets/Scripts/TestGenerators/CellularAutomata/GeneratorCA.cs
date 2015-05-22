@@ -60,9 +60,10 @@ public class GeneratorCA : MonoBehaviour
 
   private IEnumerator CreateDungeon()
   {
+    // Crear el mapa inicial de ruido usando la probabilidad de paredes
     FillRandom();
 
-    // Dibujamos y aplicamos el algoritmo
+    // Dibujar el mapa de ruido
     DrawDungeon();
 
     while (!doNextStep)
@@ -119,6 +120,40 @@ public class GeneratorCA : MonoBehaviour
         r++;
       }
     }
+
+    // Volcamos al historial de mapas generados
+    WriteToFile();
+  }
+
+  // Vuelca a fichero el resultado de la generación
+  private void WriteToFile()
+  {
+    string fileName = System.DateTime.Now.ToString("ca_yyyymmdd_Hmmss");
+    string content = "Cellular Automata";
+    content += "\nDimensions: " + width + "x" + height;
+    content += "\nWall probability: " + wallProbability + "%";
+    content += "\nPasses: " + passes;
+    content += "\n\n";
+
+    for (int r = 0; r < height; r++) // alto = filas
+    {
+      for (int c = 0; c < width; c++) // ancho = columnas
+      {
+        if (grid[c, r] == 1)
+        {
+          content += "#";
+        }
+        else
+        {
+          content += " ";
+        }
+      }
+      content += "\n";
+    }
+
+    // Escribe a fichero
+    fileName = DebugTools.instance.METRICS_PATH + "Cellular Automata/" + fileName + @".txt";
+    DebugTools.instance.WriteToFile(fileName, content);
   }
 
   // Rellena la rejilla inicial de manera aleatoria

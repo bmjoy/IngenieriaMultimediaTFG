@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: 7ef43fcd89e6dff46965f5fc32c1a655
-timeCreated: 1430555567
+guid: 7ecca479c748d004ab4492cacf797d32
+timeCreated: 1432246106
 licenseType: Free
 ModelImporter:
   serializedVersion: 18
@@ -9,7 +9,8 @@ ModelImporter:
     400000: //RootNode
     2300000: //RootNode
     3300000: //RootNode
-    4300000: Chest
+    4300000: Diamond
+    7400000: Default Take
     9500000: //RootNode
   materials:
     importMaterials: 1

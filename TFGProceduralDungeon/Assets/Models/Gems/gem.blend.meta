@@ -1,17 +1,17 @@
 fileFormatVersion: 2
-guid: 53b1e4a7ad4bf544da66ea36ea354665
-timeCreated: 1430555567
+guid: a75fe0f4f2a08854a80c9c5c1aac1ffe
+timeCreated: 1432246109
 licenseType: Free
 ModelImporter:
   serializedVersion: 18
   fileIDToRecycleName:
-    100000: Chest
-    100002: //RootNode
-    400000: Chest
-    400002: //RootNode
-    2300000: Chest
-    3300000: Chest
-    4300000: Chest
+    100000: //RootNode
+    400000: //RootNode
+    2300000: //RootNode
+    3300000: //RootNode
+    4300000: Gem
+    7400000: Default Take
+    9500000: //RootNode
   materials:
     importMaterials: 1
     materialName: 0
@@ -65,7 +65,7 @@ ModelImporter:
     feetSpacing: 0
     rootMotionBoneName: 
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 0
+  animationType: 2
   additionalBone: 0
   userData: 
   assetBundleName: 

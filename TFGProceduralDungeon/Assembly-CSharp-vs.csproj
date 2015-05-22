@@ -94,7 +94,6 @@
      <Compile Include="Assets\Scripts\UI\UIManager.cs" />
      <Compile Include="Assets\Scripts\UI\UIMenuHelp.cs" />
      <Compile Include="Assets\Scripts\Vector2i.cs" />
-     <None Include="Assets\Models\Chest WoW Style_0\readme.txt" />
      <None Include="Assets\Fonts\OFL.txt" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
