@@ -16,6 +16,7 @@ public class GeneratorCA : MonoBehaviour
   private int width, height;
   // Porcentaje de probabilidad de aparicion de pared en el tablero inicial
   private int wallProbability = 40;
+  private int seed;
   List<t_WallTile> wallTileList = new List<t_WallTile>();
 
   public bool doNextStep = false;
@@ -47,7 +48,12 @@ public class GeneratorCA : MonoBehaviour
     this.wallProbability = wallProbability;
     if (seed >= 0)
     {
-      Random.seed = seed;
+      this.seed = seed;
+      Random.seed = this.seed;
+    }
+    else
+    {
+      this.seed = Random.seed;
     }
 
     // Creamos una nueva rejilla y la rellenamos con ruido aleatorio
@@ -128,8 +134,9 @@ public class GeneratorCA : MonoBehaviour
   // Vuelca a fichero el resultado de la generación
   private void WriteToFile()
   {
-    string fileName = System.DateTime.Now.ToString("ca_yyyymmdd_Hmmss");
+    string fileName = System.DateTime.Now.ToString("ca_yyyyMMdd_HHmmss");
     string content = "Cellular Automata";
+    content += "\nSeed: " + seed;
     content += "\nDimensions: " + width + "x" + height;
     content += "\nWall probability: " + wallProbability + "%";
     content += "\nPasses: " + passes;

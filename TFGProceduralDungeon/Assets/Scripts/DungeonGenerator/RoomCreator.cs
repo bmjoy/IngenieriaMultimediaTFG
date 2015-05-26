@@ -19,31 +19,73 @@ public class RoomCreator : MonoBehaviour
   private int roomID;
   private BSPNode parentNode;
   private GameObject sibling;
+  // Posicion y dimensiones en enteros. Son unidades de grid
+  private Vector2i position;
+  private Vector2i size;
 
-  public void Setup()
+  // Establece la geometria de la habitacion sobre el grid
+  public Grid Setup(Grid grid)
   {
+    transform.position = new Vector3((int)transform.position.x - (transform.localScale.x / 2),
+                                    transform.position.y,
+                                    (int)transform.position.z - (transform.localScale.z / 2));
 
-    generator = GameObject.Find("DungeonGenerator").GetComponent<DungeonGenerator>();
-    transform.position = new Vector3((int)transform.position.x, (int)transform.position.y, (int)transform.position.z);
-    transform.position = new Vector3(transform.position.x - (transform.localScale.x / 2), transform.position.y, transform.position.z - (transform.localScale.z / 2));
     for (int i = (int)transform.position.x; i < (int)transform.position.x + transform.localScale.x; i++)
     {
       for (int j = (int)transform.position.z; j < (int)transform.position.z + transform.localScale.z; j++)
       {
-        generator.SetTile(i, j, 1);
+        grid.SetTile(i, j, 1);
       }
     }
     for (int i = 0; i < transform.localScale.x + 1; i++)
     {
-      generator.SetTile((int)transform.position.x + i, (int)transform.position.z, 2);
-      generator.SetTile((int)transform.position.x + i, (int)(transform.position.z + transform.localScale.z), 2);
+      grid.SetTile((int)transform.position.x + i, (int)transform.position.z, 2);
+      grid.SetTile((int)transform.position.x + i, (int)(transform.position.z + transform.localScale.z), 2);
     }
     for (int i = 0; i < transform.localScale.z + 1; i++)
     {
-      generator.SetTile((int)transform.position.x, (int)transform.position.z + i, 2);
-      generator.SetTile((int)(transform.position.x + transform.localScale.x), (int)transform.position.z + i, 2);
+      grid.SetTile((int)transform.position.x, (int)transform.position.z + i, 2);
+      grid.SetTile((int)(transform.position.x + transform.localScale.x), (int)transform.position.z + i, 2);
     }
+
+    return grid;
   }
+
+  //public Grid Setup(Grid grid)
+  //{
+  //  // Pasamos la posicion y escala a unidades de grid
+  //  // La posicion se situa en la esquina superior izquierda, la primera casilla de la habitacion
+  //  this.size = new Vector2i((int)transform.localScale.x, (int)transform.localScale.z);
+  //  this.position = new Vector2i((int)(transform.position.x - (size.x / 2)),
+  //                                  (int)(transform.position.z - (size.z / 2)));
+
+  //  // Obtenemos la posicion sobre el grid
+  //  //Vector2i startPosition = new Vector2i((int)(transform.position.x - (transform.localScale.x / 2)),
+  //  //                                (int)(transform.position.z - (transform.localScale.z / 2)));
+
+  //  // Desde la posicion inicial recorremos las dimensiones de la habitacion asignando valor al tile
+  //  for (int i = position.x; i < position.x + size.x; i++)
+  //  {
+  //    for (int j = position.z; j < position.z + size.z; j++)
+  //    {
+  //      grid.SetTile(i, j, 1); // FLOOR
+  //    }
+  //  }
+
+  //  // WALLS
+  //  for (int i = 0; i <= size.x; i++)
+  //  {
+  //    grid.SetTile(position.x + i, position.z, 2); // Arriba
+  //    grid.SetTile(position.x + i, position.z + size.z, 2); // Abajo
+  //  }
+  //  for (int i = 0; i <= size.z; i++)
+  //  {
+  //    grid.SetTile(position.x, position.z + i, 2); // Izquierda
+  //    grid.SetTile(position.x + size.x, position.z + i, 2); // Derecha
+  //  }
+
+  //  return grid;
+  //}
 
   public void SetID(int aID)
   {
@@ -58,10 +100,8 @@ public class RoomCreator : MonoBehaviour
   public void Connect()
   {
     GetSibiling();
-
     if (sibling != null)
     {
-
       Vector3 startPos = new Vector3();
       Vector3 endPos = new Vector3();
 
@@ -86,18 +126,13 @@ public class RoomCreator : MonoBehaviour
         endPos = sibling.GetComponent<RoomCreator>().ChooseDoorPoint(3);
       }
 
-
       GameObject aDigger = (GameObject)Instantiate(digger, startPos, Quaternion.identity);
       aDigger.GetComponent<Digger>().Begin(endPos);
 
-
       parentNode = FindRoomlessParent(parentNode);
-
       if (parentNode != null)
       {
-
         int aC = Random.Range(0, 2);
-
         if (aC == 0)
         {
           parentNode.SetRoom(this.gameObject);
@@ -106,12 +141,9 @@ public class RoomCreator : MonoBehaviour
         {
           parentNode.SetRoom(sibling.gameObject);
         }
-
         sibling.GetComponent<RoomCreator>().SetParentNode(parentNode);
       }
-
     }
-
   }
 
   private void GetSibiling()

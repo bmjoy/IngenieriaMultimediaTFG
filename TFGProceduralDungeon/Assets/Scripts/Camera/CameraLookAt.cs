@@ -3,6 +3,9 @@ using System.Collections;
 
 public class CameraLookAt : MonoBehaviour
 {
+  // Defaults
+  private Quaternion defaultRotation;
+
   private float rotateFactor = 40f;
   private float translateFactor = 2f;
   private float default_zOffset = 4f;
@@ -11,16 +14,18 @@ public class CameraLookAt : MonoBehaviour
 
   void Start()
   {
+    defaultRotation = transform.rotation;
     Reset();
   }
 
-  private void Reset()
+  public void Reset()
   {
     zOffset = default_zOffset;
     if (parent != null)
     {
       transform.position = parent.transform.position - parent.transform.forward * zOffset;
     }
+    transform.rotation = defaultRotation;
   }
 
   public void SetParent(GameObject parent)

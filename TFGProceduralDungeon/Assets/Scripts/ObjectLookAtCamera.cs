@@ -5,7 +5,7 @@ using System.Collections;
  * Script que hace que el objeto siempre mire hacia la camara.
  * Generalmente se usa para sprites en entornos 3D
  * */
-public class SpriteLookAtCamera : MonoBehaviour
+public class ObjectLookAtCamera : MonoBehaviour
 {
   private Camera camera;
   void Update()
@@ -16,8 +16,10 @@ public class SpriteLookAtCamera : MonoBehaviour
     }
     else
     {
-      transform.LookAt(transform.position + Camera.main.transform.rotation * Vector3.down,
-                          Camera.main.transform.rotation * Vector3.back);
+      Vector3 rotationDir = transform.position - camera.transform.position;
+      rotationDir.y = 0f;
+      Quaternion newRotation = Quaternion.LookRotation(rotationDir, Vector3.up);
+      transform.rotation = newRotation;
     }
   }
 }

@@ -14,17 +14,19 @@ public class Player : MonoBehaviour
   private int hitGraceTime = 1; // Segundos invencible despues de ser golpeado
   private float maxWalkSpeed = 3.0f;
   private float maxRunSpeed = 5.0f;
+  private float jumpForce = 200f;
   private bool running = false;
   private bool attacking = false;
   private float direction = -1f; // 1 derecha, -1 izquierda (en eje x)
   private bool rightDir = false; // Para girar el sprite en la direccion correcta
   private bool startJump = false; // Pasa que el FixedUpdate aplique la fuerza
-  private bool onGround = true; // Indica si el jugador esta en le suelo (no saltando o cayendo)
+  private bool onGround = true; // Indica si el jugador esta en le suelo y se puede realizar un salto
 
   private SpriteRenderer spriteRenderer; // Para aplicar efectos directamente
   private Animator animator;
   private Rigidbody rigidBody; // Al que aplicar fuerza para salto
 
+  private Camera cameraMain;
   private CameraShake cameraShaker;
 
   public bool Attacking
@@ -41,6 +43,7 @@ public class Player : MonoBehaviour
     spriteRenderer = sprite.GetComponent<SpriteRenderer>();
     animator = sprite.GetComponent<Animator>();
     rigidBody = GetComponent<Rigidbody>();
+    cameraMain = Camera.main;
     cameraShaker = Camera.main.GetComponent<CameraShake>();
   }
 
@@ -52,6 +55,7 @@ public class Player : MonoBehaviour
     {
       return;
     }
+
     // Si se pulsa Shift la velocidad cambia
     if (Input.GetKeyDown(KeyCode.LeftShift))
     {
@@ -67,6 +71,7 @@ public class Player : MonoBehaviour
     {
       speed = maxRunSpeed;
     }
+
     // Get the horizontal and vertical axis.
     // By default they are mapped to the arrow keys.
     // The value is in the range -1 to 1
@@ -76,12 +81,6 @@ public class Player : MonoBehaviour
     // Move translation along the object's x/z-axis
     transform.Translate(hWalkSpeed * Time.deltaTime, 0, 0);
     transform.Translate(0, 0, vWalkSpeed * Time.deltaTime);
-
-    // Orienta el sprite hacia la camara, pero solo en el eje x
-    // esto ademas lo invierte?
-    //    Vector3 lookAtPosition = playerCamera.transform.position;
-    //    lookAtPosition.y = sprite.transform.position.y;
-    //    sprite.transform.LookAt(lookAtPosition);
 
     // On 0 movement won't flip sprite
     if (hAxis != 0)
@@ -99,22 +98,16 @@ public class Player : MonoBehaviour
       {
         transform.localScale = Vector3.Scale(transform.localScale, new Vector3(-1, 1, 1));
         rightDir = goingRight;
-
       }
     }
 
     // SALTO. Solo cuando esta en el suelo
-    if (rigidBody.velocity.y == 0)
-    {
-      onGround = true;
-    }
-    if (onGround && Input.GetKeyDown(KeyCode.Space))
+    if (Input.GetKeyDown(KeyCode.Space) && onGround)
     {
       // Activamos el flag y la fisica se hace en FixedUpdate
       startJump = true;
       onGround = false;
     }
-
 
     // ANIMACIONES
     // Threshold speed for walk/idle animation
@@ -167,12 +160,14 @@ public class Player : MonoBehaviour
     {
       startJump = false;
       rigidBody.velocity *= 0;
-      rigidBody.AddForce(Vector3.up * 150);
+      rigidBody.AddForce(Vector3.up * jumpForce);
     }
   }
 
   void OnCollisionEnter(Collision collision)
   {
+    onGround = true;
+
     if (collision.gameObject.tag == "Enemy" && !invincible)
     {
       cameraShaker.Shake(0.4f);

@@ -51,6 +51,7 @@
      <Compile Include="Assets\Scripts\Camera\CameraLookAt.cs" />
      <Compile Include="Assets\Scripts\Camera\CameraShake.cs" />
      <Compile Include="Assets\Scripts\Camera\CameraSwitcher.cs" />
+     <Compile Include="Assets\Scripts\Chest.cs" />
      <Compile Include="Assets\Scripts\Debug\DebugInfo.cs" />
      <Compile Include="Assets\Scripts\Debug\DebugTools.cs" />
      <Compile Include="Assets\Scripts\DungeonGenerator\BSPNode.cs" />
@@ -66,10 +67,10 @@
      <Compile Include="Assets\Scripts\GameManager.cs" />
      <Compile Include="Assets\Scripts\MovingObject.cs" />
      <Compile Include="Assets\Scripts\ObjectAutodestroy.cs" />
+     <Compile Include="Assets\Scripts\ObjectLookAtCamera.cs" />
      <Compile Include="Assets\Scripts\ParticleSystemAutodestroy.cs" />
      <Compile Include="Assets\Scripts\Player.cs" />
      <Compile Include="Assets\Scripts\SceneTransition.cs" />
-     <Compile Include="Assets\Scripts\SpriteLookAtCamera.cs" />
      <Compile Include="Assets\Scripts\TestGenerators\BSP\GeneratorBSP.cs" />
      <Compile Include="Assets\Scripts\TestGenerators\BSP\t_BSPNode.cs" />
      <Compile Include="Assets\Scripts\TestGenerators\BSP\t_BSPTree.cs" />

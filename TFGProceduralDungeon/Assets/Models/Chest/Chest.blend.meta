@@ -1,22 +1,28 @@
 fileFormatVersion: 2
-guid: 87839416f20ee5d489c893f8c0eeb07c
-timeCreated: 1432246107
+guid: c15e95619357ba14d9d0615f375bd780
+timeCreated: 1432639905
 licenseType: Free
 ModelImporter:
   serializedVersion: 18
   fileIDToRecycleName:
     100000: //RootNode
-    100002: Lid
+    100002: KeyHole
+    100004: Lid
     400000: //RootNode
-    400002: Lid
+    400002: KeyHole
+    400004: Lid
     2300000: //RootNode
-    2300002: Lid
+    2300002: KeyHole
+    2300004: Lid
     3300000: //RootNode
-    3300002: Lid
+    3300002: KeyHole
+    3300004: Lid
     4300000: Chest
-    4300002: Lid
+    4300002: KeyHole
+    4300004: Lid
     7400000: Default Take
     9500000: //RootNode
+    11100000: //RootNode
   materials:
     importMaterials: 1
     materialName: 0
@@ -70,7 +76,7 @@ ModelImporter:
     feetSpacing: 0
     rootMotionBoneName: 
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 2
+  animationType: 1
   additionalBone: 0
   userData: 
   assetBundleName: 

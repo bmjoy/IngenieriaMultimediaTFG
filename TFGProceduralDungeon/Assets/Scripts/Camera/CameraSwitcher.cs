@@ -21,6 +21,11 @@ public class CameraSwitcher : MonoBehaviour
     {
       cameraLookAt.enabled = !cameraLookAt.enabled;
       cameraFree.enabled = !cameraFree.enabled;
+
+      if (cameraLookAt.enabled)
+      {
+        cameraLookAt.Reset();
+      }
     }
   }
 }

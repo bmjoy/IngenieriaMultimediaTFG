@@ -53,6 +53,11 @@ public class t_BSPNode
   void SplitX(GameObject section)
   {
     float roomSize = GeneratorBSP.ROOM_SIZE;
+    if (section.transform.localScale.x < (roomSize * 2))
+    {
+      return;
+    }
+
     float xSplit = Random.Range(roomSize, section.transform.localScale.x - roomSize);
 
     if (xSplit > roomSize)
@@ -96,6 +101,10 @@ public class t_BSPNode
   void SplitZ(GameObject section)
   {
     float roomSize = GeneratorBSP.ROOM_SIZE;
+    if (section.transform.localScale.z < (roomSize * 2))
+    {
+      return;
+    }
     float zSplit = Random.Range(roomSize, section.transform.localScale.z - roomSize);
     float zSplit1 = section.transform.localScale.z - zSplit;
 

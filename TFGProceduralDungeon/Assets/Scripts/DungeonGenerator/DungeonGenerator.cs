@@ -4,14 +4,20 @@ using UnityEngine.UI;
 
 public class DungeonGenerator : MonoBehaviour
 {
-  // Los distintos generadores para los test
+  // Dimensiones
+  public int DUNGEON_WIDTH;
+  public int DUNGEON_HEIGHT;
+  // Dimensiones minimas del espacio donde se va a crear la habitacion
+  public static float NODE_MIN_SIZE = 12f;
+  // Margen dentro del espacio del nodo. Hay que tener en cuenta que sera el doble
+  private float ROOM_MARGIN = 2f;
+  // ROOM
+  // Las dimensiones minimas de la habitacion seran la mitad de NODE_MIN_SIZE
+  // Las dimensiones maximas seran NODE_MIN_SIZE - ROOM_MARGIN
 
-  public int DUNGEON_WIDTH = 50;
-  public int DUNGEON_HEIGHT = 50;
-  public static float ROOM_SIZE = 10f;
-  public GameObject baseRoom;
-  public GameObject floorTile;
-  public GameObject wallTile;
+  public GameObject baseRoom; // Objeto base para generar habitacion
+  public GameObject floorTile; // Tile para suelo
+  public GameObject wallTile; // Tile para pared
   // Plano/rejilla sobre el que realizar las subdivisiones
   public Grid levelGrid;
 
@@ -50,7 +56,7 @@ public class DungeonGenerator : MonoBehaviour
       }
     }
     // Creamos el nodo raiz con las dimensiones totales de la mazmorra
-    // lo posicionamos en el centro segun las dimensiones
+    // lo posicionamos en el centro del mapa
     BSPNode rootNode = new BSPNode();
     rootNode.size = new Vector2(DUNGEON_WIDTH, DUNGEON_HEIGHT);
     rootNode.position = new Vector2(transform.position.x + DUNGEON_WIDTH / 2, transform.position.z + DUNGEON_HEIGHT / 2);
@@ -93,12 +99,15 @@ public class DungeonGenerator : MonoBehaviour
     }
     CreateLevel();
 
-    // Instanciamos el jugador en la entrada
+    PlacePlayer();
+  }
+
+  private void PlacePlayer()
+  {
+    // Instanciamos el jugador en la habitacion entrada
     if (entrance != null)
     {
       Vector3 playerPosition = new Vector3(entrance.transform.position.x + (entrance.transform.localScale.x / 2), 10f, entrance.transform.position.z + (entrance.transform.localScale.z / 2));
-      Debug.Log("position: " + entrance.transform.position + ", size: " + entrance.transform.localScale);
-      Debug.Log(playerPosition);
       //Vector3 playerPosition = new Vector3(2f, 2f, 2f);
       GameObject.FindGameObjectWithTag("Player").transform.position = playerPosition;
     }
@@ -118,7 +127,6 @@ public class DungeonGenerator : MonoBehaviour
       pNode.Cut();
       return;
     }
-    // Si hay 
     if (pNode.GetLeftNode() != null)
     {
       Split(pNode.GetRightNode());
@@ -135,14 +143,18 @@ public class DungeonGenerator : MonoBehaviour
     levelGrid.SetTile(x, y, value);
   }
 
+  // Agrega una habitacion dentro de los limites del espacio del nodo
   private void AddRoom(BSPNode pNode)
   {
+    // Las dimensiones minimas de la habitacion seran la mitad de NODE_MIN_SIZE
+    // Las dimensiones maximas seran NODE_MIN_SIZE - ROOM_MARGIN
+
     Vector3 roomPosition = new Vector3(pNode.position.x, 0f, pNode.position.y);
     GameObject aRoom = (GameObject)Instantiate(baseRoom, roomPosition, Quaternion.identity);
-    aRoom.transform.localScale = new Vector3((int)(Random.Range(10, pNode.size.x - 5)),
+    aRoom.transform.localScale = new Vector3((int)(Random.Range(NODE_MIN_SIZE / 2, pNode.size.x - ROOM_MARGIN)),
                                              aRoom.transform.localScale.y,
-                                             (int)(Random.Range(10, pNode.size.y - 5)));
-    aRoom.GetComponent<RoomCreator>().Setup();
+                                             (int)(Random.Range(NODE_MIN_SIZE / 2, pNode.size.y - ROOM_MARGIN)));
+    levelGrid = aRoom.GetComponent<RoomCreator>().Setup(levelGrid);
     aRoom.GetComponent<RoomCreator>().SetID(roomID);
     aRoom.GetComponent<RoomCreator>().SetParentNode(pNode);
     pNode.SetRoom(aRoom);
@@ -153,10 +165,7 @@ public class DungeonGenerator : MonoBehaviour
   {
     GameObject cube1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
     cube1.transform.localScale = new Vector3(pNode.size.x, 0.1f, pNode.size.y);
-    cube1.transform.position = new Vector3(
-      pNode.position.x,
-      0f,
-      pNode.position.y);
+    cube1.transform.position = new Vector3(pNode.position.x, 0f, pNode.position.y);
     cube1.GetComponent<Renderer>().material.color = new Color(Random.Range(0.0f, 1.0f),
                                                               Random.Range(0.0f, 1.0f),
                                                               Random.Range(0.0f, 1.0f));
@@ -284,7 +293,6 @@ public class DungeonGenerator : MonoBehaviour
             Instantiate(wallTile, new Vector3(transform.position.x - (transform.localScale.x / 2) + i, transform.position.y + transform.localScale.y / 2, transform.position.z - (transform.localScale.z / 2) + j), Quaternion.identity);
             break;
         }
-
       }
     }
   }

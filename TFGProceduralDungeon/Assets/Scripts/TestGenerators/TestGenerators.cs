@@ -38,7 +38,7 @@ public class TestGenerators : MonoBehaviour
   // Automata celular
   public GameObject settingsCA; // Instancia del panel de opciones
   private int cellularAutomataPasses = 1;
-  private int wallProbability = 35;
+  private int wallProbability = 40;
   private bool useSeed = false;
   private int seed = 0;
 
