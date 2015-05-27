@@ -65,6 +65,7 @@
      <Compile Include="Assets\Scripts\Enemies\EnemyCrab.cs" />
      <Compile Include="Assets\Scripts\Enemies\EnemyGoblin.cs" />
      <Compile Include="Assets\Scripts\GameManager.cs" />
+     <Compile Include="Assets\Scripts\Hud.cs" />
      <Compile Include="Assets\Scripts\MovingObject.cs" />
      <Compile Include="Assets\Scripts\ObjectAutodestroy.cs" />
      <Compile Include="Assets\Scripts\ObjectLookAtCamera.cs" />
@@ -91,6 +92,7 @@
      <Compile Include="Assets\Scripts\Traps\TrapArrows.cs" />
      <Compile Include="Assets\Scripts\Traps\TrapRollingRock.cs" />
      <Compile Include="Assets\Scripts\Traps\TrapSpikes.cs" />
+     <Compile Include="Assets\Scripts\UI\PauseMenu.cs" />
      <Compile Include="Assets\Scripts\UI\UIHelper.cs" />
      <Compile Include="Assets\Scripts\UI\UIManager.cs" />
      <Compile Include="Assets\Scripts\UI\UIMenuHelp.cs" />

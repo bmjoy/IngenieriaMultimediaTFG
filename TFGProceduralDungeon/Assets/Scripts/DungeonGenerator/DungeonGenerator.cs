@@ -86,7 +86,7 @@ public class DungeonGenerator : MonoBehaviour
     // Conecta las habitaciones con pasillos
     ConnectRooms(bspTree.Root);
 
-    // Limpieza con automata celular
+    //// Limpieza con automata celular
     for (int k = 0; k < 5; k++)
     {
       for (int i = 0; i < levelGrid.GetWidth(); i++)
@@ -99,17 +99,37 @@ public class DungeonGenerator : MonoBehaviour
     }
     CreateLevel();
 
-    PlacePlayer();
+    PopulateDungeon(bspTree.Root);
   }
 
-  private void PlacePlayer()
+  // Situa al jugador en la entrada de la mazmorra
+  private void PlacePlayer(Vector3 position)
   {
-    // Instanciamos el jugador en la habitacion entrada
-    if (entrance != null)
+    position.y += 5f;
+    GameObject.FindGameObjectWithTag("Player").transform.position = position;
+  }
+
+  private void PopulateDungeon(BSPNode pNode)
+  {
+    // Si hay nodo izquierdo nos movemos un nivel
+    if (pNode.GetLeftNode() != null)
     {
-      Vector3 playerPosition = new Vector3(entrance.transform.position.x + (entrance.transform.localScale.x / 2), 10f, entrance.transform.position.z + (entrance.transform.localScale.z / 2));
-      //Vector3 playerPosition = new Vector3(2f, 2f, 2f);
-      GameObject.FindGameObjectWithTag("Player").transform.position = playerPosition;
+      PopulateDungeon(pNode.GetLeftNode());
+    }
+    else
+    {
+      // Hoja con habitacion
+      RoomCreator room = pNode.GetRoom().GetComponent<RoomCreator>();
+      if (room.type == RoomType.ENTRANCE)
+      {
+        PlacePlayer(room.transform.position);
+      }
+
+      return;
+    }
+    if (pNode.GetRightNode() != null)
+    {
+      PopulateDungeon(pNode.GetRightNode());
     }
   }
 
@@ -127,7 +147,7 @@ public class DungeonGenerator : MonoBehaviour
       pNode.Cut();
       return;
     }
-    if (pNode.GetLeftNode() != null)
+    if (pNode.GetRightNode() != null)
     {
       Split(pNode.GetRightNode());
     }
@@ -156,9 +176,9 @@ public class DungeonGenerator : MonoBehaviour
                                              (int)(Random.Range(NODE_MIN_SIZE / 2, pNode.size.y - ROOM_MARGIN)));
     levelGrid = aRoom.GetComponent<RoomCreator>().Setup(levelGrid);
     aRoom.GetComponent<RoomCreator>().SetID(roomID);
+    roomID++;
     aRoom.GetComponent<RoomCreator>().SetParentNode(pNode);
     pNode.SetRoom(aRoom);
-    roomID++;
   }
 
   public void DrawNode(BSPNode pNode)

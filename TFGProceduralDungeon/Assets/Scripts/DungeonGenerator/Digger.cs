@@ -3,17 +3,10 @@ using System.Collections;
 
 public class Digger : MonoBehaviour
 {
-
-  private Vector3 targetPos;
   private DungeonGenerator generator;
 
-  public void Begin(Vector3 _targetPos)
-  {
-    targetPos = _targetPos;
 
-    Dig();
-  }
-
+  // Crear suelo alrededor de la posicion actual y la rodea con paredes
   private void UpdateTile()
   {
     generator = GameObject.Find("DungeonGenerator").GetComponent<DungeonGenerator>();
@@ -27,16 +20,15 @@ public class Digger : MonoBehaviour
     SurroundTilesWithWall((int)transform.position.x - 1, (int)transform.position.z);
     SurroundTilesWithWall((int)transform.position.x, (int)transform.position.z + 1);
     SurroundTilesWithWall((int)transform.position.x, (int)transform.position.z - 1);
-
   }
 
-  public void Dig()
+  // Avanza en x,z para actualiza cada tile del pasillo a cavar
+  public void Dig(Vector3 targetPos)
   {
-
-    while(transform.position.x != targetPos.x)
+    // Avance en eje x
+    while (transform.position.x != targetPos.x)
     {
-
-      if(transform.position.x < targetPos.x)
+      if (transform.position.x < targetPos.x)
       {
         transform.position = new Vector3(transform.position.x + 1, transform.position.y, transform.position.z);
       }
@@ -44,13 +36,12 @@ public class Digger : MonoBehaviour
       {
         transform.position = new Vector3(transform.position.x - 1, transform.position.y, transform.position.z);
       }
-
       UpdateTile();
     }
-
-    while(transform.position.z != targetPos.z)
+    // Avance en eje z
+    while (transform.position.z != targetPos.z)
     {
-      if(transform.position.z < targetPos.z)
+      if (transform.position.z < targetPos.z)
       {
         transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z + 1);
       }
@@ -58,33 +49,31 @@ public class Digger : MonoBehaviour
       {
         transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - 1);
       }
-
       UpdateTile();
     }
-
-    DestroyImmediate(this);
+    Destroy(this.gameObject);
   }
 
-  public void SurroundTilesWithWall(int _x, int _y)
+  // Crea un tile de tipo pared si este esta vacio
+  public void SurroundTilesWithWall(int x, int y)
   {
-    if(generator.GetGrid().GetTile(_x + 1, _y) == 0)
-    {
-      generator.SetTile(_x + 1, _y, 2);
-    }
+    Grid grid = generator.GetGrid();
 
-    if(generator.GetGrid().GetTile(_x - 1, _y) == 0)
+    if (grid.GetTile(x + 1, y) == 0) // Derecha
     {
-      generator.SetTile(_x - 1, _y, 2);
+      generator.SetTile(x + 1, y, 2);
     }
-
-    if(generator.GetGrid().GetTile(_x, _y + 1) == 0)
+    if (grid.GetTile(x - 1, y) == 0) // Izquierda
     {
-      generator.SetTile(_x, _y + 1, 2);
+      generator.SetTile(x - 1, y, 2);
     }
-
-    if(generator.GetGrid().GetTile(_x, _y - 1) == 0)
+    if (grid.GetTile(x, y + 1) == 0) // Superior
     {
-      generator.SetTile(_x, _y - 1, 2);
+      generator.SetTile(x, y + 1, 2);
+    }
+    if (grid.GetTile(x, y - 1) == 0) // Inferior
+    {
+      generator.SetTile(x, y - 1, 2);
     }
   }
 }

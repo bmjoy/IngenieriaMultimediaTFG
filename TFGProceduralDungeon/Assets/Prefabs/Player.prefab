@@ -29,6 +29,7 @@ GameObject:
   - 54: {fileID: 5443454}
   - 114: {fileID: 11414610}
   - 114: {fileID: 11419136}
+  - 114: {fileID: 11460420}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -43,7 +44,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 170824}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 4, z: .140000001}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 5, y: 5, z: 1}
   m_Children:
   - {fileID: 435408}
@@ -117,7 +118,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerAttack: {fileID: 182508, guid: 2f5a2c2457776bf49ac8e7b3b72560cc, type: 2}
-  life: 3
   invincible: 0
 --- !u!114 &11419136
 MonoBehaviour:
@@ -130,6 +130,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb677f72c73399347ac8ffb730f616ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &11460420
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 170824}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c8a0ce4f17ac71478f1f9a25f1d47e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  heartEmptySprite: {fileID: 153342, guid: a3bf9f1769f88cf43a9e51b9b20d81d4, type: 2}
+  heartFullSprite: {fileID: 117294, guid: 814cf65957589324da57489919fc72e6, type: 2}
 --- !u!212 &21282292
 SpriteRenderer:
   m_ObjectHideFlags: 1

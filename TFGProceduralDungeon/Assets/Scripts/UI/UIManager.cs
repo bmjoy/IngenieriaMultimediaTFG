@@ -4,6 +4,8 @@ using System.Collections;
 
 public class UIManager : MonoBehaviour
 {
+  public GameObject pauseCanvas;
+
   private GameObject menuTests;
   private GameObject menuMain;
 
@@ -17,6 +19,21 @@ public class UIManager : MonoBehaviour
     }
   }
 
+  // Update is called once per frame
+  void Update()
+  {
+    if (pauseCanvas != null && (Input.GetKeyDown(KeyCode.P) || Input.GetKeyDown(KeyCode.Escape)))
+    {
+      TogglePause();
+    }
+  }
+
+  public void TogglePause()
+  {
+    pauseCanvas.SetActive(!pauseCanvas.activeSelf);
+    Time.timeScale = 1.0f - Time.timeScale;
+  }
+
   // Eventos de boton
   public void OnNewGame()
   {
@@ -25,6 +42,12 @@ public class UIManager : MonoBehaviour
 
   public void OnSettings()
   {
+  }
+
+  public void OnMainMenu()
+  {
+    Time.timeScale = 1.0f - Time.timeScale;
+    GameManager.instance.LoadScene(SceneName.MainMenu);
   }
 
   public void OnBack()

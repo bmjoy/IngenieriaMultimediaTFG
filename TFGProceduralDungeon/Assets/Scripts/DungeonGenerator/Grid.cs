@@ -33,6 +33,10 @@ public class Grid
 
   public int GetTile(int x, int y)
   {
+    if (x < 0 || x >= gridWidth || y < 0 || y >= gridHeight)
+    {
+      return -1;
+    }
     return grid[x, y];
   }
 

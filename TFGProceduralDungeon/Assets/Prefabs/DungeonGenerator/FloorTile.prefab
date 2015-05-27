@@ -11,7 +11,7 @@ GameObject:
   - 33: {fileID: 3334108}
   - 64: {fileID: 6479580}
   - 23: {fileID: 2306558}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: FloorTile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -40,7 +40,7 @@ MeshRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 1
   m_Materials:
-  - {fileID: 2100000, guid: 4b1ba8d202ce1424bbed50ac2357b581, type: 2}
+  - {fileID: 2100000, guid: bfdcc1762cbd13844990af493c62f6eb, type: 2}
   m_SubsetIndices: 
   m_StaticBatchRoot: {fileID: 0}
   m_UseLightProbes: 1

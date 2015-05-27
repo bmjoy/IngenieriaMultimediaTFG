@@ -8,8 +8,9 @@ public class Player : MonoBehaviour
   private GameObject playerAttackInstance;
 
   // STATS del personaje
-  public int life = 3;
+  public static int MAX_HEALTH = 3;
   public bool invincible = false;
+  private int life;
 
   private int hitGraceTime = 1; // Segundos invencible despues de ser golpeado
   private float maxWalkSpeed = 3.0f;
@@ -29,6 +30,9 @@ public class Player : MonoBehaviour
   private Camera cameraMain;
   private CameraShake cameraShaker;
 
+  // HUD
+  private Hud hud;
+
   public bool Attacking
   {
     get
@@ -45,6 +49,7 @@ public class Player : MonoBehaviour
     rigidBody = GetComponent<Rigidbody>();
     cameraMain = Camera.main;
     cameraShaker = Camera.main.GetComponent<CameraShake>();
+    hud = gameObject.GetComponent<Hud>();
   }
 
   void Update()
@@ -102,7 +107,7 @@ public class Player : MonoBehaviour
     }
 
     // SALTO. Solo cuando esta en el suelo
-    if (Input.GetKeyDown(KeyCode.Space) && onGround)
+    if (onGround && (Input.GetKeyDown(KeyCode.Space) || Input.GetKey(KeyCode.Mouse1)))
     {
       // Activamos el flag y la fisica se hace en FixedUpdate
       startJump = true;
@@ -125,7 +130,7 @@ public class Player : MonoBehaviour
     }
 
     // Attack
-    if (Input.GetKeyDown(KeyCode.Z))
+    if (Input.GetKeyDown(KeyCode.Z) || Input.GetKey(KeyCode.Mouse0))
     {
       animator.Play("PlayerAttack");
       if (!attacking)
@@ -172,10 +177,11 @@ public class Player : MonoBehaviour
     {
       cameraShaker.Shake(0.4f);
       life--;
+      hud.SetHealthMeter(life);
       if (life <= 0) // Game Over
       {
         Debug.Log("Game Over!");
-        life = 3;
+        life = MAX_HEALTH;
       }
       else // Tiempo de gracia invencible
       {
