@@ -10,7 +10,7 @@ public class Player : MonoBehaviour
   // STATS del personaje
   public static int MAX_HEALTH = 3;
   public bool invincible = false;
-  private int life;
+  private int health;
 
   private int hitGraceTime = 1; // Segundos invencible despues de ser golpeado
   private float maxWalkSpeed = 3.0f;
@@ -43,12 +43,13 @@ public class Player : MonoBehaviour
 
   void Start()
   {
+    health = MAX_HEALTH;
     GameObject sprite = GameObject.Find("PlayerSprite");
     spriteRenderer = sprite.GetComponent<SpriteRenderer>();
     animator = sprite.GetComponent<Animator>();
     rigidBody = GetComponent<Rigidbody>();
     cameraMain = Camera.main;
-    cameraShaker = Camera.main.GetComponent<CameraShake>();
+    cameraShaker = cameraMain.GetComponent<CameraShake>();
     hud = gameObject.GetComponent<Hud>();
   }
 
@@ -175,18 +176,22 @@ public class Player : MonoBehaviour
 
     if (collision.gameObject.tag == "Enemy" && !invincible)
     {
-      cameraShaker.Shake(0.4f);
-      life--;
-      hud.SetHealthMeter(life);
-      if (life <= 0) // Game Over
+      //cameraShaker.Shake(0.4f);
+      if (health <= 0) // Game Over
       {
-        Debug.Log("Game Over!");
-        life = MAX_HEALTH;
+        health = MAX_HEALTH;
       }
       else // Tiempo de gracia invencible
       {
+
         StartCoroutine(OnPlayerDamaged());
       }
+      health--;
+      hud.SetHealthMeter(health);
+    }
+    else if (collision.gameObject.tag == "Exit")
+    {
+      Application.LoadLevel(Application.loadedLevel);
     }
   }
 

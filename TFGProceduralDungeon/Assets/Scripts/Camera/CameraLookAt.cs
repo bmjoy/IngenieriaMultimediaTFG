@@ -20,7 +20,8 @@ public class CameraLookAt : MonoBehaviour
 
   public void Reset()
   {
-    Cursor.lockState = CursorLockMode.Locked;
+    //Cursor.lockState = CursorLockMode.Locked;
+    //Cursor.visible = false;
     zOffset = default_zOffset;
     if (parent != null)
     {
@@ -67,20 +68,20 @@ public class CameraLookAt : MonoBehaviour
     }
 
     // Giro con raton
-    float mouseAxis = Input.GetAxis("Mouse X");
-    if (mouseAxis != 0)
-    {
-      int rotateDir = 0;
-      if (mouseAxis > 0.8f)
-      {
-        rotateDir = 1;
-      }
-      else if (mouseAxis < -0.8f)
-      {
-        rotateDir = -1;
-      }
-      transform.RotateAround(parent.transform.position, Vector3.up * rotateDir, rotateFactor * Time.deltaTime);
-    }
+    //float mouseAxis = Input.GetAxis("Mouse X");
+    //if (mouseAxis != 0)
+    //{
+    //  int rotateDir = 0;
+    //  if (mouseAxis > 0.8f)
+    //  {
+    //    rotateDir = 1;
+    //  }
+    //  else if (mouseAxis < -0.8f)
+    //  {
+    //    rotateDir = -1;
+    //  }
+    //  transform.RotateAround(parent.transform.position, Vector3.up * rotateDir, rotateFactor * Time.deltaTime);
+    //}
 
     // Zoom
     if ((Input.GetAxis("Mouse ScrollWheel") > 0 || Input.GetKey(KeyCode.Plus) || Input.GetKey(KeyCode.KeypadPlus)) && zOffset >= 1f)

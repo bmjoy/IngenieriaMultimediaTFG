@@ -23,8 +23,21 @@ public class DungeonGenerator : MonoBehaviour
 
   private int roomID = 0;
   private BSPTree bspTree;
-  private RoomCreator entrance;
+  private bool entranceCreated;
+  private bool exitCreated;
   private BSPNode exit;
+
+  // Prefabs para el inspector
+  public GameObject Traps_Arrows;
+  public GameObject Traps_FloorSpikes;
+  public GameObject Traps_WallSpikes;
+  public GameObject Traps_RollingRock;
+  public GameObject Portal;
+  public GameObject Chest;
+  public GameObject PotionHealth;
+  public GameObject EnemyCrab;
+  public GameObject EnemyGoblin;
+  public GameObject EnemyBat;
 
   // Setters para los sliders de los test
   public void SetDungeonWidth(float value)
@@ -60,6 +73,7 @@ public class DungeonGenerator : MonoBehaviour
     BSPNode rootNode = new BSPNode();
     rootNode.size = new Vector2(DUNGEON_WIDTH, DUNGEON_HEIGHT);
     rootNode.position = new Vector2(transform.position.x + DUNGEON_WIDTH / 2, transform.position.z + DUNGEON_HEIGHT / 2);
+    rootNode.branch = Branch.ROOT;
     bspTree = new BSPTree(rootNode);
 
     // Crea los nodos del arbol subdividiendo el plano inicial
@@ -69,6 +83,7 @@ public class DungeonGenerator : MonoBehaviour
 
   IEnumerator CreateDungeon()
   {
+    //Random.seed = 3; Si utilizamos una semilla fija la generacion es siempre igual
     int step = 0;
     while (step < 7)
     {
@@ -103,10 +118,83 @@ public class DungeonGenerator : MonoBehaviour
   }
 
   // Situa al jugador en la entrada de la mazmorra
-  private void PlacePlayer(Vector3 position)
+  private void PlacePlayer(RoomCreator room)
   {
+    Vector3 position = room.transform.position;
     position.y += 5f;
     GameObject.FindGameObjectWithTag("Player").transform.position = position;
+  }
+
+  // Coloca el objeto de salida de la mazmorra
+  private void PlaceExit(RoomCreator room)
+  {
+    Instantiate(Portal, room.transform.position, Portal.transform.rotation);
+  }
+
+  // Situa ememigos dentro de la habitacion
+  private void PlaceItems(RoomCreator room)
+  {
+    Vector3 position = room.transform.position;
+    int r = Random.Range(0, 2);
+    //if (r == 0)
+    //{
+    //  position.y = PotionHealth.transform.position.y;
+    //  Instantiate(PotionHealth, position, PotionHealth.transform.rotation);
+    //}
+    //else
+    //{
+    //  position.y = Chest.transform.position.y;
+    //  Instantiate(Chest, position, Chest.transform.rotation);
+    //}
+
+    position.y = Chest.transform.position.y;
+    Instantiate(Chest, position, Chest.transform.rotation);
+  }
+
+  // Coloca trampas en la habitacion
+  private void PlaceTraps(RoomCreator room)
+  {
+    Vector3 position = room.transform.position;
+    int r = Random.Range(0, 3);
+
+    switch (r)
+    {
+      case 0: // Arrows
+        position.y = Traps_Arrows.transform.position.y + 0.5f;
+        Instantiate(Traps_Arrows, position, Traps_Arrows.transform.rotation);
+        break;
+      case 1: // Floor
+        position.y = Traps_FloorSpikes.transform.position.y;
+        Instantiate(Traps_FloorSpikes, position, Traps_FloorSpikes.transform.rotation);
+        break;
+      case 2: // Wall
+        position.y = Traps_WallSpikes.transform.position.y;
+        Instantiate(Traps_WallSpikes, position, Traps_WallSpikes.transform.rotation);
+        break;
+    }
+  }
+
+  // Coloca enemigos en la habitacion
+  private void PlaceEnemies(RoomCreator room)
+  {
+    Vector3 position = room.transform.position;
+    int r = Random.Range(0, 2);
+
+    switch (r)
+    {
+      case 0: // Arrows
+        position.y = EnemyCrab.transform.position.y;
+        Instantiate(EnemyCrab, position, Traps_Arrows.transform.rotation);
+        break;
+      case 1: // Floor
+        position.y = EnemyGoblin.transform.position.y;
+        Instantiate(EnemyGoblin, position, Traps_FloorSpikes.transform.rotation);
+        break;
+      case 2: // Wall
+        position.y = EnemyBat.transform.position.y;
+        Instantiate(EnemyBat, position, Traps_WallSpikes.transform.rotation);
+        break;
+    }
   }
 
   private void PopulateDungeon(BSPNode pNode)
@@ -120,9 +208,34 @@ public class DungeonGenerator : MonoBehaviour
     {
       // Hoja con habitacion
       RoomCreator room = pNode.GetRoom().GetComponent<RoomCreator>();
-      if (room.type == RoomType.ENTRANCE)
+      switch (room.type)
       {
-        PlacePlayer(room.transform.position);
+        case RoomType.DEFAULT:
+          int r = Random.Range(0, 3);
+          switch (r)
+          {
+            case 0: // Items
+              PlaceItems(room);
+              break;
+            case 1: // Trampas
+              PlaceTraps(room);
+              break;
+            case 2: //Enemigos
+              PlaceEnemies(room);
+              break;
+          }
+
+          break;
+        case RoomType.ENTRANCE:
+          PlacePlayer(room);
+          break;
+        case RoomType.EXIT:
+          PlaceExit(room);
+          break;
+        case RoomType.PASSAGE:
+          break;
+        default:
+          break;
       }
 
       return;
@@ -168,16 +281,17 @@ public class DungeonGenerator : MonoBehaviour
   {
     // Las dimensiones minimas de la habitacion seran la mitad de NODE_MIN_SIZE
     // Las dimensiones maximas seran NODE_MIN_SIZE - ROOM_MARGIN
-
     Vector3 roomPosition = new Vector3(pNode.position.x, 0f, pNode.position.y);
     GameObject aRoom = (GameObject)Instantiate(baseRoom, roomPosition, Quaternion.identity);
     aRoom.transform.localScale = new Vector3((int)(Random.Range(NODE_MIN_SIZE / 2, pNode.size.x - ROOM_MARGIN)),
                                              aRoom.transform.localScale.y,
                                              (int)(Random.Range(NODE_MIN_SIZE / 2, pNode.size.y - ROOM_MARGIN)));
-    levelGrid = aRoom.GetComponent<RoomCreator>().Setup(levelGrid);
-    aRoom.GetComponent<RoomCreator>().SetID(roomID);
+    RoomCreator roomScript = aRoom.GetComponent<RoomCreator>();
+    levelGrid = roomScript.Setup(levelGrid);
+    roomScript.SetID(roomID);
     roomID++;
-    aRoom.GetComponent<RoomCreator>().SetParentNode(pNode);
+    roomScript.type = RoomType.DEFAULT;
+    roomScript.SetParentNode(pNode);
     pNode.SetRoom(aRoom);
   }
 
@@ -221,11 +335,16 @@ public class DungeonGenerator : MonoBehaviour
     {
       AddRoom(pNode);
 
-      if (entrance == null)
+      if (!entranceCreated && pNode.branch == Branch.LEFT)
       {
-        entrance = pNode.GetRoom().GetComponent<RoomCreator>();
-        entrance.type = RoomType.ENTRANCE;
-        entrance.name = "ENTRANCE";
+        pNode.GetRoom().GetComponent<RoomCreator>().type = RoomType.ENTRANCE;
+        entranceCreated = true;
+      }
+
+      if (!exitCreated && pNode.branch == Branch.RIGHT)
+      {
+        pNode.GetRoom().GetComponent<RoomCreator>().type = RoomType.EXIT;
+        exitCreated = true;
       }
       return;
     }

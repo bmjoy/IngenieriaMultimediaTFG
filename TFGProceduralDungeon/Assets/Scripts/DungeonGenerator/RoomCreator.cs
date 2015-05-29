@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
+// Tipos de habitaciones
 public enum RoomType
 {
   DEFAULT,
@@ -14,7 +15,7 @@ public class RoomCreator : MonoBehaviour
   public GameObject digger;
 
   public RoomType type;
-  // Posicion y dimensiones en enteros. Son unidades de grid
+  // Posicion y dimensiones en enteros. Son unidades de grid.
   public Vector2i position;
   public Vector2i size;
   private int roomID;
@@ -22,33 +23,6 @@ public class RoomCreator : MonoBehaviour
   private GameObject sibling;
 
   // Establece la geometria de la habitacion sobre el grid
-  //public Grid Setup(Grid grid)
-  //{
-  //  transform.position = new Vector3((int)transform.position.x - (transform.localScale.x / 2),
-  //                                  transform.position.y,
-  //                                  (int)transform.position.z - (transform.localScale.z / 2));
-
-  //  for (int i = (int)transform.position.x; i < (int)transform.position.x + transform.localScale.x; i++)
-  //  {
-  //    for (int j = (int)transform.position.z; j < (int)transform.position.z + transform.localScale.z; j++)
-  //    {
-  //      grid.SetTile(i, j, 1);
-  //    }
-  //  }
-  //  for (int i = 0; i < transform.localScale.x + 1; i++)
-  //  {
-  //    grid.SetTile((int)transform.position.x + i, (int)transform.position.z, 2);
-  //    grid.SetTile((int)transform.position.x + i, (int)(transform.position.z + transform.localScale.z), 2);
-  //  }
-  //  for (int i = 0; i < transform.localScale.z + 1; i++)
-  //  {
-  //    grid.SetTile((int)transform.position.x, (int)transform.position.z + i, 2);
-  //    grid.SetTile((int)(transform.position.x + transform.localScale.x), (int)transform.position.z + i, 2);
-  //  }
-
-  //  return grid;
-  //}
-
   public Grid Setup(Grid grid)
   {
     // Pasamos la posicion y escala a unidades de grid
@@ -96,6 +70,7 @@ public class RoomCreator : MonoBehaviour
 
   public void Connect()
   {
+    // Recoge el nodo hermano
     GetSibiling();
     if (sibling != null)
     {
@@ -104,22 +79,22 @@ public class RoomCreator : MonoBehaviour
       Vector3 startPos = new Vector3();
       Vector3 endPos = new Vector3();
 
-      if (siblingRoom.position.z + siblingRoom.size.z < position.z)
+      if (siblingRoom.position.z + siblingRoom.size.z < position.z) // Habitacion (norte) y hermana (sur)
       {
-        startPos = ChooseDoorPoint(0);
-        endPos = sibling.GetComponent<RoomCreator>().ChooseDoorPoint(2);
+        startPos = ChooseDoorPoint(0); // Punto sur en habitacion
+        endPos = sibling.GetComponent<RoomCreator>().ChooseDoorPoint(2); // Punto norte en hermana
       }
-      else if (siblingRoom.position.z > position.z + size.z)
+      else if (siblingRoom.position.z > position.z + size.z) // Habitacion (sur) y hermana (norte)
       {
         startPos = ChooseDoorPoint(2);
         endPos = sibling.GetComponent<RoomCreator>().ChooseDoorPoint(1);
       }
-      else if (siblingRoom.position.x + siblingRoom.size.x < position.x)
+      else if (siblingRoom.position.x + siblingRoom.size.x < position.x) // Habitacion (este) y hermana (oeste)
       {
         startPos = ChooseDoorPoint(3);
         endPos = sibling.GetComponent<RoomCreator>().ChooseDoorPoint(1);
       }
-      else if (siblingRoom.position.x > position.x + size.x)
+      else if (siblingRoom.position.x > position.x + size.x) // Habitacion (oeste) y hermana (este)
       {
         startPos = ChooseDoorPoint(1);
         endPos = sibling.GetComponent<RoomCreator>().ChooseDoorPoint(3);
@@ -128,9 +103,12 @@ public class RoomCreator : MonoBehaviour
       GameObject aDigger = (GameObject)Instantiate(digger, startPos, Quaternion.identity);
       aDigger.GetComponent<Digger>().Dig(endPos);
 
+      // Buscamos un padre sin habitacion (normalmente el padre inmediato)
       parentNode = FindRoomlessParent(parentNode);
       if (parentNode != null)
       {
+        // Decidimos aleatoriamente 50% que habitacion se le asigna al padre
+        // Si el nodo derecho o izquierdo. Asi luego conectamos mas zonas
         int aC = Random.Range(0, 2);
         if (aC == 0)
         {
@@ -145,6 +123,7 @@ public class RoomCreator : MonoBehaviour
     }
   }
 
+  // Obtiene el nodo hermano
   private void GetSibiling()
   {
     if (parentNode.GetParentNode() != null)
@@ -164,13 +143,13 @@ public class RoomCreator : MonoBehaviour
   {
     switch (index)
     {
-      case 0:
+      case 0: // Sur, se crea puerta en X, z
         return new Vector3((int)(position.x + Random.Range(1, size.x - 2)), transform.position.y, (int)(position.z));
-      case 1:
+      case 1: // Este, se crea puerta en x + size.x, Z
         return new Vector3((int)(position.x + size.x), transform.position.y, (int)(position.z + Random.Range(1, size.z - 2)));
-      case 2:
+      case 2: // Norte, se crea puerta en X, z + size.z
         return new Vector3((int)(position.x + Random.Range(1, size.x - 2)), transform.position.y, (int)(position.z + size.z));
-      case 3:
+      case 3: // Oeste, se crea puerta en x, Z
         return new Vector3((int)(position.x + 1), transform.position.y, (int)(position.z + Random.Range(1, size.z - 2)));
       default:
         return new Vector3(0, 0, 0);
@@ -182,6 +161,7 @@ public class RoomCreator : MonoBehaviour
     return parentNode;
   }
 
+  // Sube por los padres hasta encontrar uno que no tenga habitacion
   public BSPNode FindRoomlessParent(BSPNode aNode)
   {
     if (aNode != null)

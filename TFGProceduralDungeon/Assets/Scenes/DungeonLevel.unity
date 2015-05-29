@@ -611,12 +611,52 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11409134, guid: ce12990b52e3bd34d9209eb9523d008c, type: 2}
       propertyPath: DUNGEON_WIDTH
-      value: 50
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 11409134, guid: ce12990b52e3bd34d9209eb9523d008c, type: 2}
       propertyPath: DUNGEON_HEIGHT
-      value: 50
+      value: 70
       objectReference: {fileID: 0}
+    - target: {fileID: 11409134, guid: ce12990b52e3bd34d9209eb9523d008c, type: 2}
+      propertyPath: Traps_Arrows
+      value: 
+      objectReference: {fileID: 114660, guid: 0cdff4caaf41bc84b9f862ab1fb60051, type: 2}
+    - target: {fileID: 11409134, guid: ce12990b52e3bd34d9209eb9523d008c, type: 2}
+      propertyPath: Traps_FloorSpikes
+      value: 
+      objectReference: {fileID: 126750, guid: b02c001d80f33864a980b9b5b9cf6f81, type: 2}
+    - target: {fileID: 11409134, guid: ce12990b52e3bd34d9209eb9523d008c, type: 2}
+      propertyPath: Traps_RollingRock
+      value: 
+      objectReference: {fileID: 122910, guid: 9b0157556408c8e4fb3d331c068addb2, type: 2}
+    - target: {fileID: 11409134, guid: ce12990b52e3bd34d9209eb9523d008c, type: 2}
+      propertyPath: Traps_WallSpikes
+      value: 
+      objectReference: {fileID: 193766, guid: 0a0bdb90800db684d9d97f13985babd5, type: 2}
+    - target: {fileID: 11409134, guid: ce12990b52e3bd34d9209eb9523d008c, type: 2}
+      propertyPath: Portal
+      value: 
+      objectReference: {fileID: 115096, guid: 4720c7d4b3663d64f868d152e0ed51cc, type: 2}
+    - target: {fileID: 11409134, guid: ce12990b52e3bd34d9209eb9523d008c, type: 2}
+      propertyPath: Chest
+      value: 
+      objectReference: {fileID: 113354, guid: 61c89dc904e11b8479181501446a6ee3, type: 2}
+    - target: {fileID: 11409134, guid: ce12990b52e3bd34d9209eb9523d008c, type: 2}
+      propertyPath: PotionHealth
+      value: 
+      objectReference: {fileID: 180318, guid: a32f2e318005dac4b9f4e592106628fa, type: 2}
+    - target: {fileID: 11409134, guid: ce12990b52e3bd34d9209eb9523d008c, type: 2}
+      propertyPath: EnemyCrab
+      value: 
+      objectReference: {fileID: 160752, guid: 4633b856e301b324081ddf841bb6d112, type: 2}
+    - target: {fileID: 11409134, guid: ce12990b52e3bd34d9209eb9523d008c, type: 2}
+      propertyPath: EnemyBat
+      value: 
+      objectReference: {fileID: 128612, guid: 3500040386980824380a4aa98681333b, type: 2}
+    - target: {fileID: 11409134, guid: ce12990b52e3bd34d9209eb9523d008c, type: 2}
+      propertyPath: EnemyGoblin
+      value: 
+      objectReference: {fileID: 166262, guid: 2613fb9da29cdc64f9506a0e725aa6e3, type: 2}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ce12990b52e3bd34d9209eb9523d008c, type: 2}
   m_IsPrefabParent: 0
@@ -1236,6 +1276,10 @@ Prefab:
       propertyPath: m_RootOrder
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 11419136, guid: 9d8db1b54cc002a48bc5eb977eb07820, type: 2}
+      propertyPath: camera
+      value: 
+      objectReference: {fileID: 1575339324}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 9d8db1b54cc002a48bc5eb977eb07820, type: 2}
   m_IsPrefabParent: 0
