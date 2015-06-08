@@ -2,8 +2,7 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 
-public class DungeonGenerator : MonoBehaviour
-{
+public class DungeonGenerator : MonoBehaviour {
   // Dimensiones
   public int DUNGEON_WIDTH;
   public int DUNGEON_HEIGHT;
@@ -40,31 +39,25 @@ public class DungeonGenerator : MonoBehaviour
   public GameObject EnemyBat;
 
   // Setters para los sliders de los test
-  public void SetDungeonWidth(float value)
-  {
+  public void SetDungeonWidth(float value) {
     DUNGEON_WIDTH = (int)value;
   }
 
-  public void SetDungeonHeight(float value)
-  {
+  public void SetDungeonHeight(float value) {
     DUNGEON_HEIGHT = (int)value;
   }
 
-  void Start()
-  {
+  void Start() {
     GenerateDungeonBSP();
   }
 
   // Genera la mazmorra usando el algoritmo de BSP Tree
-  public void GenerateDungeonBSP()
-  {
+  public void GenerateDungeonBSP() {
     levelGrid = new Grid(DUNGEON_WIDTH, DUNGEON_HEIGHT);
 
     // Inicializamos los tiles a vacio
-    for (int i = 0; i < levelGrid.GetWidth(); i++)
-    {
-      for (int j = 0; j < levelGrid.GetHeight(); j++)
-      {
+    for (int i = 0; i < levelGrid.GetWidth(); i++) {
+      for (int j = 0; j < levelGrid.GetHeight(); j++) {
         levelGrid.SetTile(i, j, 0);
       }
     }
@@ -74,6 +67,7 @@ public class DungeonGenerator : MonoBehaviour
     rootNode.size = new Vector2(DUNGEON_WIDTH, DUNGEON_HEIGHT);
     rootNode.position = new Vector2(transform.position.x + DUNGEON_WIDTH / 2, transform.position.z + DUNGEON_HEIGHT / 2);
     rootNode.branch = Branch.ROOT;
+    rootNode.level = 0;
     bspTree = new BSPTree(rootNode);
 
     // Crea los nodos del arbol subdividiendo el plano inicial
@@ -81,12 +75,10 @@ public class DungeonGenerator : MonoBehaviour
     StartCoroutine(CreateDungeon());
   }
 
-  IEnumerator CreateDungeon()
-  {
+  IEnumerator CreateDungeon() {
     //Random.seed = 3; Si utilizamos una semilla fija la generacion es siempre igual
     int step = 0;
-    while (step < 7)
-    {
+    while (step < 7) {
       Split(bspTree.Root);
       step++;
 
@@ -102,12 +94,9 @@ public class DungeonGenerator : MonoBehaviour
     ConnectRooms(bspTree.Root);
 
     //// Limpieza con automata celular
-    for (int k = 0; k < 5; k++)
-    {
-      for (int i = 0; i < levelGrid.GetWidth(); i++)
-      {
-        for (int j = 0; j < levelGrid.GetHeight(); j++)
-        {
+    for (int k = 0; k < 5; k++) {
+      for (int i = 0; i < levelGrid.GetWidth(); i++) {
+        for (int j = 0; j < levelGrid.GetHeight(); j++) {
           RemoveSingles(i, j);
         }
       }
@@ -118,22 +107,19 @@ public class DungeonGenerator : MonoBehaviour
   }
 
   // Situa al jugador en la entrada de la mazmorra
-  private void PlacePlayer(RoomCreator room)
-  {
+  private void PlacePlayer(RoomCreator room) {
     Vector3 position = room.transform.position;
     position.y += 5f;
     GameObject.FindGameObjectWithTag("Player").transform.position = position;
   }
 
   // Coloca el objeto de salida de la mazmorra
-  private void PlaceExit(RoomCreator room)
-  {
+  private void PlaceExit(RoomCreator room) {
     Instantiate(Portal, room.transform.position, Portal.transform.rotation);
   }
 
   // Situa ememigos dentro de la habitacion
-  private void PlaceItems(RoomCreator room)
-  {
+  private void PlaceItems(RoomCreator room) {
     Vector3 position = room.transform.position;
     int r = Random.Range(0, 2);
     //if (r == 0)
@@ -152,13 +138,11 @@ public class DungeonGenerator : MonoBehaviour
   }
 
   // Coloca trampas en la habitacion
-  private void PlaceTraps(RoomCreator room)
-  {
+  private void PlaceTraps(RoomCreator room) {
     Vector3 position = room.transform.position;
     int r = Random.Range(0, 3);
 
-    switch (r)
-    {
+    switch (r) {
       case 0: // Arrows
         position.y = Traps_Arrows.transform.position.y + 0.5f;
         Instantiate(Traps_Arrows, position, Traps_Arrows.transform.rotation);
@@ -175,13 +159,11 @@ public class DungeonGenerator : MonoBehaviour
   }
 
   // Coloca enemigos en la habitacion
-  private void PlaceEnemies(RoomCreator room)
-  {
+  private void PlaceEnemies(RoomCreator room) {
     Vector3 position = room.transform.position;
     int r = Random.Range(0, 2);
 
-    switch (r)
-    {
+    switch (r) {
       case 0: // Arrows
         position.y = EnemyCrab.transform.position.y;
         Instantiate(EnemyCrab, position, Traps_Arrows.transform.rotation);
@@ -197,23 +179,18 @@ public class DungeonGenerator : MonoBehaviour
     }
   }
 
-  private void PopulateDungeon(BSPNode pNode)
-  {
+  private void PopulateDungeon(BSPNode pNode) {
     // Si hay nodo izquierdo nos movemos un nivel
-    if (pNode.GetLeftNode() != null)
-    {
+    if (pNode.GetLeftNode() != null) {
       PopulateDungeon(pNode.GetLeftNode());
     }
-    else
-    {
+    else {
       // Hoja con habitacion
       RoomCreator room = pNode.GetRoom().GetComponent<RoomCreator>();
-      switch (room.type)
-      {
+      switch (room.type) {
         case RoomType.DEFAULT:
           int r = Random.Range(0, 3);
-          switch (r)
-          {
+          switch (r) {
             case 0: // Items
               PlaceItems(room);
               break;
@@ -240,45 +217,37 @@ public class DungeonGenerator : MonoBehaviour
 
       return;
     }
-    if (pNode.GetRightNode() != null)
-    {
+    if (pNode.GetRightNode() != null) {
       PopulateDungeon(pNode.GetRightNode());
     }
   }
 
   //split the tree
-  public void Split(BSPNode pNode)
-  {
+  public void Split(BSPNode pNode) {
     // Si hay nodo izquierdo nos movemos un nivel
-    if (pNode.GetLeftNode() != null)
-    {
+    if (pNode.GetLeftNode() != null) {
       Split(pNode.GetLeftNode());
     }
-    else
-    {
+    else {
       // Cuando no hay nodos hijos, intenta crearlos
       pNode.Cut();
       return;
     }
-    if (pNode.GetRightNode() != null)
-    {
+    if (pNode.GetRightNode() != null) {
       Split(pNode.GetRightNode());
     }
   }
 
-  public Grid GetGrid()
-  {
+  public Grid GetGrid() {
     return levelGrid;
   }
 
-  public void SetTile(int x, int y, int value)
-  {
+  public void SetTile(int x, int y, int value) {
     levelGrid.SetTile(x, y, value);
   }
 
   // Agrega una habitacion dentro de los limites del espacio del nodo
-  private void AddRoom(BSPNode pNode)
-  {
+  private void AddRoom(BSPNode pNode) {
     // Las dimensiones minimas de la habitacion seran la mitad de NODE_MIN_SIZE
     // Las dimensiones maximas seran NODE_MIN_SIZE - ROOM_MARGIN
     Vector3 roomPosition = new Vector3(pNode.position.x, 0f, pNode.position.y);
@@ -291,12 +260,13 @@ public class DungeonGenerator : MonoBehaviour
     roomScript.SetID(roomID);
     roomID++;
     roomScript.type = RoomType.DEFAULT;
+    aRoom.name = pNode.GetBranchName() + "_" + pNode.level.ToString();
+    Debug.Log(aRoom.name);
     roomScript.SetParentNode(pNode);
     pNode.SetRoom(aRoom);
   }
 
-  public void DrawNode(BSPNode pNode)
-  {
+  public void DrawNode(BSPNode pNode) {
     GameObject cube1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
     cube1.transform.localScale = new Vector3(pNode.size.x, 0.1f, pNode.size.y);
     cube1.transform.position = new Vector3(pNode.position.x, 0f, pNode.position.y);
@@ -307,100 +277,80 @@ public class DungeonGenerator : MonoBehaviour
   }
 
   // Dibuja en la escena las ultimas subdivisiones en la creacion de la mazmorra
-  private void DrawLeafs(BSPNode pNode)
-  {
-    if (pNode.GetLeftNode() != null)
-    {
+  private void DrawLeafs(BSPNode pNode) {
+    if (pNode.GetLeftNode() != null) {
       DrawLeafs(pNode.GetLeftNode());
     }
-    else
-    {
+    else {
       DrawNode(pNode);
       return;
     }
 
-    if (pNode.GetRightNode() != null)
-    {
+    if (pNode.GetRightNode() != null) {
       DrawLeafs(pNode.GetRightNode());
     }
   }
 
-  private void CreateRooms(BSPNode pNode)
-  {
-    if (pNode.GetLeftNode() != null)
-    {
+  private void CreateRooms(BSPNode pNode) {
+    if (pNode.GetLeftNode() != null) {
       CreateRooms(pNode.GetLeftNode());
     }
-    else
-    {
+    else {
       AddRoom(pNode);
 
-      if (!entranceCreated && pNode.branch == Branch.LEFT)
-      {
+      if (!entranceCreated && pNode.branch == Branch.LEFT) {
         pNode.GetRoom().GetComponent<RoomCreator>().type = RoomType.ENTRANCE;
         entranceCreated = true;
       }
 
-      if (!exitCreated && pNode.branch == Branch.RIGHT)
-      {
+      if (!exitCreated && pNode.branch == Branch.RIGHT) {
         pNode.GetRoom().GetComponent<RoomCreator>().type = RoomType.EXIT;
         exitCreated = true;
       }
       return;
     }
 
-    if (pNode.GetRightNode() != null)
-    {
+    if (pNode.GetRightNode() != null) {
       CreateRooms(pNode.GetRightNode());
     }
   }
 
   // Crea los pasillos para conectar las habitaciones
   // Recorre recursivamente el arbol
-  private void ConnectRooms(BSPNode pNode)
-  {
+  private void ConnectRooms(BSPNode pNode) {
     // Recorrido por los nodos de la parte izquierda
-    if (pNode.GetLeftNode() != null)
-    {
+    if (pNode.GetLeftNode() != null) {
       ConnectRooms(pNode.GetLeftNode());
 
-      if (pNode.GetRoom() != null)
-      {
+      if (pNode.GetRoom() != null) {
         pNode.GetRoom().GetComponent<RoomCreator>().Connect();
         return;
       }
     }
-    else
-    {
-      if (pNode.GetRoom() != null)
-      {
+    else {
+      if (pNode.GetRoom() != null) {
         pNode.GetRoom().GetComponent<RoomCreator>().Connect();
         return;
       }
     }
     // Recorrido por los nodos de la parte derecha
-    if (pNode.GetRightNode() != null)
-    {
+    if (pNode.GetRightNode() != null) {
       ConnectRooms(pNode.GetRightNode());
 
-      if (pNode.GetRoom() != null)
-      {
+      if (pNode.GetRoom() != null) {
         pNode.GetRoom().GetComponent<RoomCreator>().Connect();
         return;
       }
     }
-    else
-    {
-      if (pNode.GetRoom() != null)
-      {
+    else {
+      if (pNode.GetRoom() != null) {
         pNode.GetRoom().GetComponent<RoomCreator>().Connect();
         return;
       }
     }
   }
 
-  private void CreateLevel()
-  {
+  private void CreateLevel() {
     int levelWidth = levelGrid.GetWidth();
     int levelHeight = levelGrid.GetHeight();
     // Creamos el suelo con un quad escalado
@@ -419,12 +369,9 @@ public class DungeonGenerator : MonoBehaviour
     // Establecemos el tiling del material con respecto a sus dimensiones, un tile por unidad
     floor.GetComponent<Renderer>().material.mainTextureScale = new Vector2(levelWidth, levelHeight);
 
-    for (int i = 0; i < levelWidth; i++)
-    {
-      for (int j = 0; j < levelHeight; j++)
-      {
-        switch (levelGrid.GetTile(i, j))
-        {
+    for (int i = 0; i < levelWidth; i++) {
+      for (int j = 0; j < levelHeight; j++) {
+        switch (levelGrid.GetTile(i, j)) {
           //case 1:
           //  Instantiate(floorTile, new Vector3(transform.position.x - (transform.localScale.x / 2) + i, transform.position.y + transform.localScale.y / 2, transform.position.z - (transform.localScale.z / 2) + j), Quaternion.identity);
           //  break;
@@ -437,12 +384,10 @@ public class DungeonGenerator : MonoBehaviour
   }
 
   // Automata celular para limpiar
-  private void RemoveSingles(int x, int y)
-  {
+  private void RemoveSingles(int x, int y) {
     int count = 0;
 
-    if (x < levelGrid.GetWidth() - 1 && x > 1 && y > 1 && y < levelGrid.GetHeight() - 1)
-    {
+    if (x < levelGrid.GetWidth() - 1 && x > 1 && y > 1 && y < levelGrid.GetHeight() - 1) {
       if (levelGrid.GetTile(x + 1, y) == 1)
         count++;
       if (levelGrid.GetTile(x - 1, y) == 0)

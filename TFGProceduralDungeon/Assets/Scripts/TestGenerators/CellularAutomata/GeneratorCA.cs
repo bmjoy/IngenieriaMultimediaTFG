@@ -21,23 +21,24 @@ public class GeneratorCA : MonoBehaviour
 
   public bool doNextStep = false;
 
-  private int RandomByProbability(int probability)
-  {
-    // Si la probabilidad es mayor que el random obtenido,
-    // devuelve confirmacion
-    int randomN = Random.Range(1, 101);
-    if (probability >= randomN)// 1 - 100
-    {
-      return 1;
-    }
-    return 0;
-  }
   public void Cleanup()
   {
     foreach (t_WallTile item in wallTileList)
     {
       Destroy(item.gameObject);
     }
+  }
+
+  private int RandomByProbability(int probability)
+  {
+    // Si la probabilidad es mayor que el random obtenido,
+    // devuelve confirmacion
+    int randomN = Random.Range(1, 101); // 1 - 100
+    if (probability >= randomN)
+    {
+      return 1;
+    }
+    return 0;
   }
 
   public void Generate(int width, int height, int passes, int wallProbability, int seed)
@@ -76,11 +77,9 @@ public class GeneratorCA : MonoBehaviour
     {
       yield return null;
     }
-
     doNextStep = false;
 
     int r, c;
-
     for (int t = 0; t < passes; t++)
     {
       r = 0;
@@ -96,7 +95,7 @@ public class GeneratorCA : MonoBehaviour
           {
             // Si el numero de paredes adyacentes es >= 4, sigue siendo pared
             // en caso contrario se convierte en espacio
-            if (numWalls < 3)
+            if (numWalls <= 2)
             {
               grid[c, r] = 0; // Vacio
               // Cuando un elemento se convierte en vacio, eliminamos el objeto asociado
@@ -126,6 +125,8 @@ public class GeneratorCA : MonoBehaviour
         r++;
       }
     }
+
+    GameObject.Find("TestGenerators").GetComponent<TestGenerators>().SetStepButton(false);
 
     // Volcamos al historial de mapas generados
     WriteToFile();

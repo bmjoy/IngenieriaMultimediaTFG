@@ -42,8 +42,9 @@ MonoBehaviour:
   DUNGEON_WIDTH: 100
   DUNGEON_HEIGHT: 100
   baseRoom: {fileID: 100000, guid: a55ea2bb8f260d04b9a3c9276832b17e, type: 2}
-  floorTile: {fileID: 195836, guid: 2c4b0646a1a8b5a438227990f3842e0e, type: 2}
+  floorTile: {fileID: 100002, guid: 3587d83a9b9913a4b8fe77eb04171729, type: 2}
   wallTile: {fileID: 100000, guid: 8b435b708e896784ba32936990142513, type: 2}
+  doNextStep: 0
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

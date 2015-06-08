@@ -1,13 +1,14 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class GeneratorBSP : MonoBehaviour
 {
-  public static float ROOM_SIZE = 20f;
+  public static float ROOM_SIZE = 15f;
 
   // Los distintos generadores para los test
-  public int DUNGEON_WIDTH = 100;
-  public int DUNGEON_HEIGHT = 100;
+  public int DUNGEON_WIDTH;
+  public int DUNGEON_HEIGHT;
   public GameObject baseRoom;
   public GameObject floorTile;
   public GameObject wallTile;
@@ -18,7 +19,15 @@ public class GeneratorBSP : MonoBehaviour
   private int roomID = 0;
   private t_BSPTree bspTree;
 
+  private int seed;
   public bool doNextStep = false; // Se activara por tecla o por boton
+
+  private List<Object> tileObjectList;
+
+  void Start()
+  {
+    tileObjectList = new List<Object>();
+  }
 
   // Setters para los sliders de los test
   public void SetDungeonWidth(float value)
@@ -32,10 +41,15 @@ public class GeneratorBSP : MonoBehaviour
   }
 
   // Genera la mazmorra usando el algoritmo de BSP Tree
-  public void Generate(int width, int height)
+  public void Generate(int width, int height, int seed)
   {
     DUNGEON_WIDTH = width;
     DUNGEON_HEIGHT = height;
+    this.seed = seed;
+    if (seed >= 0)
+    {
+      Random.seed = seed;
+    }
     // Creamos el cubo inicial
     GameObject rootArea = GameObject.CreatePrimitive(PrimitiveType.Cube);
     rootArea.transform.localScale = new Vector3(DUNGEON_WIDTH, 1, DUNGEON_HEIGHT);
@@ -74,28 +88,35 @@ public class GeneratorBSP : MonoBehaviour
       }
       yield return null;
     }
+
+    // Crea las habitaciones
+    CreateRooms(bspTree.Root);
+
+    EraseLevelObjects();
+    DrawLevel();
+
     while (!doNextStep)
     {
       yield return null;
     }
-    // Crea las habitaciones
-    CreateRooms(bspTree.Root);
-
+    doNextStep = false;
     // Conecta las habitaciones con pasillos
     ConnectRooms(bspTree.Root);
 
-    // Limpieza mediante automata celular
-    for (int k = 0; k < 5; k++)
+    EraseLevelObjects();
+    DrawLevel();
+
+    while (!doNextStep)
     {
-      for (int i = 0; i < levelGrid.GetWidth(); i++)
-      {
-        for (int j = 0; j < levelGrid.GetHeight(); j++)
-        {
-          RemoveSingles(i, j);
-        }
-      }
+      yield return null;
     }
-    CreateLevel();
+    doNextStep = false;
+    // Limpieza mediante automata celular
+    CleanLevelGeneration();
+    EraseLevelObjects();
+    DrawLevel();
+
+    GameObject.Find("TestGenerators").GetComponent<TestGenerators>().SetStepButton(false);
   }
 
   // Limpia los objetos creados
@@ -112,16 +133,9 @@ public class GeneratorBSP : MonoBehaviour
     {
       Destroy(objectList[i].gameObject);
     }
-    objectList = GameObject.FindGameObjectsWithTag("FloorTile");
-    for (int i = 0; i < objectList.Length; i++)
-    {
-      Destroy(objectList[i].gameObject);
-    }
-    objectList = GameObject.FindGameObjectsWithTag("WallTile");
-    for (int i = 0; i < objectList.Length; i++)
-    {
-      Destroy(objectList[i].gameObject);
-    }
+
+    EraseLevelObjects();
+
     objectList = GameObject.FindGameObjectsWithTag("Digger");
     for (int i = 0; i < objectList.Length; i++)
     {
@@ -248,7 +262,18 @@ public class GeneratorBSP : MonoBehaviour
     }
   }
 
-  private void CreateLevel()
+  // Limpia los objetos tiles del nivel
+  private void EraseLevelObjects()
+  {
+    for (int i = 0; i < tileObjectList.Count; i++)
+    {
+      Destroy(tileObjectList[i]);
+    }
+    tileObjectList = new List<Object>();
+  }
+
+  // Crea las paredes y suelo del nivel
+  private void DrawLevel()
   {
     int levelWidth = levelGrid.GetWidth();
     int levelHeight = levelGrid.GetHeight();
@@ -267,14 +292,29 @@ public class GeneratorBSP : MonoBehaviour
       {
         switch (levelGrid.GetTile(i, j))
         {
-          //case 1:
-          //  Instantiate(floorTile, new Vector3(transform.position.x - (transform.localScale.x / 2) + i, transform.position.y + transform.localScale.y / 2, transform.position.z - (transform.localScale.z / 2) + j), Quaternion.identity);
-          //  break;
+          case 1:
+            tileObjectList.Add(Instantiate(floorTile, new Vector3(transform.position.x - (transform.localScale.x / 2) + i, transform.position.y + transform.localScale.y / 2 + 0.1f, transform.position.z - (transform.localScale.z / 2) + j), Quaternion.identity));
+            break;
           case 2:
-            Instantiate(wallTile, new Vector3(transform.position.x - (transform.localScale.x / 2) + i, transform.position.y + transform.localScale.y / 2, transform.position.z - (transform.localScale.z / 2) + j), Quaternion.identity);
+            tileObjectList.Add(Instantiate(wallTile, new Vector3(transform.position.x - (transform.localScale.x / 2) + i, transform.position.y + transform.localScale.y / 2, transform.position.z - (transform.localScale.z / 2) + j), Quaternion.identity));
             break;
         }
 
+      }
+    }
+  }
+
+  // Realiza un pase de automata celular para limpiar tiles sueltos o que sobresalen
+  private void CleanLevelGeneration()
+  {
+    for (int k = 0; k < 5; k++)
+    {
+      for (int i = 0; i < levelGrid.GetWidth(); i++)
+      {
+        for (int j = 0; j < levelGrid.GetHeight(); j++)
+        {
+          RemoveSingles(i, j);
+        }
       }
     }
   }

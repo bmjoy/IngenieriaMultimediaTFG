@@ -23,11 +23,28 @@ public class BSPNode
   public Vector2 size;
 
   public Branch branch; // Left o right. Indica la rama, en base a root, a la que pertenece
+  public int level; // Nivel de profundidad dentro del arbol
 
   public BSPNode()
   {
     isConnected = false;
     myColor = new Color(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f));
+  }
+
+  public string GetBranchName()
+  {
+    string _name = "root";
+    switch (branch)
+    {
+      case Branch.LEFT:
+        _name = "left";
+        break;
+      case Branch.RIGHT:
+        _name = "right";
+        break;
+    }
+
+    return _name;
   }
 
   public void SetLeftNode(BSPNode node)
@@ -86,6 +103,7 @@ public class BSPNode
     {
       leftNode.branch = this.branch;
     }
+    leftNode.level = level + 1;
 
     leftNode.SetParentNode(this);
 
@@ -104,6 +122,7 @@ public class BSPNode
     {
       rightNode.branch = this.branch;
     }
+    rightNode.level = level + 1;
 
     rightNode.SetParentNode(this);
   }
@@ -132,7 +151,7 @@ public class BSPNode
     {
       leftNode.branch = this.branch;
     }
-
+    leftNode.level = level + 1;
     leftNode.SetParentNode(this);
 
     rightNode = new BSPNode();
@@ -148,7 +167,7 @@ public class BSPNode
     {
       rightNode.branch = this.branch;
     }
-
+    rightNode.level = level + 1;
     rightNode.SetParentNode(this);
 
   }
