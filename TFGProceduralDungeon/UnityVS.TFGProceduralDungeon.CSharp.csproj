@@ -7,14 +7,16 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{254B7848-7639-8E36-FC02-01E0D24419BE}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <AssemblyName>Assembly-CSharp</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{E097FAD1-6243-4DAD-9C02-E9B9EFC3FFC1};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Web v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile></CompilerResponseFile>
+    <CompilerResponseFile>
+    </CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>WebPlayer:6</UnityBuildTarget>
     <UnityVersion>5.0.2f1</UnityVersion>
@@ -74,7 +76,7 @@
     <Compile Include="Assets\Scripts\DungeonGenerator\Digger.cs" />
     <Compile Include="Assets\Scripts\DungeonGenerator\DungeonGenerator.cs" />
     <Compile Include="Assets\Scripts\DungeonGenerator\Grid.cs" />
-    <Compile Include="Assets\Scripts\DungeonGenerator\RoomCreator.cs" />
+    <Compile Include="Assets\Scripts\DungeonGenerator\Room.cs" />
     <Compile Include="Assets\Scripts\Enemies\Enemy.cs" />
     <Compile Include="Assets\Scripts\Enemies\EnemyBat.cs" />
     <Compile Include="Assets\Scripts\Enemies\EnemyCrab.cs" />

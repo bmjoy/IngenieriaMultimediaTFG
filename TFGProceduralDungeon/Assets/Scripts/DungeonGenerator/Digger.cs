@@ -10,12 +10,13 @@ public class Digger : MonoBehaviour
   private void UpdateTile()
   {
     generator = GameObject.Find("DungeonGenerator").GetComponent<DungeonGenerator>();
+    // Inicializa los tiles del pasillo
     generator.SetTile((int)transform.position.x, (int)transform.position.z, 1);
     generator.SetTile((int)transform.position.x + 1, (int)transform.position.z, 1);
     generator.SetTile((int)transform.position.x - 1, (int)transform.position.z, 1);
     generator.SetTile((int)transform.position.x, (int)transform.position.z + 1, 1);
     generator.SetTile((int)transform.position.x, (int)transform.position.z - 1, 1);
-
+    // Rodea los tiles con pared
     SurroundTilesWithWall((int)transform.position.x + 1, (int)transform.position.z);
     SurroundTilesWithWall((int)transform.position.x - 1, (int)transform.position.z);
     SurroundTilesWithWall((int)transform.position.x, (int)transform.position.z + 1);

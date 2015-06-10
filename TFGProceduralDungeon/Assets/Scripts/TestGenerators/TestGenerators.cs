@@ -2,7 +2,8 @@
 using UnityEngine.UI;
 using System.Collections;
 
-public class TestGenerators : MonoBehaviour {
+public class TestGenerators : MonoBehaviour
+{
   // Generadores
   public GeneratorGrowingTree prefabGeneratorGT; // Growing Tree
   private GeneratorGrowingTree instanceGeneratorGT;
@@ -14,7 +15,7 @@ public class TestGenerators : MonoBehaviour {
   private Button stepButton;
 
   // Valores por defecto de camara segun el test
-  public Camera camera;
+  private GameObject cameraInstance;
   private Vector3[] cameraDefaults = { 
                                        new Vector3(-1f, 15f, -2f), // Posicion para Growing Tree
                                        new Vector3(90f, 0f, 0f), // Rotacion para Growing Tree
@@ -47,43 +48,54 @@ public class TestGenerators : MonoBehaviour {
   public GameObject settingsSeed;
 
   // Setters para los sliders de los test
-  public void SetDelay(float value) {
+  public void SetDelay(float value)
+  {
     delay = value;
   }
 
-  public void SetRandom(bool value) {
+  public void SetRandom(bool value)
+  {
     random = value;
   }
 
-  public void SetSeed(bool value) {
+  public void SetSeed(bool value)
+  {
     useSeed = value;
   }
 
-  public void SetStepButton(bool value) {
+  public void SetStepButton(bool value)
+  {
     stepButton.interactable = value;
   }
 
-  public void SetDungeonWidth(float value) {
+  public void SetDungeonWidth(float value)
+  {
     DUNGEON_WIDTH = (int)value;
   }
 
-  public void SetDungeonHeight(float value) {
+  public void SetDungeonHeight(float value)
+  {
     DUNGEON_HEIGHT = (int)value;
   }
 
-  public void SetCAPasses(float value) {
+  public void SetCAPasses(float value)
+  {
     cellularAutomataPasses = (int)value;
   }
 
-  public void SetCAProbability(float value) {
+  public void SetCAProbability(float value)
+  {
     wallProbability = (int)value;
   }
 
-  public void SetBSPRoomSize(float value) {
+  public void SetBSPRoomSize(float value)
+  {
     GeneratorBSP.ROOM_SIZE = value;
   }
 
-  private void Start() {
+  private void Start()
+  {
+    cameraInstance = Camera.main.gameObject;
     stepButton = GameObject.Find("ButtonStep").GetComponent<Button>();
     settingsGT.SetActive(true);
     settingsCA.SetActive(false);
@@ -91,14 +103,17 @@ public class TestGenerators : MonoBehaviour {
     settingsSeed.SetActive(false);
   }
 
-  private void Update() {
-    if (Input.GetKeyDown(KeyCode.P)) {
+  private void Update()
+  {
+    if (Input.GetKeyDown(KeyCode.P))
+    {
       OnStep();
     }
   }
 
   // Activa las opciones del algoritmo seleccionado
-  public void OnAlgSelected(float selection) {
+  public void OnAlgSelected(float selection)
+  {
     selectedAlg = (int)selection;
 
     settingsSize.SetActive(false);
@@ -106,7 +121,8 @@ public class TestGenerators : MonoBehaviour {
     settingsCA.SetActive(false);
     settingsBSP.SetActive(false);
     settingsSeed.SetActive(false);
-    switch (selectedAlg) {
+    switch (selectedAlg)
+    {
       case 0: // Growing Tree
         settingsGT.SetActive(true);
         break;
@@ -123,8 +139,10 @@ public class TestGenerators : MonoBehaviour {
     }
   }
   // Boton de comenzar a ejecutar el algoritmo
-  public void OnRun() {
-    switch (selectedAlg) {
+  public void OnRun()
+  {
+    switch (selectedAlg)
+    {
       case 0: // Growing Tree
         stepButton.interactable = false;
         SetCamera();
@@ -143,24 +161,28 @@ public class TestGenerators : MonoBehaviour {
     }
   }
 
-  private void SetCamera() {
-    switch (selectedAlg) {
+  private void SetCamera()
+  {
+    switch (selectedAlg)
+    {
       case 0:
-        camera.transform.position = cameraDefaults[0];
-        camera.GetComponent<Camera>().orthographicSize = 8;
-        camera.transform.localEulerAngles = cameraDefaults[1];
+        cameraInstance.transform.position = cameraDefaults[0];
+        cameraInstance.GetComponent<Camera>().orthographicSize = 8;
+        cameraInstance.transform.localEulerAngles = cameraDefaults[1];
         break;
       case 1:
       case 2:
-        camera.transform.position = cameraDefaults[2];
-        camera.GetComponent<Camera>().orthographicSize = 40;
-        camera.transform.localEulerAngles = cameraDefaults[3];
+        cameraInstance.transform.position = cameraDefaults[2];
+        cameraInstance.GetComponent<Camera>().orthographicSize = 40;
+        cameraInstance.transform.localEulerAngles = cameraDefaults[3];
         break;
     }
   }
 
-  public void OnStep() {
-    switch (selectedAlg) {
+  public void OnStep()
+  {
+    switch (selectedAlg)
+    {
       case 1: // Cellular Automata
         instanceGeneratorCA.doNextStep = true;
         break;
@@ -170,33 +192,40 @@ public class TestGenerators : MonoBehaviour {
     }
   }
 
-  public void Cleanup() {
-    if (instanceGeneratorGT != null) {
+  public void Cleanup()
+  {
+    if (instanceGeneratorGT != null)
+    {
       instanceGeneratorGT.Cleanup();
       Destroy(instanceGeneratorGT.gameObject);
     }
 
-    if (instanceGeneratorCA != null) {
+    if (instanceGeneratorCA != null)
+    {
       instanceGeneratorCA.Cleanup();
       Destroy(instanceGeneratorCA.gameObject);
     }
 
-    if (instanceGeneratorBSP != null) {
+    if (instanceGeneratorBSP != null)
+    {
       instanceGeneratorBSP.Cleanup();
       Destroy(instanceGeneratorBSP.gameObject);
     }
   }
 
   // Genera la mazmorra usando el algoritmo de Growing Tree
-  private void GenerateDungeonGrowingTree() {
+  private void GenerateDungeonGrowingTree()
+  {
     Cleanup();
     instanceGeneratorGT = Instantiate(prefabGeneratorGT);
     instanceGeneratorGT.name = "GeneratorGrowingTree";
     instanceGeneratorGT.Generate(delay, random);
   }
 
-  private void SetSeed() {
-    if (useSeed) {
+  private void SetSeed()
+  {
+    if (useSeed)
+    {
       Text input = GameObject.Find("TextSeed").GetComponent<Text>();
       bool result = int.TryParse(input.text, out seed);
       if (!result) // No se puede parsear el entero, cancelamos la semilla
@@ -207,13 +236,15 @@ public class TestGenerators : MonoBehaviour {
         useSeed = false;
       }
     }
-    else {
+    else
+    {
       seed = -1;
     }
   }
 
   // Genera la mazmorra usando el algoritmo de Automata Celular
-  private void GenerateDungeonCA() {
+  private void GenerateDungeonCA()
+  {
     Cleanup();
     instanceGeneratorCA = Instantiate(prefabGeneratorCA);
     instanceGeneratorCA.name = "GeneratorCA";
@@ -222,7 +253,8 @@ public class TestGenerators : MonoBehaviour {
   }
 
   // Genera la mazmorra usando el algoritmo de BSP Tree
-  private void GenerateDungeonBSP() {
+  private void GenerateDungeonBSP()
+  {
     Cleanup();
     instanceGeneratorBSP = Instantiate(prefabGeneratorBSP);
     instanceGeneratorBSP.name = "GeneratorBSP";

@@ -7,10 +7,16 @@ using System.Collections;
  * */
 public class ObjectLookAtCamera : MonoBehaviour
 {
-  public Camera camera;
+  private GameObject cameraInstance;
+
+  void Start()
+  {
+    cameraInstance = Camera.main.gameObject;
+  }
+
   void Update()
   {
-    Vector3 rotationDir = transform.position - camera.transform.position;
+    Vector3 rotationDir = transform.position - cameraInstance.transform.position;
     rotationDir.y = 0f;
     Quaternion newRotation = Quaternion.LookRotation(rotationDir, Vector3.up);
     transform.rotation = newRotation;

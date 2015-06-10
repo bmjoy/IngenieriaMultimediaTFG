@@ -3,7 +3,6 @@ using System.Collections;
 
 public class CameraSwitcher : MonoBehaviour
 {
-
   private CameraLookAt cameraLookAt;
   private CameraFree cameraFree;
 

@@ -31,7 +31,7 @@ public class UIManager : MonoBehaviour
   public void TogglePause()
   {
     pauseCanvas.SetActive(!pauseCanvas.activeSelf);
-    Time.timeScale = 1.0f - Time.timeScale;
+    GameManager.instance.SetPause(!GameManager.instance.Paused);
   }
 
   // Eventos de boton

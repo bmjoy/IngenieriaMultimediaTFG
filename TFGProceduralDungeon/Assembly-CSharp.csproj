@@ -59,7 +59,7 @@
      <Compile Include="Assets\Scripts\DungeonGenerator\Digger.cs" />
      <Compile Include="Assets\Scripts\DungeonGenerator\DungeonGenerator.cs" />
      <Compile Include="Assets\Scripts\DungeonGenerator\Grid.cs" />
-     <Compile Include="Assets\Scripts\DungeonGenerator\RoomCreator.cs" />
+     <Compile Include="Assets\Scripts\DungeonGenerator\Room.cs" />
      <Compile Include="Assets\Scripts\Enemies\Enemy.cs" />
      <Compile Include="Assets\Scripts\Enemies\EnemyBat.cs" />
      <Compile Include="Assets\Scripts\Enemies\EnemyCrab.cs" />

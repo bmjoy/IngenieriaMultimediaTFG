@@ -10,7 +10,7 @@ public enum RoomType
   PASSAGE   // Pasillo que une dos habitaciones
 }
 
-public class RoomCreator : MonoBehaviour
+public class Room : MonoBehaviour
 {
   public GameObject digger;
 
@@ -18,7 +18,7 @@ public class RoomCreator : MonoBehaviour
   // Posicion y dimensiones en enteros. Son unidades de grid.
   public Vector2i position;
   public Vector2i size;
-  private int roomID;
+  private int roomId;
   private BSPNode parentNode;
   private GameObject sibling;
 
@@ -34,25 +34,25 @@ public class RoomCreator : MonoBehaviour
     //Vector2i startPosition = new Vector2i((int)(transform.position.x - (transform.localScale.x / 2)),
     //                                (int)(transform.position.z - (transform.localScale.z / 2)));
 
-    // Desde la posicion inicial recorremos las dimensiones de la habitacion asignando valor al tile
+    // Inicializa todos los tiles de la habitacion
     for (int i = position.x; i < position.x + size.x; i++)
     {
       for (int j = position.z; j < position.z + size.z; j++)
       {
-        grid.SetTile(i, j, 1); // FLOOR
+        grid.SetTile(i, j, 0);
       }
     }
 
-    // WALLS
+    // Paredes de la habitacion
     for (int i = 0; i <= size.x; i++)
     {
-      grid.SetTile(position.x + i, position.z, 2); // Arriba
-      grid.SetTile(position.x + i, position.z + size.z, 2); // Abajo
+      grid.SetTile(position.x + i, position.z, roomId); // Arriba
+      grid.SetTile(position.x + i, position.z + size.z, roomId); // Abajo
     }
     for (int i = 0; i <= size.z; i++)
     {
-      grid.SetTile(position.x, position.z + i, 2); // Izquierda
-      grid.SetTile(position.x + size.x, position.z + i, 2); // Derecha
+      grid.SetTile(position.x, position.z + i, roomId); // Izquierda
+      grid.SetTile(position.x + size.x, position.z + i, roomId); // Derecha
     }
 
     return grid;
@@ -60,7 +60,7 @@ public class RoomCreator : MonoBehaviour
 
   public void SetID(int aID)
   {
-    roomID = aID;
+    roomId = aID;
   }
 
   public void SetParentNode(BSPNode aNode)
@@ -74,7 +74,7 @@ public class RoomCreator : MonoBehaviour
     GetSibiling();
     if (sibling != null)
     {
-      RoomCreator siblingRoom = sibling.GetComponent<RoomCreator>();
+      Room siblingRoom = sibling.GetComponent<Room>();
 
       Vector3 startPos = new Vector3();
       Vector3 endPos = new Vector3();
@@ -82,22 +82,22 @@ public class RoomCreator : MonoBehaviour
       if (siblingRoom.position.z + siblingRoom.size.z < position.z) // Habitacion (norte) y hermana (sur)
       {
         startPos = ChooseDoorPoint(0); // Punto sur en habitacion
-        endPos = sibling.GetComponent<RoomCreator>().ChooseDoorPoint(2); // Punto norte en hermana
+        endPos = sibling.GetComponent<Room>().ChooseDoorPoint(2); // Punto norte en hermana
       }
       else if (siblingRoom.position.z > position.z + size.z) // Habitacion (sur) y hermana (norte)
       {
         startPos = ChooseDoorPoint(2);
-        endPos = sibling.GetComponent<RoomCreator>().ChooseDoorPoint(1);
+        endPos = sibling.GetComponent<Room>().ChooseDoorPoint(1);
       }
       else if (siblingRoom.position.x + siblingRoom.size.x < position.x) // Habitacion (este) y hermana (oeste)
       {
         startPos = ChooseDoorPoint(3);
-        endPos = sibling.GetComponent<RoomCreator>().ChooseDoorPoint(1);
+        endPos = sibling.GetComponent<Room>().ChooseDoorPoint(1);
       }
       else if (siblingRoom.position.x > position.x + size.x) // Habitacion (oeste) y hermana (este)
       {
         startPos = ChooseDoorPoint(1);
-        endPos = sibling.GetComponent<RoomCreator>().ChooseDoorPoint(3);
+        endPos = sibling.GetComponent<Room>().ChooseDoorPoint(3);
       }
 
       GameObject aDigger = (GameObject)Instantiate(digger, startPos, Quaternion.identity);
@@ -118,8 +118,10 @@ public class RoomCreator : MonoBehaviour
         {
           parentNode.SetRoom(sibling.gameObject);
         }
-        sibling.GetComponent<RoomCreator>().SetParentNode(parentNode);
+        sibling.GetComponent<Room>().SetParentNode(parentNode);
       }
+
+      Destroy(aDigger);
     }
   }
 

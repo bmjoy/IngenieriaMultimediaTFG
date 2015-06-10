@@ -20,8 +20,17 @@ public enum SceneName
 
 public class GameManager : MonoBehaviour
 {
-  private float levelStartDelay = 2f;
   public static GameManager instance = null;
+
+  private float levelStartDelay = 2f;
+  private float timeScale = 1.0f;
+
+  private bool paused = false;
+  public bool Paused
+  {
+    get { return paused; }
+    set { paused = value; }
+  }
 
   private void Awake()
   {
@@ -34,6 +43,16 @@ public class GameManager : MonoBehaviour
       Destroy(gameObject);
     }
     DontDestroyOnLoad(gameObject);
+  }
+
+  public void SetPause(bool pause)
+  {
+    Time.timeScale = timeScale;
+    paused = pause;
+    if (pause)
+    {
+      Time.timeScale = 0f;
+    }
   }
 
   // Carga una escena por nombre
