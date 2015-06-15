@@ -10,19 +10,25 @@ public enum SceneName
   Splash = 0,
   MainMenu,
   Intro,
-  MapScreen,
   DungeonLevel,
   Ending,
   // Tests
   TestLevelGeneration,
-  TestEnemies
+  TestEnemies,
+  TestTraps
 };
 
-public class GameManager : MonoBehaviour
+public class GameManager : Singleton<GameManager>
 {
-  public static GameManager instance = null;
+  public GameObject prefObjectManager;
+  public ObjectManager objectManager;
 
-  private float levelStartDelay = 2f;
+  public GameObject prefDungeonGenerator;
+  public DungeonGenerator dungeonGenerator;
+
+  [HideInInspector]
+  public Player player; // Referencia al player para que otras clases accedan
+
   private float timeScale = 1.0f;
 
   private bool paused = false;
@@ -32,17 +38,32 @@ public class GameManager : MonoBehaviour
     set { paused = value; }
   }
 
-  private void Awake()
+  protected GameManager() { } // guarantee this will be always a singleton only - can't use the constructor!
+
+  private void Start()
   {
-    if (instance == null)
+    LoadScene(Application.loadedLevel);
+  }
+
+  private void Cleanup()
+  {
+    if (dungeonGenerator != null)
     {
-      instance = this;
+      Destroy(dungeonGenerator.gameObject);
     }
-    else if (instance != this)
+    if (objectManager != null)
     {
-      Destroy(gameObject);
+      Destroy(objectManager.gameObject);
     }
-    DontDestroyOnLoad(gameObject);
+  }
+
+  public void Init()
+  {
+    player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+    objectManager = Instantiate(prefObjectManager).GetComponent<ObjectManager>();
+    objectManager.transform.parent = this.transform;
+    dungeonGenerator = Instantiate(prefDungeonGenerator).GetComponent<DungeonGenerator>();
+    dungeonGenerator.transform.parent = this.transform;
   }
 
   public void SetPause(bool pause)
@@ -61,7 +82,23 @@ public class GameManager : MonoBehaviour
     Application.LoadLevel((int)sceneName);
   }
 
+  public void LoadScene(int sceneIndex)
+  {
+    Application.LoadLevel(sceneIndex);
+  }
+
   private void OnLevelWasLoaded(int index)
   {
+    Cleanup();
+    switch (index)
+    {
+      case (int)SceneName.DungeonLevel:
+        Init();
+        dungeonGenerator.GenerateDungeon();
+        break;
+      default:
+        Init();
+        break;
+    }
   }
 }

@@ -1,80 +1,104 @@
 using UnityEngine;
 using System.Collections;
 
-public class Digger : MonoBehaviour
-{
-  private DungeonGenerator generator;
+public class Digger : MonoBehaviour {
+  public int roomId; // El pasillo tambien es una habitacion
 
+  private DungeonGenerator generator;
+  private Vector2i digger, end;
+
+
+  Color color;
+
+  private void Awake() {
+    generator = GameManager.Instance.dungeonGenerator;
+  }
 
   // Crear suelo alrededor de la posicion actual y la rodea con paredes
-  private void UpdateTile()
-  {
-    generator = GameObject.Find("DungeonGenerator").GetComponent<DungeonGenerator>();
+  private void UpdateTile() {
+    //generator.SetTile(digger.x, digger.z, 100);
+    //GameManager.Instance.objectManager.CreateCube(digger.ToVector3(), color);
+
     // Inicializa los tiles del pasillo
-    generator.SetTile((int)transform.position.x, (int)transform.position.z, 1);
-    generator.SetTile((int)transform.position.x + 1, (int)transform.position.z, 1);
-    generator.SetTile((int)transform.position.x - 1, (int)transform.position.z, 1);
-    generator.SetTile((int)transform.position.x, (int)transform.position.z + 1, 1);
-    generator.SetTile((int)transform.position.x, (int)transform.position.z - 1, 1);
+    generator.SetTile(digger.x, digger.z, (int)TileType.FLOOR);
+    generator.SetTile(digger.x + 1, digger.z, (int)TileType.FLOOR);
+    generator.SetTile(digger.x - 1, digger.z, (int)TileType.FLOOR);
+    generator.SetTile(digger.x, digger.z + 1, (int)TileType.FLOOR);
+    generator.SetTile(digger.x, digger.z - 1, (int)TileType.FLOOR);
     // Rodea los tiles con pared
-    SurroundTilesWithWall((int)transform.position.x + 1, (int)transform.position.z);
-    SurroundTilesWithWall((int)transform.position.x - 1, (int)transform.position.z);
-    SurroundTilesWithWall((int)transform.position.x, (int)transform.position.z + 1);
-    SurroundTilesWithWall((int)transform.position.x, (int)transform.position.z - 1);
+    SurroundTilesWithWall(digger.x + 1, digger.z);
+    SurroundTilesWithWall(digger.x - 1, digger.z);
+    SurroundTilesWithWall(digger.x, digger.z + 1);
+    SurroundTilesWithWall(digger.x, digger.z - 1);
   }
 
   // Avanza en x,z para actualiza cada tile del pasillo a cavar
-  public void Dig(Vector3 targetPos)
-  {
-    // Avance en eje x
-    while (transform.position.x != targetPos.x)
-    {
-      if (transform.position.x < targetPos.x)
-      {
-        transform.position = new Vector3(transform.position.x + 1, transform.position.y, transform.position.z);
+  public void Dig(Vector2i startPos, Vector2i targetPos) {
+    digger = startPos;
+    end = targetPos;
+    color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
+
+    Vector3 offset = new Vector3(0.5f, 0.5f, 0.5f);
+    Vector3 p = digger.ToVector3() + offset;
+    GameManager.Instance.objectManager.CreateCube(p, Color.green);
+    p = end.ToVector3() + offset;
+    GameManager.Instance.objectManager.CreateCube(p, Color.red);
+
+    while (digger.x != end.x) {
+      if (digger.x < end.x) {
+        digger.x++;
       }
-      else
-      {
-        transform.position = new Vector3(transform.position.x - 1, transform.position.y, transform.position.z);
+      else {
+        digger.x--;
+      }
+      // El tile final se queda vacio
+      if (digger.x != end.x) {
+        UpdateTile();
+      }
+    }
+
+    while (digger.z != end.z) {
+      if (digger.z < end.z) {
+        digger.z++;
+      }
+      else {
+        digger.z--;
       }
       UpdateTile();
     }
-    // Avance en eje z
-    while (transform.position.z != targetPos.z)
-    {
-      if (transform.position.z < targetPos.z)
-      {
-        transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z + 1);
-      }
-      else
-      {
-        transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - 1);
-      }
-      UpdateTile();
-    }
+
     Destroy(this.gameObject);
   }
-
   // Crea un tile de tipo pared si este esta vacio
-  public void SurroundTilesWithWall(int x, int y)
-  {
+  public void SurroundTilesWithWall(int x, int y) {
     Grid grid = generator.GetGrid();
 
-    if (grid.GetTile(x + 1, y) == 0) // Derecha
+    //int c = 0;
+    ////// Arriba, izquierda, derecha, abajo (casillas impares)
+    //for (int i = x - 1; i <= x + 1; i++) {
+    //  for (int j = y - 1; j <= y + 1; j++) {
+    //    if (c % 2 != 0 && grid.GetTile(i, j) == 0) {
+    //      grid.SetTile(i, j, 2);
+    //    }
+    //    c++;
+    //  }
+    //}
+
+    if (grid.GetTile(x + 1, y) == (int)TileType.EMPTY) // Derecha
     {
-      generator.SetTile(x + 1, y, 2);
+      generator.SetTile(x + 1, y, roomId);
     }
-    if (grid.GetTile(x - 1, y) == 0) // Izquierda
+    if (grid.GetTile(x - 1, y) == (int)TileType.EMPTY) // Izquierda
     {
-      generator.SetTile(x - 1, y, 2);
+      generator.SetTile(x - 1, y, roomId);
     }
-    if (grid.GetTile(x, y + 1) == 0) // Superior
+    if (grid.GetTile(x, y + 1) == (int)TileType.EMPTY) // Superior
     {
-      generator.SetTile(x, y + 1, 2);
+      generator.SetTile(x, y + 1, roomId);
     }
-    if (grid.GetTile(x, y - 1) == 0) // Inferior
+    if (grid.GetTile(x, y - 1) == (int)TileType.EMPTY) // Inferior
     {
-      generator.SetTile(x, y - 1, 2);
+      generator.SetTile(x, y - 1, roomId);
     }
   }
 }

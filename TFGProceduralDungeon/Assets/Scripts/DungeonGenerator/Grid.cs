@@ -10,6 +10,21 @@ public class Grid
 
   private int[,] grid;
 
+  public int[,] GetGrid()
+  {
+    return grid;
+  }
+  public void SetGrid(int[,] grid)
+  {
+    for (int i = 0; i < gridWidth; i++)
+    {
+      for (int j = 0; j < gridHeight; j++)
+      {
+        this.grid[i, j] = grid[i, j];
+      }
+    }
+  }
+
   public Grid(int width, int height)
   {
     gridWidth = width;
@@ -28,16 +43,27 @@ public class Grid
 
   public void SetTile(int x, int y, int value)
   {
-    grid[x, y] = value;
+    if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight)
+    {
+      grid[x, y] = value;
+    }
+    else
+    {
+      Debug.LogWarning("Grid.SetTile: Trying to set a value of a tile out of bounds (" + x + ", " + y + ")");
+    }
   }
 
   public int GetTile(int x, int y)
   {
-    if (x < 0 || x >= gridWidth || y < 0 || y >= gridHeight)
+    if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight)
     {
-      return -1;
+      return grid[x, y];
     }
-    return grid[x, y];
+    else
+    {
+      Debug.LogWarning("Grid.GetTile: Trying to get a value of a tile out of bounds (" + x + ", " + y + ")");
+    }
+    return -1;
   }
 
   public int GetWidth()

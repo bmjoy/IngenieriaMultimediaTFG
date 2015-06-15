@@ -39,6 +39,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e10917ff88364b045b89d2c8e20bad13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _persistent: 1
+  prefObjectManager: {fileID: 117646, guid: d7ab9b956f2475348bff412e038d0744, type: 2}
+  objectManager: {fileID: 0}
+  prefDungeonGenerator: {fileID: 140640, guid: ce12990b52e3bd34d9209eb9523d008c, type: 2}
+  dungeonGenerator: {fileID: 0}
+  player: {fileID: 0}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

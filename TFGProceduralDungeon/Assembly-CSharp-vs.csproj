@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\AudioManager.cs" />
+     <Compile Include="Assets\Scripts\Camera\CameraClearVision.cs" />
      <Compile Include="Assets\Scripts\Camera\CameraFree.cs" />
      <Compile Include="Assets\Scripts\Camera\CameraLookAt.cs" />
      <Compile Include="Assets\Scripts\Camera\CameraShake.cs" />
@@ -61,17 +62,17 @@
      <Compile Include="Assets\Scripts\DungeonGenerator\Grid.cs" />
      <Compile Include="Assets\Scripts\DungeonGenerator\Room.cs" />
      <Compile Include="Assets\Scripts\Enemies\Enemy.cs" />
-     <Compile Include="Assets\Scripts\Enemies\EnemyBat.cs" />
-     <Compile Include="Assets\Scripts\Enemies\EnemyCrab.cs" />
-     <Compile Include="Assets\Scripts\Enemies\EnemyGoblin.cs" />
+     <Compile Include="Assets\Scripts\Enemies\EnemyAnimator.cs" />
      <Compile Include="Assets\Scripts\GameManager.cs" />
      <Compile Include="Assets\Scripts\Hud.cs" />
      <Compile Include="Assets\Scripts\MovingObject.cs" />
      <Compile Include="Assets\Scripts\ObjectAutodestroy.cs" />
      <Compile Include="Assets\Scripts\ObjectLookAtCamera.cs" />
+     <Compile Include="Assets\Scripts\ObjectManager.cs" />
      <Compile Include="Assets\Scripts\ParticleSystemAutodestroy.cs" />
      <Compile Include="Assets\Scripts\Player.cs" />
      <Compile Include="Assets\Scripts\SceneTransition.cs" />
+     <Compile Include="Assets\Scripts\Singleton.cs" />
      <Compile Include="Assets\Scripts\TestGenerators\BSP\GeneratorBSP.cs" />
      <Compile Include="Assets\Scripts\TestGenerators\BSP\t_BSPNode.cs" />
      <Compile Include="Assets\Scripts\TestGenerators\BSP\t_BSPTree.cs" />

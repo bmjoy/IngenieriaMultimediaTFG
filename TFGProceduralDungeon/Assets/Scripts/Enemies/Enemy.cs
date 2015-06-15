@@ -1,114 +1,203 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Enemy : MonoBehaviour
-{
+// Estados de la IA
+public enum AIState {
+  Idle,
+  Patrolling,
+  Chasing,
+  Attacking,
+  Dead
+}
+
+public class Enemy : MonoBehaviour {
+  public float speed;
+  private float chaseSpeedMultiplier = 1.5f;
+
+  public AIState state;
   public GameObject deathEffectPrefab;
-  public bool patrolling = false;
-  public float speed = 1f;
 
-  private bool attacking = false;
-  private bool isDead = false;
+  // Estado Chasing
+  public float sightRadius = 3f;
+  // Parametros para patrullar alrededor de punto
+  public Vector3 patrolCenter;
+  public float patrolRadius = 2f;
+  private Vector3[] patrolPoints; // Puntos target de la zona de patrulla
+  private int patrolIterator = 0; // Indica el target del array
+  private Vector3 target;
 
-  private bool rightDir = true;
-  private Animator animator;
-  private string defaultAnimation;
+  private Player player;
+  private Coroutine routine;
+  private EnemyAnimator animator;
+  private SpriteRenderer sprite;
 
+  void Awake() {
+    animator = this.GetComponent<EnemyAnimator>();
+    sprite = this.GetComponentInChildren<SpriteRenderer>();
+    SetState(state);
+    patrolCenter = new Vector3();
+    patrolPoints = new Vector3[4];
+    target = patrolPoints[0];
+    CalculatePatrolPoints();
+  }
 
-  void Start()
-  {
-    defaultAnimation = "Idle";
-    animator = GetComponent<Animator>();
-    if (patrolling)
-    {
-      TriggerAnimation("Walk");
-      defaultAnimation = "Walk";
+  void Update() {
+    MakeDecision();
+    switch (state) {
+      case AIState.Idle:
+        Wait();
+        break;
+      case AIState.Patrolling:
+        Patrol();
+        break;
+      case AIState.Chasing:
+        Chase();
+        break;
+      case AIState.Attacking:
+        Attack();
+        break;
+      case AIState.Dead:
+        DeadAnimation();
+        break;
+      default:
+        Wait();
+        break;
     }
   }
 
-  void Update()
-  {
-    if (!isDead)
-    {
-      if (patrolling && !attacking)
-      {
-        if (rightDir)
-        {
-          transform.Translate(speed * Time.deltaTime, 0, 0);
-        }
-        else
-        {
-          transform.Translate(-speed * Time.deltaTime, 0, 0);
-        }
-      }
-    }
-    // Animacion muerte
-    else
-    {
-      transform.Rotate(0f, 0f, 720f * Time.deltaTime);
-      if (rightDir)
-      {
-        transform.localScale -= new Vector3(0.1f, 0.1f, 0f);
-      }
-      else
-      {
-        transform.localScale -= new Vector3(-0.1f, 0.1f, 0f);
-      }
+  public void SetPatrolCenter(Vector3 position) {
+    patrolCenter = position;
+    CalculatePatrolPoints();
+    target = patrolPoints[0];
+  }
 
+  private void CalculatePatrolPoints() {
+    float r = patrolRadius;
+    Vector3 c = patrolCenter;
+    patrolPoints[0] = new Vector3(c.x + r, c.y, c.z + r);
+    patrolPoints[1] = new Vector3(c.x + r, c.y, c.z - r);
+    patrolPoints[2] = new Vector3(c.x - r, c.y, c.z - r);
+    patrolPoints[3] = new Vector3(c.x - r, c.y, c.z + r);
+  }
+
+  private void MakeDecision() {
+    if (state != AIState.Dead && state != AIState.Attacking) {
+      if (player == null) {
+        player = GameManager.Instance.player;
+      }
+      else {
+        float distance = Vector3.Distance(player.transform.position, this.transform.position);
+        if (state == AIState.Chasing) {
+          if (distance > sightRadius) {
+            if (routine != null) {
+              StopCoroutine(routine);
+            }
+            routine = StartCoroutine(LostTarget());
+          }
+          else {
+            target = player.transform.position;
+          }
+        }
+        else {
+          if (distance <= sightRadius) {
+            SetState(AIState.Chasing);
+          }
+        }
+      }
     }
   }
 
-  // Activa una animacion mediante trigger
-  private void TriggerAnimation(string animationName)
-  {
-    if (!animator.GetCurrentAnimatorStateInfo(0).IsName(animationName))
-    {
-      animator.SetTrigger(animationName);
+  private IEnumerator LostTarget() {
+    SetState(AIState.Idle);
+    yield return new WaitForSeconds(1f);
+    SetState(AIState.Patrolling);
+    GetNextTarget();
+  }
+
+  private void SetState(AIState _state) {
+    state = _state;
+    animator.TriggerAnimation(state);
+  }
+
+  private void Wait() {
+  }
+
+  private void GetNextTarget() {
+    patrolIterator++;
+    if (patrolIterator >= patrolPoints.Length) {
+      patrolIterator = 0;
     }
+    target = patrolPoints[patrolIterator];
+    target.y = transform.position.y;
+  }
+
+  private void MoveToTarget(float _speed) {
+    target.y = transform.position.y; // Siempre a la altura del enemigo
+    Vector3 direction = target - transform.position;
+    direction.Normalize();
+    transform.Translate(direction * _speed * Time.deltaTime);
+  }
+
+  private void Patrol() {
+    MoveToTarget(speed);
+    if (Vector3.Distance(transform.position, target) < 0.1f) {
+      // Obtiene el siguiente punto de la zona de patrulla
+      GetNextTarget();
+    }
+  }
+
+  private void Chase() {
+    //animator.TriggerAnimation("Walk");
+    MoveToTarget(speed * chaseSpeedMultiplier);
   }
 
   // Animacion de ataque
-  private IEnumerator Attack()
-  {
-    attacking = true;
-    TriggerAnimation("Attack");
-    float delay = animator.GetCurrentAnimatorStateInfo(0).length;
+  private IEnumerator Attack() {
+    SetState(AIState.Attacking);
+    float delay = animator.GetCurrentAnimationLength();
     yield return new WaitForSeconds(delay);
-    attacking = false;
-    TriggerAnimation(defaultAnimation);
+    SetState(AIState.Patrolling);
+  }
+
+  // Animacion de muerte, se aplica sobre el sprite ya que es el que gira segun la camara
+  private void DeadAnimation() {
+    if (sprite.transform.localScale.x > 0.1f &&
+        sprite.transform.localScale.y > 0.1f) {
+      sprite.transform.localScale -= new Vector3(0.1f, 0.1f, 0f);
+      //transform.Translate(0f, -0.02f, 0f);
+    }
+    //0f, 0f, 720f * Time.deltaTime, Space.Self
+    sprite.transform.Rotate(new Vector3(0f, 0f, 1f), 720f * Time.deltaTime, Space.Self);
   }
 
   // El enemigo muere
-  private IEnumerator Die()
-  {
-    isDead = true;
-    // Efecto
+  private IEnumerator Die() {
+    animator.enabled = false;
+    SetState(AIState.Dead);
+    // Efecto de sangre
     Vector3 spawnPosition = transform.position;
-    spawnPosition.y += 0.3f;
     Instantiate(deathEffectPrefab, spawnPosition, deathEffectPrefab.transform.rotation);
-    // Desactivamos el rigiBody para realizar la rotacion sin colisiones
-    Destroy(GetComponent<BoxCollider>());
-    Destroy(GetComponent<Rigidbody>());
-
-    yield return new WaitForSeconds(1f);
+    Destroy(this.GetComponent<BoxCollider>());
+    Destroy(this.GetComponent<Rigidbody>());
+    Destroy(this.GetComponentInChildren<ObjectLookAtCamera>()); // En caso contrario no gira, ya que se cambia el forward
+    yield return new WaitForSeconds(0.5f);
     Destroy(this.gameObject);
   }
 
-  void OnCollisionEnter(Collision collision)
-  {
+  void OnCollisionEnter(Collision collision) {
     string cTag = collision.gameObject.tag;
-    if (cTag == "Wall")
+    if (cTag == "Wall") // Si choca con pared busca el siguiente target
     {
-      rightDir = !rightDir;
-      Vector3 scale = transform.localScale;
-      scale.x *= -1;
-      transform.localScale = scale;
+      GetNextTarget();
     }
-    else if (cTag == "Player") // Ataque
+    if (cTag == "Player") // Ataque
     {
       StartCoroutine(Attack());
     }
-    else if (cTag == "Damage") // Recibe daño
+  }
+
+  void OnTriggerStay(Collider collider) {
+    if (collider.gameObject.tag == "Damage") // Ataque
     {
       StartCoroutine(Die());
     }

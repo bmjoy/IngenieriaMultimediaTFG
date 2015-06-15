@@ -31,13 +31,13 @@ public class UIManager : MonoBehaviour
   public void TogglePause()
   {
     pauseCanvas.SetActive(!pauseCanvas.activeSelf);
-    GameManager.instance.SetPause(!GameManager.instance.Paused);
+    GameManager.Instance.SetPause(!GameManager.Instance.Paused);
   }
 
   // Eventos de boton
   public void OnNewGame()
   {
-    GameManager.instance.LoadScene(SceneName.Intro);
+    GameManager.Instance.LoadScene(SceneName.Intro);
   }
 
   public void OnSettings()
@@ -47,12 +47,12 @@ public class UIManager : MonoBehaviour
   public void OnMainMenu()
   {
     Time.timeScale = 1.0f - Time.timeScale;
-    GameManager.instance.LoadScene(SceneName.MainMenu);
+    GameManager.Instance.LoadScene(SceneName.MainMenu);
   }
 
   public void OnBack()
   {
-    GameManager.instance.LoadScene(SceneName.MainMenu);
+    GameManager.Instance.LoadScene(SceneName.MainMenu);
   }
 
   /*********** TESTS ***********/
@@ -64,11 +64,11 @@ public class UIManager : MonoBehaviour
 
   public void OnTestLevelGeneration()
   {
-    GameManager.instance.LoadScene(SceneName.TestLevelGeneration);
+    GameManager.Instance.LoadScene(SceneName.TestLevelGeneration);
   }
 
   public void OnTestEnemies()
   {
-    GameManager.instance.LoadScene(SceneName.TestEnemies);
+    GameManager.Instance.LoadScene(SceneName.TestEnemies);
   }
 }

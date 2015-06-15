@@ -28,7 +28,8 @@ public class Player : MonoBehaviour
   private Rigidbody rigidBody; // Al que aplicar fuerza para salto
 
   private Camera cameraMain;
-  private CameraShake cameraShaker;
+  private CameraShake cameraShaker; // Vibracion de la camara
+  private CameraLookAt cameraLookAt; // Camara que sigue al jugador
 
   // HUD
   private Hud hud;
@@ -50,6 +51,7 @@ public class Player : MonoBehaviour
     rigidBody = GetComponent<Rigidbody>();
     cameraMain = Camera.main;
     cameraShaker = cameraMain.GetComponent<CameraShake>();
+    cameraLookAt = cameraMain.GetComponent<CameraLookAt>();
     hud = gameObject.GetComponent<Hud>();
   }
 
@@ -142,22 +144,29 @@ public class Player : MonoBehaviour
 
     if (playerAttackInstance != null)
     {
-      playerAttackInstance.transform.position = new Vector3(transform.position.x + (direction * 0.4f), transform.position.y, transform.position.z);
+      playerAttackInstance.transform.position = this.transform.position + (direction * this.transform.right * 0.8f);
     }
   }
 
   private IEnumerator Attack()
   {
     attacking = true;
-    yield return new WaitForSeconds(0.4f);
+    cameraLookAt.locked = true;
+    // El length a una animacion no cambia al modificar su speed en el editor
+    // por lo que tenemos que tomar el valor de length y dividirlo entre la speed
+    // que le hemos dado a la animacion en el editor
+    float animationLength = animator.GetCurrentAnimatorStateInfo(0).length;
+    float animationTime = animationLength / 3f;
+    yield return new WaitForSeconds(animationTime * 0.4f);
     // Instanciamos la caja de daño al lado del Player
     Vector3 position;
-    position = new Vector3(transform.position.x + (direction * 0.6f), transform.position.y, transform.position.z);
-    playerAttackInstance = (GameObject)Instantiate(playerAttack, position, Quaternion.identity);
+    position = this.transform.position + (direction * this.transform.right * 0.7f);
+    playerAttackInstance = (GameObject)Instantiate(playerAttack, position, this.transform.rotation);
     playerAttackInstance.transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y, 1);
-    yield return new WaitForSeconds(0.5f);
+    yield return new WaitForSeconds(animationTime * 0.6f);
     Destroy(playerAttackInstance);
     attacking = false;
+    cameraLookAt.locked = false;
   }
 
   void FixedUpdate()
@@ -192,6 +201,11 @@ public class Player : MonoBehaviour
     else if (collision.gameObject.tag == "Exit")
     {
       Application.LoadLevel(Application.loadedLevel);
+    }
+    else if (collision.gameObject.tag == "Wall")
+    {
+      Vector3 direction = collision.gameObject.transform.position - this.transform.position;
+      rigidBody.AddForce(direction);
     }
   }
 

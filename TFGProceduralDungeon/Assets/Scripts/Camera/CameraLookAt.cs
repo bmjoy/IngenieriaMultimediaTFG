@@ -3,14 +3,24 @@ using System.Collections;
 
 public class CameraLookAt : MonoBehaviour
 {
+  public GameObject parent; // La camara sigue al objeto
+
+  // Para bloquear ciertos movimientos dependiendo de la situacion (el jugador atacando...)
+  public bool locked = false;
+
   // Defaults
   private Quaternion defaultRotation;
 
-  private float rotateFactor = 150f;
-  private float translateFactor = 8f;
-  private float default_zOffset = 5f;
+  private const float ROTATE_FACTOR = 100f;
+  private const float TRANSLATE_FACTOR = 8f;
+  private const float DEFAULT_ZOFFSET = 5f;
+  private const float ACCELERATION = 10f;
+  private const float FRICTION = 2f;
+
+  private float velocity = 0f; // Velocidad actual
+  private Vector3 direction = Vector3.up; // Direccion de giro
+
   private float zOffset;
-  public GameObject parent; // La camara sigue al objeto
 
   void Start()
   {
@@ -22,12 +32,13 @@ public class CameraLookAt : MonoBehaviour
   {
     //Cursor.lockState = CursorLockMode.Locked;
     //Cursor.visible = false;
-    zOffset = default_zOffset;
+    zOffset = DEFAULT_ZOFFSET;
     if (parent != null)
     {
       transform.position = parent.transform.position - parent.transform.forward * zOffset;
     }
     transform.rotation = defaultRotation;
+    locked = false;
   }
 
   public void SetParent(GameObject parent)
@@ -42,55 +53,56 @@ public class CameraLookAt : MonoBehaviour
       return;
     }
 
+    // Posicion con respecto al parent
     transform.position = parent.transform.position - transform.forward * zOffset;
     transform.LookAt(parent.transform);
 
-    // Altura/rotacion vertical de la camara
-    //if (Input.GetKey(KeyCode.PageUp) || Input.GetKey(KeyCode.I))
-    //{
-    //  transform.RotateAround(parent.transform.position, Vector3.right, rotateFactor * Time.deltaTime);
-    //}
-
-    //if (Input.GetKey(KeyCode.PageUp) || Input.GetKey(KeyCode.K))
-    //{
-    //  transform.RotateAround(parent.transform.position, Vector3.left, rotateFactor * Time.deltaTime);
-    //}
-
     // Rotacion horizontal
-    if (Input.GetKey(KeyCode.L)) // Derecha
-    {
-      transform.RotateAround(parent.transform.position, Vector3.down, rotateFactor * Time.deltaTime);
+    float mouseAxis = Input.GetAxis("Mouse X");
+    if (!this.locked && (Input.GetKey(KeyCode.L) || mouseAxis < -0.5f))
+    {// Derecha
+      if (direction == Vector3.up)
+      {
+        velocity = 0f;
+        direction = Vector3.down;
+      }
+      velocity += ACCELERATION;
+      if (velocity > ROTATE_FACTOR)
+      {
+        velocity = ROTATE_FACTOR;
+      }
+    }
+    if (!this.locked && (Input.GetKey(KeyCode.J) || mouseAxis > 0.5f))
+    {// Izquierda
+      if (direction == Vector3.down)
+      {
+        velocity = 0f;
+        direction = Vector3.up;
+      }
+      velocity += ACCELERATION;
+      if (velocity > ROTATE_FACTOR)
+      {
+        velocity = ROTATE_FACTOR;
+      }
     }
 
-    if (Input.GetKey(KeyCode.J)) // Izquierda
+    velocity -= FRICTION;
+
+    if (velocity < float.Epsilon)
     {
-      transform.RotateAround(parent.transform.position, Vector3.up, rotateFactor * Time.deltaTime);
+      velocity = 0f;
     }
 
-    // Giro con raton
-    //float mouseAxis = Input.GetAxis("Mouse X");
-    //if (mouseAxis != 0)
-    //{
-    //  int rotateDir = 0;
-    //  if (mouseAxis > 0.8f)
-    //  {
-    //    rotateDir = 1;
-    //  }
-    //  else if (mouseAxis < -0.8f)
-    //  {
-    //    rotateDir = -1;
-    //  }
-    //  transform.RotateAround(parent.transform.position, Vector3.up * rotateDir, rotateFactor * Time.deltaTime);
-    //}
+    transform.RotateAround(parent.transform.position, direction, velocity * Time.deltaTime);
 
     // Zoom
     if ((Input.GetAxis("Mouse ScrollWheel") > 0 || Input.GetKey(KeyCode.Plus) || Input.GetKey(KeyCode.KeypadPlus)) && zOffset >= 1f)
     {
-      zOffset -= translateFactor * Time.deltaTime;
+      zOffset -= TRANSLATE_FACTOR * Time.deltaTime;
     }
     if ((Input.GetAxis("Mouse ScrollWheel") < 0 || Input.GetKey(KeyCode.Minus) || Input.GetKey(KeyCode.KeypadMinus)) && zOffset <= 6f)
     {
-      zOffset += translateFactor * Time.deltaTime;
+      zOffset += TRANSLATE_FACTOR * Time.deltaTime;
     }
 
     if (Input.GetKey(KeyCode.Home))

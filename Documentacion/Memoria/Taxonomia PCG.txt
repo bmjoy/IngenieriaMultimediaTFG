@@ -1,0 +1,26 @@
+# En línea / Desconectado
+Las técnicas de generación de contenido pueden actuar sobre juegos online, generando variaciones infinitas e incluso abriendo la posibilidad de que el contenido generado sea adaptado sobre la marcha. Un ejemplo de esto lo tenemos en el juego Left 4 Dead de Valve, donde el “director de IA” decide los puntos de aparición de zombies, controla la cantidad de estos y posiciona objetos extra como armas o munición durante el transcurso de la partida, dependiendo del comportamiento del jugador o jugadores.
+
+Por otro lado el contenido puede ser pre-generado antes de comenzar la partida o entre niveles, como en el juego Spore, donde los usuarios pueden crear criaturas, en cuya animación y aspecto final participan procesos de generación procedimental, y luego permitir compartir estas creaciones con otros jugadores por internet utilizando un servidor central. En este caso el contenido es generado antes de ser compartido en línea. Otro ejemplo es el juego de conducción Forza Motorsport, donde coches manejados por la máquina (NPC) pueden ser entrenados offline para conducir de manera similar al jugador y poder participar en carreras sin la intervención de este.
+
+Una combinación entre contenido pre-generado y la generación “en marcha” durante la partida utilizando algún “agente” o “director” es totalmente compatible. Se podría generar la estructura del escenario o mundo y los objetos y entidades necesarias antes de comenzar la partida y luego utilizar un agente para decidir, según la actuación del jugador o mediante otras reglas, la colocación de objetos secundarios, la actuación de la inteligencia artificial, etc.
+
+# Necesario / Opcional
+El contenido puede ser requerido para completar un nivel, o puede servir como contenido auxiliar que puede ser desechado o intercambiado sin afectar el flujo básico de la partida. La diferencia más importante entre uno y otro es que el contenido necesario debe ser siempre estructuralmente correcto, mientras que esta condición no es tan importante para el contenido opcional.
+
+# Grados / Dimensiones de control
+La generación de contenido puede ser controlada por diferentes parámetros por parte del usuario o del desarrollador. Por ejemplo se puede hacer uso de una semilla para obtener control sobre la aleatoriedad, permitiendo regenerar el mundo exactamente igual siempre que se utilice la misma semilla, como podemos ver en Minecraft. En generacion de mazmorras, además de semilla, se pueden establecer otros parámetros como la dimensión mínima de las habitaciones.
+
+# Generico / Adaptativo
+Con genérico nos referimos a que el contenido es generado son la intervención del usuario, sin tener en cuenta su comportamiento durante la partida o el progreso en el juego. Es el tipo de generación más habitual.
+
+Generar contenido de manera adaptativa indica la capacidad del generador de recoger información sobre el comportamiento del jugador y tener en cuenta esta información para la generación de contenido. Un ejemplo lo podemos ver en el juego Left 4 Dead donde un “director” decide durante la partida los puntos de aparición de los zombies, la cantidad de estos o si proporciona al usuario con objetos extra secundarios, como munición o botiquines. Es decir, la partida se adapta al jugador, para evitar frustraciones y que este se sienta más atraído a continuar jugando. Otro ejemplo diferente que utiliza la generación adaptativa es el juego Galactic Arms Race, donde las armas presentadas al jugador se basan o son una evolución de las armas anteriores y preferencias personales del jugador, utilizando para ello un algoritmo evolutivo.
+
+# Estocástico / Determinístico
+La generación determinística permite regenerar el mismo contenido una y otra vez dado el mismo punto de inicio y parámetros, como cuando se hace uso de una semilla y es esta, y otros posibles parámetros, los que permiten regenerar una misma mazmorra o mundo como en Minecraft. Al contrario, con la generación estocástica, incluso partiendo de la misma semilla, no permite reconstruir el mismo resultado.
+
+# Constructivo / Por pruebas
+El método constructivo genera contenido una vez y no permite ninguna modificación. Por otro lado las técnicas por pruebas realizan varias iteraciones donde cada vez se modifica el resultado hasta obtener una solución más cercana a los parámetros deseados.
+
+# Generación automática / Cooperación humana
+El generador de contenido puede realizar todo el proceso de manera automatizada, sin intervención del jugador o del diseñador, o puede permitir a éstos introducir o modificar parámetros que afecten al resultado final, que de esta manera posibilita una afinidad mayor a lo que se desea crear en un principio. Este tipo de cooperación humana es difícil de ver en videojuegos, aunque quizá el ejemplo más claro sea Spore, pero es más común en sistemas interactivos de creación de terrenos o ciudades como en SketchaWorld, que posteriormente se puede utilizar para incorporar escenarios a un videojuego.

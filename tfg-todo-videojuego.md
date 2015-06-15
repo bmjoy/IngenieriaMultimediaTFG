@@ -1,23 +1,24 @@
 TODO del videojuego
 ===================
+## General
++ Limpiar codigo. Usar correctamente properties o variables publicas. Revisar nombres de funciones y agregar comentarios.
+
 ## Tests
 + Usar el DungeonGenerator para los tests en vez del GeneratorBSP que ya esta antiguo.
 
 ## Dungeon Generator
 + Centrar habitaciones dentro del espacio del nodo
 + Colocar la salida lejos de la entrada y de manera que no exista un camino demasiado directo. Utilizar distancias usando directamente el arbol.
-+ Agregar items de manera aleatoria con probabilidad
 + Agregar items con probabilidad variable. Afecta el nivel, otros items, etc.
++ Clasificar las habitaciones y pasillos en el grid de alguna manera y distinguiendo todo el area que ocupan. Hace un enum con los tipos de tiles de escenario o algo asi.
 
 ## Enemigos
-+ Terminar de implementar las diferentes IA de patrulla, etc.
 + Colocar enemigos en mazmorras de manera aleatoria basándose en probabilidad y afectado por items y trampas.
 
 ## Visual/Animaciones
 + Efectos ítems
   * Arreglar animación de cofre
   * Efecto moneda al cogerla. Hace un brinco y mientras se hace pequeña y gira se introduce en la mochila del jugador.
-  * 
 
 ## Texturas
 + Cofre

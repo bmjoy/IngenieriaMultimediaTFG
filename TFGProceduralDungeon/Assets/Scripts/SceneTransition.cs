@@ -40,6 +40,6 @@ public class SceneTransition : MonoBehaviour
       yield return null;
     }
     // Al finalizar cargamos la escena de menu principal
-    GameManager.instance.LoadScene(nextScene);
+    GameManager.Instance.LoadScene(nextScene);
   }
 }

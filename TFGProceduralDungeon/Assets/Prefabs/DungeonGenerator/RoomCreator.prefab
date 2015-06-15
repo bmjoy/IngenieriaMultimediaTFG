@@ -39,7 +39,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2dbd0e064522394a8b1a5f34da4eb43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  digger: {fileID: 111302, guid: 7482671f495828c42bafd35ea781195c, type: 2}
+  prefabDigger: {fileID: 111302, guid: 7482671f495828c42bafd35ea781195c, type: 2}
+  type: 0
+  position:
+    x: 0
+    z: 0
+  size:
+    x: 0
+    z: 0
+  doorPoints: []
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
