@@ -11,7 +11,6 @@ GameObject:
   - 212: {fileID: 21266314}
   - 95: {fileID: 9584188}
   - 114: {fileID: 11437792}
-  - 65: {fileID: 6588830}
   m_Layer: 0
   m_Name: Sprite
   m_TagString: Enemy
@@ -28,11 +27,12 @@ GameObject:
   m_Component:
   - 4: {fileID: 488354}
   - 54: {fileID: 5442452}
+  - 65: {fileID: 6521022}
   - 114: {fileID: 11418862}
   - 114: {fileID: 11432248}
   m_Layer: 0
   m_Name: EnemyGobling
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -56,7 +56,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 191264}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.28999996, y: 1, z: 3.80999994}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 485162}
@@ -77,17 +77,17 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!65 &6588830
+--- !u!65 &6521022
 BoxCollider:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 181802}
+  m_GameObject: {fileID: 191264}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: .159999996, y: .219999999, z: .200000003}
+  m_Size: {x: .5, y: 1, z: .300000012}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!95 &9584188
 Animator:

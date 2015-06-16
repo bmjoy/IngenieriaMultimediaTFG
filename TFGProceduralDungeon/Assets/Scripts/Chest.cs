@@ -4,27 +4,24 @@ using System.Collections;
 public class Chest : MonoBehaviour
 {
   public GameObject particlesGemsPrefab;
-  private bool opened = false;
 
   private IEnumerator OpenChest()
   {
-    opened = true;
-    Animation openAnimation = GetComponent<Animation>();
+    Animation openAnimation = GetComponentInChildren<Animation>();
+    Debug.Log(openAnimation);
     if (openAnimation != null)
     {
       openAnimation.Play();
     }
     yield return new WaitForSeconds(0.6f);
     Instantiate(particlesGemsPrefab, transform.position, particlesGemsPrefab.transform.rotation);
+
+    Destroy(gameObject.GetComponent<Chest>());
   }
 
-  void OnCollisionEnter(Collision collision)
+  void OnTriggerEnter(Collider collider)
   {
-    if (opened)
-    {
-      return;
-    }
-    if (collision.gameObject.tag == "Player")
+    if (collider.gameObject.tag == "Damage")
     {
       StartCoroutine(OpenChest());
     }

@@ -9,6 +9,7 @@ public class Player : MonoBehaviour
 
   // STATS del personaje
   public static int MAX_HEALTH = 3;
+  public int points = 0;
   public bool invincible = false;
   private int health;
 
@@ -159,10 +160,20 @@ public class Player : MonoBehaviour
     float animationTime = animationLength / 3f;
     yield return new WaitForSeconds(animationTime * 0.4f);
     // Instanciamos la caja de daño al lado del Player
-    Vector3 position;
-    position = this.transform.position + (direction * this.transform.right * 0.7f);
-    playerAttackInstance = (GameObject)Instantiate(playerAttack, position, this.transform.rotation);
+    Vector3 start = this.transform.position;
+    start.y -= 0.1f;
+    Vector3 end = start + direction * this.transform.right * 0.7f;
+    playerAttackInstance = (GameObject)Instantiate(playerAttack, start, this.transform.rotation);
     playerAttackInstance.transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y, 1);
+    Vector3 position = start;
+    while (Vector3.Distance(position, end) > 0.1f)
+    {
+      position += (direction * this.transform.right * 0.1f);
+      playerAttackInstance.transform.position = position;
+      // Debug.Log(position);
+      yield return null;
+    }
+
     yield return new WaitForSeconds(animationTime * 0.6f);
     Destroy(playerAttackInstance);
     attacking = false;
@@ -182,8 +193,9 @@ public class Player : MonoBehaviour
   void OnCollisionEnter(Collision collision)
   {
     onGround = true;
+    string cTag = collision.gameObject.tag;
 
-    if (collision.gameObject.tag == "Enemy" && !invincible)
+    if (cTag == "Enemy" && !invincible)
     {
       //cameraShaker.Shake(0.4f);
       if (health <= 0) // Game Over
@@ -198,14 +210,22 @@ public class Player : MonoBehaviour
       health--;
       hud.SetHealthMeter(health);
     }
-    else if (collision.gameObject.tag == "Exit")
+    else if (cTag == "Exit")
     {
-      Application.LoadLevel(Application.loadedLevel);
+      GameManager.Instance.levelManager.LoadNextLevel();
     }
-    else if (collision.gameObject.tag == "Wall")
+    else if (cTag == "Wall")
     {
       Vector3 direction = collision.gameObject.transform.position - this.transform.position;
       rigidBody.AddForce(direction);
+    }
+  }
+
+  private void OnTriggerEnter(Collider collider)
+  {
+    if (collider.gameObject.tag == "Coin")
+    {
+      points += (int)ItemPoints.COIN;
     }
   }
 
@@ -227,26 +247,5 @@ public class Player : MonoBehaviour
     CancelInvoke(); // ATENCION: Detiene todos los InvokeRepeating
     spriteRenderer.enabled = !spriteRenderer.enabled;
     invincible = false;
-  }
-
-  // Uso trigger para que no interactue fisicamente con la puerta
-  // pero se detecte la colision
-  void OnTriggerExit(Collider collider)
-  {
-    // El jugador pasa por una puerta, comprobamos su direccion
-    // para mover la camara en la direccion correcta
-    //if (collider.gameObject.tag == "Door")
-    //{
-    //  CameraMovement cameraMove = playerCamera.GetComponent<CameraMovement>();
-    //  if (rightDir)
-    //  {
-    //    cameraMove.MoveRight();
-    //  }
-    //  else
-    //  {
-    //    cameraMove.MoveLeft();
-    //  }
-
-    //}
   }
 }

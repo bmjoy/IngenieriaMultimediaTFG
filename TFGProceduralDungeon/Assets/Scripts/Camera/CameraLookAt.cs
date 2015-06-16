@@ -11,7 +11,7 @@ public class CameraLookAt : MonoBehaviour
   // Defaults
   private Quaternion defaultRotation;
 
-  private const float ROTATE_FACTOR = 100f;
+  private const float ROTATE_FACTOR = 150f;
   private const float TRANSLATE_FACTOR = 8f;
   private const float DEFAULT_ZOFFSET = 5f;
   private const float ACCELERATION = 10f;
@@ -30,8 +30,8 @@ public class CameraLookAt : MonoBehaviour
 
   public void Reset()
   {
-    //Cursor.lockState = CursorLockMode.Locked;
-    //Cursor.visible = false;
+    Cursor.lockState = CursorLockMode.Locked;
+    Cursor.visible = false;
     zOffset = DEFAULT_ZOFFSET;
     if (parent != null)
     {

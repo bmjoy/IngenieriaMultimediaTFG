@@ -50,9 +50,11 @@
      <Compile Include="Assets\Scripts\Camera\CameraClearVision.cs" />
      <Compile Include="Assets\Scripts\Camera\CameraFree.cs" />
      <Compile Include="Assets\Scripts\Camera\CameraLookAt.cs" />
+     <Compile Include="Assets\Scripts\Camera\CameraMinimap.cs" />
      <Compile Include="Assets\Scripts\Camera\CameraShake.cs" />
      <Compile Include="Assets\Scripts\Camera\CameraSwitcher.cs" />
      <Compile Include="Assets\Scripts\Chest.cs" />
+     <Compile Include="Assets\Scripts\Coin.cs" />
      <Compile Include="Assets\Scripts\Debug\DebugInfo.cs" />
      <Compile Include="Assets\Scripts\Debug\DebugTools.cs" />
      <Compile Include="Assets\Scripts\DungeonGenerator\BSPNode.cs" />
@@ -65,6 +67,7 @@
      <Compile Include="Assets\Scripts\Enemies\EnemyAnimator.cs" />
      <Compile Include="Assets\Scripts\GameManager.cs" />
      <Compile Include="Assets\Scripts\Hud.cs" />
+     <Compile Include="Assets\Scripts\LevelManager.cs" />
      <Compile Include="Assets\Scripts\MovingObject.cs" />
      <Compile Include="Assets\Scripts\ObjectAutodestroy.cs" />
      <Compile Include="Assets\Scripts\ObjectLookAtCamera.cs" />

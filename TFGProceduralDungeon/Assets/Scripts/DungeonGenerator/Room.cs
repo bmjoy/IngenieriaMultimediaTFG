@@ -3,14 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 
 // Tipos de habitaciones
-public enum RoomType {
+public enum RoomType
+{
   DEFAULT,
   ENTRANCE, // Habitacion inicial donde comienza el jugador
   EXIT,     // Habitacion final de la mazmorra
   PASSAGE   // Pasillo que une dos habitaciones
 }
 
-public class Room : MonoBehaviour {
+public class Room : MonoBehaviour
+{
   public GameObject prefabDigger;
 
   public RoomType type;
@@ -22,12 +24,14 @@ public class Room : MonoBehaviour {
   private BSPNode parentNode;
   private GameObject sibling;
 
-  public BSPNode GetParent() {
+  public BSPNode GetNode()
+  {
     return parentNode;
   }
 
   // Establece la geometria de la habitacion sobre el grid
-  public Grid Setup(Grid grid) {
+  public Grid Setup(Grid grid)
+  {
     doorPoints = new List<Vector2i>();
     // Pasamos la posicion y escala a unidades de grid
     // La posicion se situa en la esquina superior izquierda, la primera casilla de la habitacion
@@ -35,18 +39,22 @@ public class Room : MonoBehaviour {
     this.position = new Vector2i((int)(transform.position.x - (size.x / 2)), (int)(transform.position.z - (size.z / 2)));
 
     // Inicializa todos los tiles de la habitacion
-    for (int i = position.x; i < position.x + size.x; i++) {
-      for (int j = position.z; j < position.z + size.z; j++) {
+    for (int i = position.x; i < position.x + size.x; i++)
+    {
+      for (int j = position.z; j < position.z + size.z; j++)
+      {
         grid.SetTile(i, j, (int)TileType.FLOOR);
       }
     }
 
     // Paredes de la habitacion
-    for (int i = 0; i <= size.x; i++) {
+    for (int i = 0; i <= size.x; i++)
+    {
       grid.SetTile(position.x + i, position.z, roomId); // Arriba
       grid.SetTile(position.x + i, position.z + size.z, roomId); // Abajo
     }
-    for (int i = 0; i <= size.z; i++) {
+    for (int i = 0; i <= size.z; i++)
+    {
       grid.SetTile(position.x, position.z + i, roomId); // Izquierda
       grid.SetTile(position.x + size.x, position.z + i, roomId); // Derecha
     }
@@ -54,24 +62,24 @@ public class Room : MonoBehaviour {
     return grid;
   }
 
-  public void SetID(int aID) {
+  public void SetID(int aID)
+  {
     roomId = aID;
   }
 
-  public void SetParentNode(BSPNode aNode) {
+  public void SetParentNode(BSPNode aNode)
+  {
     parentNode = aNode;
   }
 
-  public void Connect() {
-    if (this.parentNode.GetParentNode() == GameManager.Instance.dungeonGenerator.bspTree.Root) {
-      //return;
-    }
-
-    DungeonGenerator generator = GameManager.Instance.dungeonGenerator;
+  public void Connect()
+  {
+    DungeonGenerator generator = GameObject.FindObjectOfType<DungeonGenerator>();
 
     // Recoge el nodo hermano
     GetSibiling();
-    if (sibling != null) {
+    if (sibling != null)
+    {
       Room siblingRoom = sibling.GetComponent<Room>();
 
       Vector2i startPos = new Vector2i(this.position.x + this.size.x / 2, this.position.z + this.size.z / 2);
@@ -84,24 +92,29 @@ public class Room : MonoBehaviour {
 
       // Buscar un padre sin habitacion (normalmente el padre inmediato)
       parentNode = FindRoomlessParent(parentNode);
-      if (parentNode != null) {
+      if (parentNode != null)
+      {
         // Para decidir que habitacion va a heredar el padre escogemos la que este mas cerca del
         // centro de la mazmorra. Esto es una manera de escoger siempre la habitacion que esta en la parte
         // mas interior y asi evitar que al conectarlas por un pasillo, este corte otra habitacion
-        if (Random.Range(0, 2) == 0) {
-          parentNode.SetRoom(this.gameObject);
-        }
-        else {
-          parentNode.SetRoom(sibling.gameObject);
-        }
-        //Vector2 center = new Vector2(GameManager.Instance.dungeonGenerator.DUNGEON_WIDTH / 2,
-        //                              GameManager.Instance.dungeonGenerator.DUNGEON_HEIGHT / 2);
-        //if (Vector2.Distance(center, this.parentNode.position) <= Vector2.Distance(center, siblingRoom.parentNode.position)) {
+        //if (Random.Range(0, 2) == 0)
+        //{
         //  parentNode.SetRoom(this.gameObject);
         //}
-        //else {
+        //else
+        //{
         //  parentNode.SetRoom(sibling.gameObject);
         //}
+        Vector2 center = new Vector2(GameManager.Instance.levelManager.dungeonGenerator.DUNGEON_WIDTH / 2,
+                                      GameManager.Instance.levelManager.dungeonGenerator.DUNGEON_HEIGHT / 2);
+        if (Vector2.Distance(center, this.parentNode.position) <= Vector2.Distance(center, siblingRoom.parentNode.position))
+        {
+          parentNode.SetRoom(this.gameObject);
+        }
+        else
+        {
+          parentNode.SetRoom(sibling.gameObject);
+        }
         siblingRoom.SetParentNode(parentNode);
       }
       Destroy(digger);
@@ -109,19 +122,25 @@ public class Room : MonoBehaviour {
   }
 
   // Obtiene el nodo hermano
-  private void GetSibiling() {
-    if (parentNode.GetParentNode() != null) {
-      if (parentNode.GetParentNode().GetLeftNode() != parentNode) {
+  private void GetSibiling()
+  {
+    if (parentNode.GetParentNode() != null)
+    {
+      if (parentNode.GetParentNode().GetLeftNode() != parentNode)
+      {
         sibling = parentNode.GetParentNode().GetLeftNode().GetRoom();
       }
-      else {
+      else
+      {
         sibling = parentNode.GetParentNode().GetRightNode().GetRoom();
       }
     }
   }
 
-  public Vector3 ChooseDoorPoint(int index) {
-    switch (index) {
+  public Vector3 ChooseDoorPoint(int index)
+  {
+    switch (index)
+    {
       case 0: // Sur, se crea puerta en X, z
         return new Vector3((int)(position.x + Random.Range(1, size.x - 2)), transform.position.y, (int)(position.z));
       case 1: // Este, se crea puerta en x + size.x, Z
@@ -136,12 +155,16 @@ public class Room : MonoBehaviour {
   }
 
   // Sube por los padres hasta encontrar uno que no tenga habitacion
-  public BSPNode FindRoomlessParent(BSPNode aNode) {
-    if (aNode != null) {
-      if (aNode.GetRoom() == null) {
+  public BSPNode FindRoomlessParent(BSPNode aNode)
+  {
+    if (aNode != null)
+    {
+      if (aNode.GetRoom() == null)
+      {
         return aNode;
       }
-      else {
+      else
+      {
         return FindRoomlessParent(aNode.GetParentNode());
       }
     }

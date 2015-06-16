@@ -3,6 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
+public enum ItemPoints
+{
+  COIN = 5,
+  CHEST = 100
+};
+
 // Lista de nombre de escenas ordenadas segun su indice en la build
 // Hay que asegurarse que estan bien ordenadas cuando se modifique algo en la build
 public enum SceneName
@@ -23,8 +29,8 @@ public class GameManager : Singleton<GameManager>
   public GameObject prefObjectManager;
   public ObjectManager objectManager;
 
-  public GameObject prefDungeonGenerator;
-  public DungeonGenerator dungeonGenerator;
+  public GameObject prefLevelManager;
+  public LevelManager levelManager;
 
   [HideInInspector]
   public Player player; // Referencia al player para que otras clases accedan
@@ -47,9 +53,9 @@ public class GameManager : Singleton<GameManager>
 
   private void Cleanup()
   {
-    if (dungeonGenerator != null)
+    if (levelManager != null)
     {
-      Destroy(dungeonGenerator.gameObject);
+      levelManager.Cleanup();
     }
     if (objectManager != null)
     {
@@ -62,8 +68,11 @@ public class GameManager : Singleton<GameManager>
     player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
     objectManager = Instantiate(prefObjectManager).GetComponent<ObjectManager>();
     objectManager.transform.parent = this.transform;
-    dungeonGenerator = Instantiate(prefDungeonGenerator).GetComponent<DungeonGenerator>();
-    dungeonGenerator.transform.parent = this.transform;
+    if (levelManager == null)
+    {
+      levelManager = Instantiate(prefLevelManager).GetComponent<LevelManager>();
+      levelManager.transform.parent = this.transform;
+    }
   }
 
   public void SetPause(bool pause)
@@ -94,7 +103,7 @@ public class GameManager : Singleton<GameManager>
     {
       case (int)SceneName.DungeonLevel:
         Init();
-        dungeonGenerator.GenerateDungeon();
+        levelManager.Init();
         break;
       default:
         Init();

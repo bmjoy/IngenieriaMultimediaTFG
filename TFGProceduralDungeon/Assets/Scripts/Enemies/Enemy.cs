@@ -2,7 +2,8 @@
 using System.Collections;
 
 // Estados de la IA
-public enum AIState {
+public enum AIState
+{
   Idle,
   Patrolling,
   Chasing,
@@ -10,7 +11,8 @@ public enum AIState {
   Dead
 }
 
-public class Enemy : MonoBehaviour {
+public class Enemy : MonoBehaviour
+{
   public float speed;
   private float chaseSpeedMultiplier = 1.5f;
 
@@ -25,13 +27,15 @@ public class Enemy : MonoBehaviour {
   private Vector3[] patrolPoints; // Puntos target de la zona de patrulla
   private int patrolIterator = 0; // Indica el target del array
   private Vector3 target;
+  private bool reverse = false; // Recorre los targets al reves
 
   private Player player;
   private Coroutine routine;
   private EnemyAnimator animator;
   private SpriteRenderer sprite;
 
-  void Awake() {
+  void Awake()
+  {
     animator = this.GetComponent<EnemyAnimator>();
     sprite = this.GetComponentInChildren<SpriteRenderer>();
     SetState(state);
@@ -41,9 +45,11 @@ public class Enemy : MonoBehaviour {
     CalculatePatrolPoints();
   }
 
-  void Update() {
+  void Update()
+  {
     MakeDecision();
-    switch (state) {
+    switch (state)
+    {
       case AIState.Idle:
         Wait();
         break;
@@ -65,13 +71,15 @@ public class Enemy : MonoBehaviour {
     }
   }
 
-  public void SetPatrolCenter(Vector3 position) {
+  public void SetPatrolCenter(Vector3 position)
+  {
     patrolCenter = position;
     CalculatePatrolPoints();
     target = patrolPoints[0];
   }
 
-  private void CalculatePatrolPoints() {
+  private void CalculatePatrolPoints()
+  {
     float r = patrolRadius;
     Vector3 c = patrolCenter;
     patrolPoints[0] = new Vector3(c.x + r, c.y, c.z + r);
@@ -80,26 +88,36 @@ public class Enemy : MonoBehaviour {
     patrolPoints[3] = new Vector3(c.x - r, c.y, c.z + r);
   }
 
-  private void MakeDecision() {
-    if (state != AIState.Dead && state != AIState.Attacking) {
-      if (player == null) {
+  private void MakeDecision()
+  {
+    if (state != AIState.Dead && state != AIState.Attacking)
+    {
+      if (player == null)
+      {
         player = GameManager.Instance.player;
       }
-      else {
+      else
+      {
         float distance = Vector3.Distance(player.transform.position, this.transform.position);
-        if (state == AIState.Chasing) {
-          if (distance > sightRadius) {
-            if (routine != null) {
+        if (state == AIState.Chasing)
+        {
+          if (distance > sightRadius)
+          {
+            if (routine != null)
+            {
               StopCoroutine(routine);
             }
             routine = StartCoroutine(LostTarget());
           }
-          else {
+          else
+          {
             target = player.transform.position;
           }
         }
-        else {
-          if (distance <= sightRadius) {
+        else
+        {
+          if (distance <= sightRadius)
+          {
             SetState(AIState.Chasing);
           }
         }
@@ -107,52 +125,73 @@ public class Enemy : MonoBehaviour {
     }
   }
 
-  private IEnumerator LostTarget() {
+  private IEnumerator LostTarget()
+  {
     SetState(AIState.Idle);
     yield return new WaitForSeconds(1f);
     SetState(AIState.Patrolling);
     GetNextTarget();
   }
 
-  private void SetState(AIState _state) {
+  private void SetState(AIState _state)
+  {
     state = _state;
     animator.TriggerAnimation(state);
   }
 
-  private void Wait() {
+  private void Wait()
+  {
   }
 
-  private void GetNextTarget() {
-    patrolIterator++;
-    if (patrolIterator >= patrolPoints.Length) {
-      patrolIterator = 0;
+  private void GetNextTarget()
+  {
+    if (reverse)
+    {
+      patrolIterator--;
+      if (patrolIterator < 0)
+      {
+        patrolIterator = patrolPoints.Length - 1;
+      }
+    }
+    else
+    {
+      patrolIterator++;
+      if (patrolIterator >= patrolPoints.Length)
+      {
+        patrolIterator = 0;
+      }
     }
     target = patrolPoints[patrolIterator];
     target.y = transform.position.y;
   }
 
-  private void MoveToTarget(float _speed) {
+  private void MoveToTarget(float _speed)
+  {
     target.y = transform.position.y; // Siempre a la altura del enemigo
     Vector3 direction = target - transform.position;
     direction.Normalize();
     transform.Translate(direction * _speed * Time.deltaTime);
   }
 
-  private void Patrol() {
+  private void Patrol()
+  {
     MoveToTarget(speed);
-    if (Vector3.Distance(transform.position, target) < 0.1f) {
+    if (Vector3.Distance(transform.position, target) < 0.1f)
+    {
       // Obtiene el siguiente punto de la zona de patrulla
       GetNextTarget();
     }
   }
 
-  private void Chase() {
+  private void Chase()
+  {
     //animator.TriggerAnimation("Walk");
     MoveToTarget(speed * chaseSpeedMultiplier);
   }
 
   // Animacion de ataque
-  private IEnumerator Attack() {
+  private IEnumerator Attack()
+  {
     SetState(AIState.Attacking);
     float delay = animator.GetCurrentAnimationLength();
     yield return new WaitForSeconds(delay);
@@ -160,31 +199,35 @@ public class Enemy : MonoBehaviour {
   }
 
   // Animacion de muerte, se aplica sobre el sprite ya que es el que gira segun la camara
-  private void DeadAnimation() {
+  private void DeadAnimation()
+  {
     if (sprite.transform.localScale.x > 0.1f &&
-        sprite.transform.localScale.y > 0.1f) {
+        sprite.transform.localScale.y > 0.1f)
+    {
       sprite.transform.localScale -= new Vector3(0.1f, 0.1f, 0f);
-      //transform.Translate(0f, -0.02f, 0f);
     }
-    //0f, 0f, 720f * Time.deltaTime, Space.Self
     sprite.transform.Rotate(new Vector3(0f, 0f, 1f), 720f * Time.deltaTime, Space.Self);
   }
 
   // El enemigo muere
-  private IEnumerator Die() {
+  private IEnumerator Die()
+  {
     animator.enabled = false;
     SetState(AIState.Dead);
     // Efecto de sangre
     Vector3 spawnPosition = transform.position;
     Instantiate(deathEffectPrefab, spawnPosition, deathEffectPrefab.transform.rotation);
-    Destroy(this.GetComponent<BoxCollider>());
-    Destroy(this.GetComponent<Rigidbody>());
+    //Destroy();
+    this.GetComponent<Rigidbody>().isKinematic = true;
+    Destroy(this.GetComponentInChildren<BoxCollider>());
     Destroy(this.GetComponentInChildren<ObjectLookAtCamera>()); // En caso contrario no gira, ya que se cambia el forward
     yield return new WaitForSeconds(0.5f);
     Destroy(this.gameObject);
   }
 
-  void OnCollisionEnter(Collision collision) {
+  void OnCollisionEnter(Collision collision)
+  {
+    reverse = !reverse;
     string cTag = collision.gameObject.tag;
     if (cTag == "Wall") // Si choca con pared busca el siguiente target
     {
@@ -196,7 +239,8 @@ public class Enemy : MonoBehaviour {
     }
   }
 
-  void OnTriggerStay(Collider collider) {
+  void OnTriggerStay(Collider collider)
+  {
     if (collider.gameObject.tag == "Damage") // Ataque
     {
       StartCoroutine(Die());

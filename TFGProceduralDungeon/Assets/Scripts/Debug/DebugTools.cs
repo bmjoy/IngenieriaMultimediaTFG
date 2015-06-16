@@ -33,12 +33,13 @@ public class DebugTools : MonoBehaviour
     { // Restart level
       GameManager.Instance.LoadScene(Application.loadedLevel);
     }
+    if (Input.GetKeyDown(KeyCode.N))
+    { // Restart level
+      GameManager.Instance.levelManager.LoadNextLevel();
+    }
     else if (Input.GetKeyDown(KeyCode.F3)) // Save level to file
     {
-      if (GameManager.Instance.dungeonGenerator != null)
-      {
-        GameManager.Instance.dungeonGenerator.SaveToFile();
-      }
+      GameManager.Instance.levelManager.SaveToFile();
     }
   }
 

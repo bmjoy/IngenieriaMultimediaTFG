@@ -15,6 +15,9 @@ TagManager:
   - Digger
   - Floor
   - Exit
+  - Coin
+  - Chest
+  - Item
   layers:
   - Default
   - TransparentFX
@@ -25,7 +28,7 @@ TagManager:
   - 
   - 
   - Scenery
-  - 
+  - Minimap
   - 
   - 
   - 

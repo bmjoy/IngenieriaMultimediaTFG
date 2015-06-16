@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
-public enum TileType {
+// Tipos de tiles y numero identificador base de habitaciones
+public enum TileType
+{
   // Vacio
   EMPTY = 0,
   // Suelo
@@ -15,6 +17,8 @@ public enum TileType {
   // Trampas
   TRAP_SPIKES_FLOOR,
   TRAP_SPIKES_WALL,
+  TRAP_ARROWS,
+  TRAP_ROCK,
   ENEMY_CRAB,
   ENEMY_GOBLIN,
   EXIT,
@@ -22,7 +26,29 @@ public enum TileType {
   ROOM_ID = 50 // A partir de este id seran habitaciones y pasillos
 }
 
-public class DungeonGenerator : MonoBehaviour {
+// Direcciones para trampas y otros objetos. 
+// Es importante que se mantenga este orden ya que:
+public enum Direction
+{
+  NORTH = 0,
+  EAST,
+  SOUTH,
+  WEST,
+  NONE
+}
+
+public static class Tools
+{
+  public static bool IsBetween(this int item, int lower, int upper, bool inclusive = false)
+  {
+    return inclusive
+        ? lower <= item && item <= upper
+        : lower < item && item < upper;
+  }
+}
+
+public class DungeonGenerator : MonoBehaviour
+{
   // Dimensiones
   public int DUNGEON_WIDTH;
   public int DUNGEON_HEIGHT;
@@ -46,37 +72,41 @@ public class DungeonGenerator : MonoBehaviour {
   public Grid levelGrid; // Habitaciones
   [HideInInspector]
   public Grid objectsGrid; // Items y trampas
-
+  [HideInInspector]
   public int nextId;
+  [HideInInspector]
+  public int numRooms = 0; // Total de habitaciones (no pasillos) generadas
+  [HideInInspector]
   public BSPTree bspTree;
-  private bool entranceCreated;
-  private bool exitCreated;
+  private List<Room> rooms = new List<Room>(); // Lista de habitaciones (no pasillos) para acceso rapido
 
   // Setters para los sliders de los test
-  public void SetDungeonWidth(float value) {
+  public void SetDungeonWidth(float value)
+  {
     DUNGEON_WIDTH = (int)value;
   }
 
-  public void SetDungeonHeight(float value) {
+  public void SetDungeonHeight(float value)
+  {
     DUNGEON_HEIGHT = (int)value;
   }
 
-  private void Init() {
-    entranceCreated = false;
-    exitCreated = false;
-    objectManager = GameManager.Instance.objectManager;
-  }
 
   // Genera la mazmorra usando el algoritmo de BSP Tree
-  public void GenerateDungeon() {
-    Init();
+  public void GenerateDungeon(int width, int height)
+  {
+    objectManager = GameManager.Instance.objectManager;
+    DUNGEON_WIDTH = width;
+    DUNGEON_HEIGHT = height;
     levelGrid = new Grid(DUNGEON_WIDTH, DUNGEON_HEIGHT);
     objectsGrid = new Grid(DUNGEON_WIDTH, DUNGEON_HEIGHT);
-    // 0 --> vacio, >= 1 --> room id
     nextId = 0;
+    numRooms = nextId;
     // Inicializamos los tiles a vacio
-    for (int i = 0; i < levelGrid.GetWidth(); i++) {
-      for (int j = 0; j < levelGrid.GetHeight(); j++) {
+    for (int i = 0; i < levelGrid.GetWidth(); i++)
+    {
+      for (int j = 0; j < levelGrid.GetHeight(); j++)
+      {
         levelGrid.SetTile(i, j, (int)TileType.EMPTY);
       }
     }
@@ -94,10 +124,12 @@ public class DungeonGenerator : MonoBehaviour {
     routine = StartCoroutine(CreateDungeon());
   }
 
-  IEnumerator CreateDungeon() {
+  IEnumerator CreateDungeon()
+  {
     //Random.seed = 3; Si utilizamos una semilla fija la generacion es siempre igual
     int step = 0;
-    while (step < 7) {
+    while (step < 7)
+    {
       Split(bspTree.Root);
       step++;
       yield return null;
@@ -112,97 +144,173 @@ public class DungeonGenerator : MonoBehaviour {
     ConnectRooms(bspTree.Root);
 
     // Limpieza con automata celular
-    for (int k = 0; k < 5; k++) {
-      for (int i = 0; i < levelGrid.GetWidth(); i++) {
-        for (int j = 0; j < levelGrid.GetHeight(); j++) {
+    for (int k = 0; k < 5; k++)
+    {
+      for (int i = 0; i < levelGrid.GetWidth(); i++)
+      {
+        for (int j = 0; j < levelGrid.GetHeight(); j++)
+        {
           RemoveSingles(i, j);
         }
       }
     }
 
     // Objetos, trampas y enemigos
+    SetStartEndPoints();
     PopulateDungeon(bspTree.Root);
-
+    PopulatePassages();
     DrawLevel();
   }
 
+  private void SetStartEndPoints()
+  {
+    Room entrance = null;
+    Room exit = null;
+    //Debug.Log(rooms.Count);
+    //for (int i = 0; i < rooms.Count; i++)
+    //{
+    //  Debug.Log(i + " -- " + rooms[i].GetNode());
+    //}
+    // Entrance
+    for (int i = 0; i < rooms.Count; i++)
+    {
+      if (rooms[i].GetNode().branch == Branch.LEFT)
+      {
+        entrance = rooms[i];
+        entrance.type = RoomType.ENTRANCE;
+        break;
+      }
+    }
+    // Exit
+    if (entrance != null)
+    {
+      for (int i = 0; i < rooms.Count; i++)
+      {
+        if (rooms[i].GetNode() != null && rooms[i].GetNode().branch == Branch.RIGHT)
+        {
+          if (exit == null)
+          {
+            exit = rooms[i];
+          }
+          else if (Vector3.Distance(entrance.position.ToVector3(), rooms[i].position.ToVector3()) >
+                   Vector3.Distance(entrance.position.ToVector3(), exit.position.ToVector3()))
+          {// Nos quedamos con la habitacion mas alejada de la entrada
+            exit = rooms[i];
+          }
+        }
+      }
+      exit.type = RoomType.EXIT;
+    }
+    else
+    {
+      Debug.LogWarning("Couldn't stablish entrance/exit");
+    }
+  }
+
   // Limpia los objetos creados
-  public void Cleanup() {
-    if (routine != null) {
+  public void Cleanup()
+  {
+    if (routine != null)
+    {
       StopCoroutine(routine);
     }
     bspTree = null;
     // Eliminamos los cubos base "GenSection"
     GameObject[] objectList = GameObject.FindGameObjectsWithTag("GenSection");
-    for (int i = 0; i < objectList.Length; i++) {
+    for (int i = 0; i < objectList.Length; i++)
+    {
       Destroy(objectList[i].gameObject);
     }
 
     objectList = GameObject.FindGameObjectsWithTag("Digger");
-    for (int i = 0; i < objectList.Length; i++) {
+    for (int i = 0; i < objectList.Length; i++)
+    {
       Destroy(objectList[i].gameObject);
     }
     objectList = GameObject.FindGameObjectsWithTag("BaseRoom");
-    for (int i = 0; i < objectList.Length; i++) {
+    for (int i = 0; i < objectList.Length; i++)
+    {
       Destroy(objectList[i].gameObject);
     }
     GameObject floor = GameObject.Find("Floor");
-    if (floor != null) {
+    if (floor != null)
+    {
       Destroy(floor.gameObject);
     }
   }
 
   //split the tree
-  public void Split(t_BSPNode pNode) {
-    if (pNode.GetLeftNode() != null) {
+  public void Split(t_BSPNode pNode)
+  {
+    if (pNode.GetLeftNode() != null)
+    {
       Split(pNode.GetLeftNode());
     }
-    else {
+    else
+    {
       pNode.Cut();
       return;
     }
 
-    if (pNode.GetLeftNode() != null) {
+    if (pNode.GetLeftNode() != null)
+    {
       Split(pNode.GetRightNode());
     }
   }
 
+  private Vector2i GetRandomCoordinateInRoom(Room room)
+  {
+    bool found = false;
+    int tries = 0;
+    int rx = room.position.x + 1;
+    int rz = room.position.z + 1;
+    int depth = 2;
+    while (!found && tries < 20)
+    {
+      // No queremos posiciones en pared o adyacentes a pared
+      rx = Random.Range(room.position.x + depth, room.position.x + room.size.x - depth);
+      rz = Random.Range(room.position.z + depth, room.position.z + room.size.z - depth);
+
+      if (levelGrid.GetTile(rx, rz) == (int)TileType.FLOOR &&
+          objectsGrid.GetTile(rx, rz) == (int)TileType.EMPTY)
+      {
+        found = true;
+      }
+      tries++;
+    }
+    Vector2i position = new Vector2i(rx, rz);
+    if (!found)
+    {
+      position = new Vector2i(-1, -1);
+    }
+    return position;
+  }
+
   // Situa al jugador en la entrada de la mazmorra
-  private void PlacePlayer(Room room) {
+  private void PlacePlayer(Room room)
+  {
     Vector3 position = room.transform.position;
     position.y += 0.1f;
     GameObject.FindGameObjectWithTag("Player").transform.position = position;
   }
 
   // Coloca el objeto de salida de la mazmorra
-  private void PlaceExit(Room room) {
+  private void PlaceExit(Room room)
+  {
     Vector2i coord = Vector2i.ToVector2i(room.transform.position);
     objectsGrid.SetTile(coord.x, coord.z, (int)TileType.EXIT);
   }
 
-  private Vector2i GetRandomCoordinateInRoom(Room room) {
-    bool found = false;
-    int tries = 0;
-    int rx = room.position.x + 1;
-    int rz = room.position.z + 1;
-    while (!found && tries < 10) {
-      rx = Random.Range(room.position.x + 1, room.position.x + room.size.x - 1);
-      rz = Random.Range(room.position.z + 1, room.position.z + room.size.z - 1);
-
-      if (levelGrid.GetTile(rx, rz) == (int)TileType.EMPTY) {
-        found = true;
-      }
-
-      tries++;
-    }
-    return new Vector2i(rx, rz);
-  }
-
   // Situa ememigos dentro de la habitacion
-  private void PlaceItems(Room room) {
+  private void PlaceItems(Room room)
+  {
     Vector3 position = room.transform.position;
     // Actualiza el grid de objetos
     Vector2i coord = GetRandomCoordinateInRoom(room);
+    if (coord.x == -1)
+    {
+      return;
+    }
 
     int r = Random.Range(0, 100);
     // Crea un item segun su probabilidad
@@ -210,11 +318,13 @@ public class DungeonGenerator : MonoBehaviour {
     {
       int coins = Random.Range(1, 6);
       // Pueden aparecer mas de una moneda
-      for (int i = 0; i < coins; i++) { // Probabilidad igual
+      for (int i = 0; i < coins; i++)
+      { // Probabilidad igual
         objectsGrid.SetTile(coord.x, coord.z, (int)TileType.COIN);
         coord = GetRandomCoordinateInRoom(room);
       }
     }
+    r = Random.Range(0, 100);
     if (r >= 60 && r < 80) // Potion
     {
       objectsGrid.SetTile(coord.x, coord.z, (int)TileType.POTION_HEALTH);
@@ -226,21 +336,29 @@ public class DungeonGenerator : MonoBehaviour {
   }
 
   // Coloca trampas en la habitacion
-  private void PlaceTraps(Room room) {
+  private void PlaceTraps(Room room)
+  {
     Vector2i start = room.position;
     Vector2i end = room.position + room.size;
     // Rodear los cofres con pinchos
     // Aunque la geometria de la habitacion haya sido modificada seguimos contando con el mismo
     // area para recorrer su parte del grid
-    for (int i = start.x; i < end.x; i++) {
-      for (int j = start.z; j < end.z; j++) {
-        switch (objectsGrid.GetTile(i, j)) {
+    for (int i = start.x; i < end.x; i++)
+    {
+      for (int j = start.z; j < end.z; j++)
+      {
+        switch (objectsGrid.GetTile(i, j))
+        {
           case (int)TileType.CHEST:
             // Recorremos las celdas adyacentes colocando trampas
-            for (int x = i - 1; x <= i + 1; x++) {
-              for (int z = j - 1; z <= j + 1; z++) {
-                if (!(x == i && z == j)) { // No a si mismo
-                  if (levelGrid.GetTile(x, z) == 0) { // El espacio del escenario esta vacio
+            for (int x = i - 1; x <= i + 1; x++)
+            {
+              for (int z = j - 1; z <= j + 1; z++)
+              {
+                if (!(x == i && z == j))
+                { // No a si mismo
+                  if (levelGrid.GetTile(x, z) == (int)TileType.FLOOR)
+                  { // El espacio del escenario es suelo
                     objectsGrid.SetTile(x, z, (int)TileType.TRAP_SPIKES_FLOOR);
                   }
                 }
@@ -249,11 +367,19 @@ public class DungeonGenerator : MonoBehaviour {
             break;
           case (int)TileType.COIN:
             // Si la moneda esta cerca de una pared, colocamos una trampa en ese tile de pared
-            for (int x = i - 2; x <= i + 2; x++) {
-              for (int z = j - 2; z <= j + 2; z++) {
-                if (levelGrid.GetTile(x, z) >= (int)TileType.ROOM_ID) // Pared
+            Vector2i xLimits = new Vector2i(i - 2, i + 2);
+            Vector2i zLimits = new Vector2i(j - 2, j + 2);
+            for (int x = xLimits.x; x <= xLimits.z; x++)
+            {
+              for (int z = zLimits.x; z <= zLimits.z; z++)
+              {
+                if (!(x == xLimits.x && z == zLimits.x) && !(x == xLimits.x && z == zLimits.z) &&
+                  !(x == xLimits.z && z == zLimits.x) && !(x == xLimits.z && z == zLimits.z))
                 {
-                  objectsGrid.SetTile(x, z, (int)TileType.TRAP_SPIKES_WALL);
+                  if (levelGrid.GetTile(x, z) >= (int)TileType.ROOM_ID) // Pared
+                  {
+                    objectsGrid.SetTile(x, z, (int)TileType.TRAP_SPIKES_WALL);
+                  }
                 }
               }
             }
@@ -263,30 +389,73 @@ public class DungeonGenerator : MonoBehaviour {
     }
   }
 
+  private void PopulatePassages()
+  {
+    // Segunda pasada para rellenar pasillos
+    List<int> visitedPassages = new List<int>();
+    int cellCount = 0;
+    for (int i = 0; i < DUNGEON_WIDTH; i++)
+    {
+      for (int j = 0; j < DUNGEON_HEIGHT; j++)
+      {
+        int tile = levelGrid.GetTile(i, j);
+        int currentTile = tile;
+        // Encuentra tile de pasillo no visitado
+        if (tile >= numRooms && visitedPassages.FindIndex(item => item == tile) == -1)
+        {
+          // Recorrido horizontal
+          for (int x = j; tile == currentTile && x < DUNGEON_HEIGHT; x++)
+          {
+            cellCount++;
+            tile = levelGrid.GetTile(i, x);
+          }
+
+          visitedPassages.Add(currentTile);
+        }
+        if (cellCount >= 10) // Se puede poner una roca rodante
+        {
+          objectsGrid.SetTile(i + 2, j, (int)TileType.TRAP_ROCK);
+        }
+        cellCount = 0;
+      }
+    }
+  }
+
   // Coloca enemigos en la habitacion
-  private void PlaceEnemies(Room room) {
+  private void PlaceEnemies(Room room)
+  {
     Vector3 position = room.transform.position;
+    Vector2i coord = GetRandomCoordinateInRoom(room);
+    if (coord.x == -1)
+    {
+      return;
+    }
     int r = Random.Range(0, 2);
 
-    switch (r) {
+    switch (r)
+    {
       case 0: // Crab
-        objectsGrid.SetTile((int)position.x, (int)position.z, (int)TileType.ENEMY_CRAB);
+        objectsGrid.SetTile(coord.x, coord.z, (int)TileType.ENEMY_CRAB);
         break;
       case 1: // Goblin
-        objectsGrid.SetTile((int)position.x, (int)position.z, (int)TileType.ENEMY_GOBLIN);
+        objectsGrid.SetTile(coord.x, coord.z, (int)TileType.ENEMY_GOBLIN);
         break;
     }
   }
 
-  private void PopulateDungeon(BSPNode node) {
+  private void PopulateDungeon(BSPNode node)
+  {
     // Si hay nodo izquierdo nos movemos un nivel
-    if (node.GetLeftNode() != null) {
+    if (node.GetLeftNode() != null)
+    {
       PopulateDungeon(node.GetLeftNode());
     }
-    else {// Hoja con habitacion
+    else
+    {// Hoja con habitacion
       Room room = node.GetRoom().GetComponent<Room>();
 
-      switch (room.type) {
+      switch (room.type)
+      {
         case RoomType.DEFAULT:
           PlaceItems(room);
           PlaceTraps(room);
@@ -305,37 +474,45 @@ public class DungeonGenerator : MonoBehaviour {
       }
       return;
     }
-    if (node.GetRightNode() != null) {
+    if (node.GetRightNode() != null)
+    {
       PopulateDungeon(node.GetRightNode());
     }
   }
 
   //split the tree
-  public void Split(BSPNode node) {
+  public void Split(BSPNode node)
+  {
     // Si hay nodo izquierdo nos movemos un nivel
-    if (node.GetLeftNode() != null) {
+    if (node.GetLeftNode() != null)
+    {
       Split(node.GetLeftNode());
     }
-    else {
+    else
+    {
       // Cuando no hay nodos hijos, intenta crearlos
       node.Cut();
       return;
     }
-    if (node.GetRightNode() != null) {
+    if (node.GetRightNode() != null)
+    {
       Split(node.GetRightNode());
     }
   }
 
-  public Grid GetGrid() {
+  public Grid GetGrid()
+  {
     return levelGrid;
   }
 
-  public void SetTile(int x, int y, int value) {
+  public void SetTile(int x, int y, int value)
+  {
     levelGrid.SetTile(x, y, value);
   }
 
   // Agrega una habitacion dentro de los limites del espacio del nodo
-  private void AddRoom(BSPNode node) {
+  private Room AddRoom(BSPNode node)
+  {
     // Las dimensiones minimas de la habitacion seran la mitad de NODE_MIN_SIZE
     // Las dimensiones maximas seran NODE_MIN_SIZE - ROOM_MARGIN
     Vector3 roomPosition = new Vector3(node.position.x, 0f, node.position.y);
@@ -348,15 +525,19 @@ public class DungeonGenerator : MonoBehaviour {
     // Id unico
     roomScript.SetID((int)TileType.ROOM_ID + nextId);
     nextId++;
+    numRooms = (int)TileType.ROOM_ID + nextId;
     roomScript.type = RoomType.DEFAULT;
     aRoom.name = node.GetBranchName() + "-" + node.level.ToString();
     // Escribe en el grid la estructura de la habitacion
     levelGrid = roomScript.Setup(levelGrid);
     roomScript.SetParentNode(node);
     node.SetRoom(aRoom);
+
+    return roomScript;
   }
 
-  public void DrawNode(BSPNode node) {
+  public void DrawNode(BSPNode node)
+  {
     GameObject cube1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
     cube1.transform.localScale = new Vector3(node.size.x, 0.1f, node.size.y);
     cube1.transform.position = new Vector3(node.position.x, 0f, node.position.y);
@@ -367,114 +548,129 @@ public class DungeonGenerator : MonoBehaviour {
   }
 
   // Dibuja en la escena las ultimas subdivisiones en la creacion de la mazmorra
-  private void DrawLeafs(BSPNode node) {
-    if (node.GetLeftNode() != null) {
+  private void DrawLeafs(BSPNode node)
+  {
+    if (node.GetLeftNode() != null)
+    {
       DrawLeafs(node.GetLeftNode());
     }
-    else {
+    else
+    {
       DrawNode(node);
       return;
     }
 
-    if (node.GetRightNode() != null) {
+    if (node.GetRightNode() != null)
+    {
       DrawLeafs(node.GetRightNode());
     }
   }
 
-  private void CreateRooms(BSPNode node) {
-    if (node.GetLeftNode() != null) {
+  private void CreateRooms(BSPNode node)
+  {
+    if (node.GetLeftNode() != null)
+    {
       CreateRooms(node.GetLeftNode());
     }
-    else {
-      AddRoom(node);
-
-      if (!entranceCreated && node.branch == Branch.LEFT) {
-        node.GetRoom().GetComponent<Room>().type = RoomType.ENTRANCE;
-        entranceCreated = true;
-      }
-
-      if (!exitCreated && node.branch == Branch.RIGHT) {
-        node.GetRoom().GetComponent<Room>().type = RoomType.EXIT;
-        exitCreated = true;
-      }
+    else
+    {
+      rooms.Add(AddRoom(node));
       return;
     }
 
-    if (node.GetRightNode() != null) {
+    if (node.GetRightNode() != null)
+    {
       CreateRooms(node.GetRightNode());
     }
   }
 
   // Crea los pasillos para conectar las habitaciones
   // Recorre recursivamente el arbol
-  private void ConnectRooms(BSPNode node) {
+  private void ConnectRooms(BSPNode node)
+  {
     // Recorrido por los nodos de la parte izquierda
-    if (node.GetLeftNode() != null) {
+    if (node.GetLeftNode() != null)
+    {
       ConnectRooms(node.GetLeftNode());
 
-      if (node.GetRoom() != null) {
+      if (node.GetRoom() != null)
+      {
         node.GetRoom().GetComponent<Room>().Connect();
         return;
       }
     }
-    else {
-      if (node.GetRoom() != null) {
+    else
+    {
+      if (node.GetRoom() != null)
+      {
         node.GetRoom().GetComponent<Room>().Connect();
         return;
       }
     }
     // Recorrido por los nodos de la parte derecha
-    if (node.GetRightNode() != null) {
+    if (node.GetRightNode() != null)
+    {
       ConnectRooms(node.GetRightNode());
 
-      if (node.GetRoom() != null) {
+      if (node.GetRoom() != null)
+      {
         node.GetRoom().GetComponent<Room>().Connect();
         return;
       }
     }
-    else {
-      if (node.GetRoom() != null) {
+    else
+    {
+      if (node.GetRoom() != null)
+      {
         node.GetRoom().GetComponent<Room>().Connect();
         return;
       }
     }
   }
 
-  private Vector2i GetAdyacentWallDirection(int x, int z) {
+  private Vector2i GetAdyacentWallDirection(int x, int z, int depth = 1)
+  {
     Vector2i direction = new Vector2i(0, 0);
-    if (levelGrid.GetTile(x - 1, z) != 0) {
+    if (levelGrid.GetTile(x - depth, z) != 0)
+    {
       direction.x = -1;
     }
-    else if (levelGrid.GetTile(x + 1, z) != 0) {
+    else if (levelGrid.GetTile(x + depth, z) != 0)
+    {
       direction.x = 1;
     }
-    else if (levelGrid.GetTile(x, z - 1) != 0) {
+    else if (levelGrid.GetTile(x, z - depth) != 0)
+    {
       direction.z = -1;
     }
-    else if (levelGrid.GetTile(x, z + 1) != 0) {
+    else if (levelGrid.GetTile(x, z + depth) != 0)
+    {
       direction.z = 1;
     }
     return direction;
   }
 
-  private GameObject CreateWall(List<Vector2i> coordinates, char axis) {
+  private GameObject CreateWall(List<Vector2i> coordinates, char axis)
+  {
     GameObject wall = null;
     // Extra que se agrega a la escala de la pared para que los collider se solapen
     // y los sprites no pasen a traves de esquinas
-    if (coordinates.Count <= 0) {
+    if (coordinates.Count <= 0)
+    {
       return null;
     }
     float halfUnit = TILE_UNIT / 2;
     Vector3 position = new Vector3(coordinates[0].x + halfUnit, 0f, coordinates[0].z + halfUnit); // En el centro de la celda
     if (coordinates.Count == 1)// Celdas solitarias
     {
-      if (axis == 'x') {
+      if (axis == 'x')
+      {
         wall = objectManager.Create(ObjectName.TileWall, new Vector3(position.x, 1f, position.z));
-        Vector3 wallScale = wall.transform.localScale;
-        wall.transform.localScale = wallScale;
+        wall.GetComponent<TextureTiling>().ReTiling();
       }
     }
-    else if (coordinates.Count > 1) { // Agrupar tiles en un pared
+    else if (coordinates.Count > 1)
+    { // Agrupar tiles en un pared
       Vector3 midPoint = coordinates[coordinates.Count / 2].ToVector3();
       int wallWidth = coordinates.Count;
       wall = objectManager.Create(ObjectName.TileWall, new Vector3(midPoint.x, 1f, midPoint.z));
@@ -486,15 +682,19 @@ public class DungeonGenerator : MonoBehaviour {
       wall.transform.localScale = wallScale;
       wall.GetComponent<TextureTiling>().ReTiling(); // Establece el tiling de las texturas segun la escala
       // Ajustes para centrar la pared dentro de las celdas
-      if (axis == 'x') {
+      if (axis == 'x')
+      {
         wall.transform.Translate(0f, 0f, halfUnit);
-        if (wallWidth % 2 != 0) {
+        if (wallWidth % 2 != 0)
+        {
           wall.transform.Translate(halfUnit, 0f, 0f);
         }
       }
-      if (axis == 'z') {
+      if (axis == 'z')
+      {
         wall.transform.Translate(halfUnit, 0f, 0f);
-        if (wallWidth % 2 != 0) {
+        if (wallWidth % 2 != 0)
+        {
           wall.transform.Translate(0f, 0f, halfUnit);
         }
         wall.transform.Rotate(Vector3.up, 90f);
@@ -504,7 +704,8 @@ public class DungeonGenerator : MonoBehaviour {
     return wall;
   }
 
-  private void DrawLevel() {
+  private void DrawLevel()
+  {
     GameObject tempObject;
     // Instanciamos el prefab del suelo y lo escalamos
     GameObject floor = objectManager.Create(ObjectName.TileFloor);
@@ -521,17 +722,23 @@ public class DungeonGenerator : MonoBehaviour {
 
     // Crear el escenario, uniendo paredes
     // Paredes Eje z
-    for (int r = 0; r < DUNGEON_WIDTH; r++) { //x
-      for (int c = 0; c < DUNGEON_HEIGHT; c++) { //z
-        if (tempGrid.GetTile(r, c) >= (int)TileType.ROOM_ID) {
+    for (int r = 0; r < DUNGEON_WIDTH; r++)
+    { //x
+      for (int c = 0; c < DUNGEON_HEIGHT; c++)
+      { //z
+        if (tempGrid.GetTile(r, c) >= (int)TileType.ROOM_ID)
+        {
           wallCoordinates.Add(new Vector2i(r, c));
         }
-        else {
+        else
+        {
           tempObject = CreateWall(wallCoordinates, 'z');
-          if (tempObject != null) {
+          if (tempObject != null)
+          {
             tempObject.transform.parent = floor.transform.parent;
           }
-          if (wallCoordinates.Count > 1) {
+          if (wallCoordinates.Count > 1)
+          {
             for (int i = 0; i < wallCoordinates.Count; i++) // Borra la pared del mapa temporal
             {
               tempGrid.SetTile(wallCoordinates[i].x, wallCoordinates[i].z, 0);
@@ -543,14 +750,19 @@ public class DungeonGenerator : MonoBehaviour {
     }
 
     // Paredes Eje x y celdas solitarias restantes
-    for (int c = 0; c < DUNGEON_HEIGHT; c++) { //z
-      for (int r = 0; r < DUNGEON_WIDTH; r++) { //x
-        if (tempGrid.GetTile(r, c) >= (int)TileType.ROOM_ID) {
+    for (int c = 0; c < DUNGEON_HEIGHT; c++)
+    { //z
+      for (int r = 0; r < DUNGEON_WIDTH; r++)
+      { //x
+        if (tempGrid.GetTile(r, c) >= (int)TileType.ROOM_ID)
+        {
           wallCoordinates.Add(new Vector2i(r, c));
         }
-        else {
+        else
+        {
           tempObject = CreateWall(wallCoordinates, 'x');
-          if (tempObject != null) {
+          if (tempObject != null)
+          {
             tempObject.transform.parent = floor.transform.parent;
           }
           for (int i = 0; i < wallCoordinates.Count; i++) // Borra la pared del mapa temporal
@@ -564,11 +776,14 @@ public class DungeonGenerator : MonoBehaviour {
 
     // OBJETOS
     Vector3 position;
-    for (int r = 0; r < DUNGEON_WIDTH; r++) { //x
-      for (int c = 0; c < DUNGEON_HEIGHT; c++) { //z
+    for (int r = 0; r < DUNGEON_WIDTH; r++)
+    { //x
+      for (int c = 0; c < DUNGEON_HEIGHT; c++)
+      { //z
         position = new Vector3(r + TILE_UNIT / 2, 0f, c + TILE_UNIT / 2); // En el centro de la celda
         // Objetos
-        switch (objectsGrid.GetTile(r, c)) {
+        switch (objectsGrid.GetTile(r, c))
+        {
           case (int)TileType.COIN:
             objectManager.Create(ObjectName.Coin, position);
             break;
@@ -576,17 +791,57 @@ public class DungeonGenerator : MonoBehaviour {
             // Los cofres cerca de una pared se giran sobre esta
             GameObject chest = objectManager.Create(ObjectName.Chest, position);
             Vector3 direction = GetAdyacentWallDirection(r, c).ToVector3();
-            direction.y = -1f;
+            direction.x *= -1f;
+            chest.transform.LookAt(position + direction);
             break;
           case (int)TileType.POTION_HEALTH:
             objectManager.Create(ObjectName.PotionHealth, position);
             break;
           case (int)TileType.TRAP_SPIKES_WALL:
-            position = new Vector3(r + TILE_UNIT, TILE_UNIT, c + TILE_UNIT / 2);
-            objectManager.Create(ObjectName.TrapSpikeWall, position);
+            position = new Vector3(r, TILE_UNIT, c);
+            Direction orientation = CalculateTrapDirection(new Vector2i(r, c));
+            if (orientation != Direction.NONE)
+            {
+              Vector3 rotation = new Vector3(90f, 0f, 0f);
+              if (orientation == Direction.NORTH)
+              {
+                position.x += TILE_UNIT / 2;
+                position.z += TILE_UNIT;
+                rotation = new Vector3(90f, 0f, 0f);
+              }
+              else if (orientation == Direction.EAST)
+              {
+                position.x += TILE_UNIT;
+                position.z += TILE_UNIT / 2;
+                rotation = new Vector3(90f, 90f, 0f);
+              }
+              else if (orientation == Direction.SOUTH)
+              {
+                position.x += TILE_UNIT / 2;
+                rotation = new Vector3(90f, 180f, 0f);
+              }
+              else if (orientation == Direction.WEST)
+              {
+                position.z += TILE_UNIT / 2;
+                rotation = new Vector3(90f, 270f, 0f);
+              }
+
+              GameObject trap = objectManager.Create(ObjectName.TrapSpikeWall, position);
+
+              trap.transform.eulerAngles = rotation;
+            }
+            else
+            {
+              // Restauramos el tile para que no aparezca en las metricas
+              objectsGrid.SetTile(r, c, (int)TileType.EMPTY);
+            }
+
             break;
           case (int)TileType.TRAP_SPIKES_FLOOR:
             objectManager.Create(ObjectName.TrapSpikeFloor, position);
+            break;
+          case (int)TileType.TRAP_ROCK:
+            objectManager.Create(ObjectName.TrapRock, position);
             break;
           case (int)TileType.ENEMY_CRAB:
             position.y += TILE_UNIT;
@@ -606,37 +861,86 @@ public class DungeonGenerator : MonoBehaviour {
     }
   }
 
+  // Mira los alrededores de la posicion de la trampa para orientarla hacia el lado correcto
+  private Direction CalculateTrapDirection(Vector2i pos)
+  {
+    List<Direction> candidates = new List<Direction>();
+    Direction orientation = Direction.NONE;
+
+    //// Arriba, izquierda, derecha, abajo (casillas impares)
+    int c = 0;
+    for (int i = pos.x - 1; i <= pos.x + 1; i++)
+    {
+      for (int j = pos.z - 1; j <= pos.z + 1; j++)
+      {
+        if (c % 2 != 0 && levelGrid.GetTile(i, j) == (int)TileType.FLOOR)
+        {
+          if (c == 1)
+          {
+            candidates.Add(Direction.WEST);
+          }
+          else if (c == 3)
+          {
+            candidates.Add(Direction.SOUTH);
+          }
+          else if (c == 5)
+          {
+            candidates.Add(Direction.NORTH);
+          }
+          else if (c == 7)
+          {
+            candidates.Add(Direction.EAST);
+          }
+        }
+        c++;
+      }
+    }
+
+    if (candidates.Count == 1)
+    {
+      orientation = candidates[0];
+    }
+    else if (candidates.Count > 1) // Escoge una direccion aleatoriamente
+    {
+      orientation = candidates[Random.Range(0, candidates.Count)];
+    }
+
+    return orientation;
+  }
+
   // Automata celular para limpiar
-  private void RemoveSingles(int x, int y) {
+  private void RemoveSingles(int x, int y)
+  {
     int count = 0;
 
-    if (x < levelGrid.GetWidth() - 1 && x > 1 && y > 1 && y < levelGrid.GetHeight() - 1) {
-      if (levelGrid.GetTile(x + 1, y) == 1)
+    if (x < levelGrid.GetWidth() - 1 && x > 1 && y > 1 && y < levelGrid.GetHeight() - 1)
+    {
+      if (levelGrid.GetTile(x + 1, y) == (int)TileType.FLOOR)
         count++;
-      if (levelGrid.GetTile(x - 1, y) == 0)
+      if (levelGrid.GetTile(x - 1, y) == (int)TileType.EMPTY)
         return;
-      if (levelGrid.GetTile(x + 1, y) == 0)
+      if (levelGrid.GetTile(x + 1, y) == (int)TileType.EMPTY)
         return;
-      if (levelGrid.GetTile(x, y + 1) == 0)
+      if (levelGrid.GetTile(x, y + 1) == (int)TileType.EMPTY)
         return;
-      if (levelGrid.GetTile(x, y - 1) == 0)
+      if (levelGrid.GetTile(x, y - 1) == (int)TileType.EMPTY)
         return;
 
-      if (levelGrid.GetTile(x - 1, y) == 1)
+      if (levelGrid.GetTile(x - 1, y) == (int)TileType.FLOOR)
         count++;
-      if (levelGrid.GetTile(x, y + 1) == 1)
+      if (levelGrid.GetTile(x, y + 1) == (int)TileType.FLOOR)
         count++;
-      if (levelGrid.GetTile(x, y - 1) == 1)
+      if (levelGrid.GetTile(x, y - 1) == (int)TileType.FLOOR)
         count++;
-      if (levelGrid.GetTile(x - 1, y) == 1)
+      if (levelGrid.GetTile(x - 1, y) == (int)TileType.FLOOR)
         count++;
-      if (levelGrid.GetTile(x - 1, y - 1) == 1)
+      if (levelGrid.GetTile(x - 1, y - 1) == (int)TileType.FLOOR)
         count++;
-      if (levelGrid.GetTile(x + 1, y - 1) == 1)
+      if (levelGrid.GetTile(x + 1, y - 1) == (int)TileType.FLOOR)
         count++;
-      if (levelGrid.GetTile(x - 1, y + 1) == 1)
+      if (levelGrid.GetTile(x - 1, y + 1) == (int)TileType.FLOOR)
         count++;
-      if (levelGrid.GetTile(x + 1, y + 1) == 1)
+      if (levelGrid.GetTile(x + 1, y + 1) == (int)TileType.FLOOR)
         count++;
 
       if (count >= 5)
@@ -645,7 +949,8 @@ public class DungeonGenerator : MonoBehaviour {
   }
 
   // Vuelca a fichero el resultado de la generación
-  public void SaveToFile() {
+  public void SaveToFile()
+  {
     string fileName = System.DateTime.Now.ToString("yyyyMMdd_HHmmss");
     fileName = "bsp_" + fileName;
     string content = "Dungeon Generator (BSP)";
@@ -662,15 +967,19 @@ public class DungeonGenerator : MonoBehaviour {
     {
       for (int z = 0; z < DUNGEON_HEIGHT; z++) // ancho = columnas
       {
-        if (levelGrid.GetTile(x, z) == 0) {
+        if (levelGrid.GetTile(x, z) == 0)
+        {
           content += "--";
         }
-        else {
+        else
+        {
           tile = levelGrid.GetTile(x, z);
-          if (tile < 10) {
+          if (tile < 10)
+          {
             temp = "0" + tile.ToString();
           }
-          else {
+          else
+          {
             temp = tile.ToString();
           }
           content += temp;
@@ -685,27 +994,35 @@ public class DungeonGenerator : MonoBehaviour {
     {
       for (int z = 0; z < DUNGEON_HEIGHT; z++) // ancho = columnas
       {
-        if (objectsGrid.GetTile(x, z) == 0) {
-          if (levelGrid.GetTile(x, z) == 0) {
+        if (objectsGrid.GetTile(x, z) == 0)
+        {
+          if (levelGrid.GetTile(x, z) == 0)
+          {
             content += "--";
           }
-          else {
+          else
+          {
             tile = levelGrid.GetTile(x, z);
-            if (tile < 10) {
+            if (tile < 10)
+            {
               temp = "0" + tile.ToString();
             }
-            else {
+            else
+            {
               temp = tile.ToString();
             }
             content += temp;
           }
         }
-        else {
+        else
+        {
           tile = objectsGrid.GetTile(x, z);
-          if (tile < 10) {
+          if (tile < 10)
+          {
             temp = "0" + tile.ToString();
           }
-          else {
+          else
+          {
             temp = tile.ToString();
           }
           content += temp;

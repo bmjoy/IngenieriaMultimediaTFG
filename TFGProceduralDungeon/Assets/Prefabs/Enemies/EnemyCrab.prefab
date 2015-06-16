@@ -9,6 +9,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 403854}
   - 54: {fileID: 5492358}
+  - 65: {fileID: 6569050}
   - 114: {fileID: 11424504}
   - 114: {fileID: 11423622}
   m_Layer: 0
@@ -29,10 +30,9 @@ GameObject:
   - 212: {fileID: 21245146}
   - 95: {fileID: 9507768}
   - 114: {fileID: 11411588}
-  - 65: {fileID: 6554926}
   m_Layer: 0
   m_Name: Sprite
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -77,18 +77,18 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!65 &6554926
+--- !u!65 &6569050
 BoxCollider:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 156798}
-  m_Material: {fileID: 0}
+  m_GameObject: {fileID: 107290}
+  m_Material: {fileID: 13400000, guid: c679d0c671f8aaf43998570592344d26, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: .200000003, y: .150000006, z: .200000003}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: .5, y: .899999976, z: .5}
+  m_Center: {x: 0, y: -0, z: 0}
 --- !u!95 &9507768
 Animator:
   serializedVersion: 3

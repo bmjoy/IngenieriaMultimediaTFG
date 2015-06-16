@@ -1,7 +1,8 @@
 using UnityEngine;
 using System.Collections;
 
-public class Digger : MonoBehaviour {
+public class Digger : MonoBehaviour
+{
   public int roomId; // El pasillo tambien es una habitacion
 
   private DungeonGenerator generator;
@@ -10,12 +11,15 @@ public class Digger : MonoBehaviour {
 
   Color color;
 
-  private void Awake() {
-    generator = GameManager.Instance.dungeonGenerator;
+  private void Awake()
+  {
+
+    generator = GameObject.FindObjectOfType<DungeonGenerator>();
   }
 
   // Crear suelo alrededor de la posicion actual y la rodea con paredes
-  private void UpdateTile() {
+  private void UpdateTile()
+  {
     //generator.SetTile(digger.x, digger.z, 100);
     //GameManager.Instance.objectManager.CreateCube(digger.ToVector3(), color);
 
@@ -33,35 +37,43 @@ public class Digger : MonoBehaviour {
   }
 
   // Avanza en x,z para actualiza cada tile del pasillo a cavar
-  public void Dig(Vector2i startPos, Vector2i targetPos) {
+  public void Dig(Vector2i startPos, Vector2i targetPos)
+  {
     digger = startPos;
     end = targetPos;
     color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
 
-    Vector3 offset = new Vector3(0.5f, 0.5f, 0.5f);
-    Vector3 p = digger.ToVector3() + offset;
-    GameManager.Instance.objectManager.CreateCube(p, Color.green);
-    p = end.ToVector3() + offset;
-    GameManager.Instance.objectManager.CreateCube(p, Color.red);
+    //Vector3 offset = new Vector3(0.5f, 0.5f, 0.5f);
+    //Vector3 p = digger.ToVector3() + offset;
+    //GameManager.Instance.objectManager.CreateCube(p, Color.green);
+    //p = end.ToVector3() + offset;
+    //GameManager.Instance.objectManager.CreateCube(p, Color.red);
 
-    while (digger.x != end.x) {
-      if (digger.x < end.x) {
+    while (digger.x != end.x)
+    {
+      if (digger.x < end.x)
+      {
         digger.x++;
       }
-      else {
+      else
+      {
         digger.x--;
       }
       // El tile final se queda vacio
-      if (digger.x != end.x) {
+      if (digger.x != end.x)
+      {
         UpdateTile();
       }
     }
 
-    while (digger.z != end.z) {
-      if (digger.z < end.z) {
+    while (digger.z != end.z)
+    {
+      if (digger.z < end.z)
+      {
         digger.z++;
       }
-      else {
+      else
+      {
         digger.z--;
       }
       UpdateTile();
@@ -70,7 +82,8 @@ public class Digger : MonoBehaviour {
     Destroy(this.gameObject);
   }
   // Crea un tile de tipo pared si este esta vacio
-  public void SurroundTilesWithWall(int x, int y) {
+  public void SurroundTilesWithWall(int x, int y)
+  {
     Grid grid = generator.GetGrid();
 
     //int c = 0;

@@ -39,9 +39,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f49a7f709cf6a574ab02a964e6932a17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DUNGEON_WIDTH: 50
+  DUNGEON_WIDTH: 60
   DUNGEON_HEIGHT: 50
   BaseRoom: {fileID: 179418, guid: 9f20e38222654be438a6b15beb7aa85d, type: 2}
+  nextId: 0
+  numRooms: 0
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

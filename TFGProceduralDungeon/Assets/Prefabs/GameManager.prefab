@@ -42,8 +42,8 @@ MonoBehaviour:
   _persistent: 1
   prefObjectManager: {fileID: 117646, guid: d7ab9b956f2475348bff412e038d0744, type: 2}
   objectManager: {fileID: 0}
-  prefDungeonGenerator: {fileID: 140640, guid: ce12990b52e3bd34d9209eb9523d008c, type: 2}
-  dungeonGenerator: {fileID: 0}
+  prefLevelManager: {fileID: 100420, guid: 4646dc6feb010c642b428e5ed2bd64c7, type: 2}
+  levelManager: {fileID: 0}
   player: {fileID: 0}
 --- !u!1001 &100100000
 Prefab:
