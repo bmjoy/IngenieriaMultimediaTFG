@@ -6,11 +6,20 @@ ModelImporter:
   serializedVersion: 18
   fileIDToRecycleName:
     100000: //RootNode
+    100002: Coin_001
+    100004: Cylinder
     400000: //RootNode
+    400002: Coin_001
+    400004: Cylinder
     2300000: //RootNode
+    2300002: Coin_001
+    2300004: Cylinder
     3300000: //RootNode
+    3300002: Coin_001
+    3300004: Cylinder
     4300000: Cylinder
     4300002: Coin
+    4300004: Coin_001
     7400000: Default Take
     9500000: //RootNode
   materials:

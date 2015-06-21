@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 
 // Plano rejilla sobre el que realizar las subdivisiones
-// para las mazmorras de tipo BSP
+// y donde se establecen los tipos distintos de tiles del nivel
 public class Grid
 {
   private int gridWidth;
@@ -16,9 +16,9 @@ public class Grid
   }
   public void SetGrid(int[,] grid)
   {
-    for (int i = 0; i < gridWidth; i++)
+    for(int i = 0; i < gridWidth; i++)
     {
-      for (int j = 0; j < gridHeight; j++)
+      for(int j = 0; j < gridHeight; j++)
       {
         this.grid[i, j] = grid[i, j];
       }
@@ -32,9 +32,9 @@ public class Grid
 
     grid = new int[gridWidth, gridHeight];
 
-    for (int i = 0; i < gridWidth; i++)
+    for(int i = 0; i < gridWidth; i++)
     {
-      for (int j = 0; j < gridHeight; j++)
+      for(int j = 0; j < gridHeight; j++)
       {
         grid[i, j] = 0;
       }
@@ -43,7 +43,7 @@ public class Grid
 
   public void SetTile(int x, int y, int value)
   {
-    if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight)
+    if(x >= 0 && x < gridWidth && y >= 0 && y < gridHeight)
     {
       grid[x, y] = value;
     }
@@ -55,7 +55,7 @@ public class Grid
 
   public int GetTile(int x, int y)
   {
-    if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight)
+    if(x >= 0 && x < gridWidth && y >= 0 && y < gridHeight)
     {
       return grid[x, y];
     }

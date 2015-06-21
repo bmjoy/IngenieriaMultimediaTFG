@@ -11,7 +11,7 @@ public class UIManager : MonoBehaviour
 
   private void Start()
   {
-    if (Application.loadedLevel == (int)SceneName.MainMenu)
+    if(Application.loadedLevel == (int)SceneName.MainMenu)
     {
       menuMain = GameObject.Find("MenuMain");
       menuTests = GameObject.Find("MenuTests");
@@ -22,16 +22,32 @@ public class UIManager : MonoBehaviour
   // Update is called once per frame
   void Update()
   {
-    if (pauseCanvas != null && (Input.GetKeyDown(KeyCode.P) || Input.GetKeyDown(KeyCode.Escape)))
+    if(pauseCanvas != null && (Input.GetKeyDown(KeyCode.P) || Input.GetKeyDown(KeyCode.Escape)))
     {
       TogglePause();
     }
   }
 
+  // Activa/desactiva la pausa
   public void TogglePause()
   {
     pauseCanvas.SetActive(!pauseCanvas.activeSelf);
     GameManager.Instance.SetPause(!GameManager.Instance.Paused);
+    LockMouse(!GameManager.Instance.Paused);
+  }
+
+  public void LockMouse(bool locked)
+  {
+    if(locked)
+    {
+      Cursor.lockState = CursorLockMode.Locked;
+      Cursor.visible = false;
+    }
+    else
+    {
+      Cursor.lockState = CursorLockMode.Confined;
+      Cursor.visible = true;
+    }
   }
 
   // Eventos de boton

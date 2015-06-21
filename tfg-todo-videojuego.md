@@ -2,6 +2,7 @@ TODO del videojuego
 ===================
 ## General
 + Limpiar codigo. Usar correctamente properties o variables publicas. Revisar nombres de funciones y agregar comentarios.
++ Mantener en fichero el sistema de probilidades de aparicion y leer desde ahi.
 
 ## Tests
 + Usar el DungeonGenerator para los tests en vez del GeneratorBSP que ya esta antiguo.
@@ -11,6 +12,7 @@ TODO del videojuego
 + Colocar la salida lejos de la entrada y de manera que no exista un camino demasiado directo. Utilizar distancias usando directamente el arbol.
 + Agregar items con probabilidad variable. Afecta el nivel, otros items, etc.
 + Clasificar las habitaciones y pasillos en el grid de alguna manera y distinguiendo todo el area que ocupan. Hace un enum con los tipos de tiles de escenario o algo asi.
++ BUG: A veces al buscar una salida no la encuentra y da error porque es null. En la funcion de calcular las distancias.
 
 ## Enemigos
 + Colocar enemigos en mazmorras de manera aleatoria basándose en probabilidad y afectado por items y trampas.

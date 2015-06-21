@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class Player : MonoBehaviour
@@ -9,9 +10,11 @@ public class Player : MonoBehaviour
 
   // STATS del personaje
   public static int MAX_HEALTH = 3;
-  public int points = 0;
   public bool invincible = false;
   private int health;
+  private int points = 0;
+  // HUD
+  private Hud hud;
 
   private int hitGraceTime = 1; // Segundos invencible despues de ser golpeado
   private float maxWalkSpeed = 3.0f;
@@ -32,15 +35,12 @@ public class Player : MonoBehaviour
   private CameraShake cameraShaker; // Vibracion de la camara
   private CameraLookAt cameraLookAt; // Camara que sigue al jugador
 
-  // HUD
-  private Hud hud;
 
-  public bool Attacking
+  // Suma los puntos y establece el tope al que tiene que llegar currentPoints
+  public void AddPoints(int points)
   {
-    get
-    {
-      return attacking;
-    }
+    this.points += points;
+    hud.OnPointsChanged(this.points);
   }
 
   void Start()
@@ -54,29 +54,30 @@ public class Player : MonoBehaviour
     cameraShaker = cameraMain.GetComponent<CameraShake>();
     cameraLookAt = cameraMain.GetComponent<CameraLookAt>();
     hud = gameObject.GetComponent<Hud>();
+
   }
 
   void Update()
   {
     // Input
     // Cuando esta atacando no se puede mover
-    if (attacking)
+    if(attacking)
     {
       return;
     }
 
     // Si se pulsa Shift la velocidad cambia
-    if (Input.GetKeyDown(KeyCode.LeftShift))
+    if(Input.GetKeyDown(KeyCode.LeftShift))
     {
       running = true;
     }
-    if (Input.GetKeyUp(KeyCode.LeftShift))
+    if(Input.GetKeyUp(KeyCode.LeftShift))
     {
       running = false;
     }
 
     float speed = maxWalkSpeed;
-    if (running)
+    if(running)
     {
       speed = maxRunSpeed;
     }
@@ -92,18 +93,18 @@ public class Player : MonoBehaviour
     transform.Translate(0, 0, vWalkSpeed * Time.deltaTime);
 
     // On 0 movement won't flip sprite
-    if (hAxis != 0)
+    if(hAxis != 0)
     {
       bool goingRight = false;
       direction = -1f;
-      if (Input.GetAxis("Horizontal") > 0)
+      if(Input.GetAxis("Horizontal") > 0)
       {
         goingRight = true;
         direction = 1f;
       }
 
       // Change direction of the sprite
-      if (goingRight != rightDir)
+      if(goingRight != rightDir)
       {
         transform.localScale = Vector3.Scale(transform.localScale, new Vector3(-1, 1, 1));
         rightDir = goingRight;
@@ -111,7 +112,7 @@ public class Player : MonoBehaviour
     }
 
     // SALTO. Solo cuando esta en el suelo
-    if (onGround && (Input.GetKeyDown(KeyCode.Space) || Input.GetKey(KeyCode.Mouse1)))
+    if(onGround && (Input.GetKeyDown(KeyCode.Space) || Input.GetKey(KeyCode.Mouse1)))
     {
       // Activamos el flag y la fisica se hace en FixedUpdate
       startJump = true;
@@ -120,30 +121,30 @@ public class Player : MonoBehaviour
 
     // ANIMACIONES
     // Threshold speed for walk/idle animation
-    if (!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerAttack"))
+    if(!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerAttack"))
     {
       float tSpeed = maxWalkSpeed * 0.5f;
-      if (Mathf.Abs(vWalkSpeed) > tSpeed || Mathf.Abs(hWalkSpeed) > tSpeed)
+      if(Mathf.Abs(vWalkSpeed) > tSpeed || Mathf.Abs(hWalkSpeed) > tSpeed)
       {
-        animator.Play("PlayerWalk");
+        animator.Play("BilboWalk");
       }
       else
       {
-        animator.Play("PlayerIdle");
+        animator.Play("BilboIdle");
       }
     }
 
     // Attack
-    if (Input.GetKeyDown(KeyCode.Z) || Input.GetKey(KeyCode.Mouse0))
+    if(Input.GetKeyDown(KeyCode.Z) || Input.GetKey(KeyCode.Mouse0))
     {
       animator.Play("PlayerAttack");
-      if (!attacking)
+      if(!attacking)
       {
         StartCoroutine(Attack());
       }
     }
 
-    if (playerAttackInstance != null)
+    if(playerAttackInstance != null)
     {
       playerAttackInstance.transform.position = this.transform.position + (direction * this.transform.right * 0.8f);
     }
@@ -166,7 +167,7 @@ public class Player : MonoBehaviour
     playerAttackInstance = (GameObject)Instantiate(playerAttack, start, this.transform.rotation);
     playerAttackInstance.transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y, 1);
     Vector3 position = start;
-    while (Vector3.Distance(position, end) > 0.1f)
+    while(Vector3.Distance(position, end) > 0.1f)
     {
       position += (direction * this.transform.right * 0.1f);
       playerAttackInstance.transform.position = position;
@@ -182,7 +183,7 @@ public class Player : MonoBehaviour
 
   void FixedUpdate()
   {
-    if (startJump)
+    if(startJump)
     {
       startJump = false;
       rigidBody.velocity *= 0;
@@ -195,37 +196,33 @@ public class Player : MonoBehaviour
     onGround = true;
     string cTag = collision.gameObject.tag;
 
-    if (cTag == "Enemy" && !invincible)
+    if(cTag == "Enemy" && !invincible)
     {
-      //cameraShaker.Shake(0.4f);
-      if (health <= 0) // Game Over
-      {
-        health = MAX_HEALTH;
-      }
-      else // Tiempo de gracia invencible
-      {
-
-        StartCoroutine(OnPlayerDamaged());
-      }
-      health--;
-      hud.SetHealthMeter(health);
+      StartCoroutine(OnPlayerDamaged());
     }
-    else if (cTag == "Exit")
+    else if(cTag == "Exit")
     {
       GameManager.Instance.levelManager.LoadNextLevel();
     }
-    else if (cTag == "Wall")
+    else if(cTag == "Wall")
     {
       Vector3 direction = collision.gameObject.transform.position - this.transform.position;
       rigidBody.AddForce(direction);
     }
   }
+ 
 
   private void OnTriggerEnter(Collider collider)
   {
-    if (collider.gameObject.tag == "Coin")
+    string cTag = collider.gameObject.tag;
+    if(cTag == "Coin")
     {
-      points += (int)ItemPoints.COIN;
+      AddPoints((int)ItemPoints.COIN);
+    }
+    else if(cTag == "Potion")
+    {
+      Debug.Log("Pocion");
+      SetHealth(MAX_HEALTH);
     }
   }
 
@@ -235,9 +232,21 @@ public class Player : MonoBehaviour
     spriteRenderer.enabled = !spriteRenderer.enabled;
   }
 
+  private void SetHealth(int health)
+  {
+    this.health = health;
+    if(this.health <= 0)
+    {
+      this.health = MAX_HEALTH;
+    }
+    hud.SetHealthMeter(this.health);
+  }
+
   // Espera un tiempo de gracia durante el cual el 
   IEnumerator OnPlayerDamaged()
   {
+    SetHealth(health - 1);
+
     invincible = true;
     // Activa el parpadeo del sprite durante el tiempo de gracia
     // Parpadeo de sprite cuando es invencible
@@ -245,7 +254,7 @@ public class Player : MonoBehaviour
     yield return new WaitForSeconds(hitGraceTime);
     // Restaura
     CancelInvoke(); // ATENCION: Detiene todos los InvokeRepeating
-    spriteRenderer.enabled = !spriteRenderer.enabled;
+    spriteRenderer.enabled = true;
     invincible = false;
   }
 }

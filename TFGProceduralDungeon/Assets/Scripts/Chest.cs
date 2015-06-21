@@ -8,22 +8,23 @@ public class Chest : MonoBehaviour
   private IEnumerator OpenChest()
   {
     Animation openAnimation = GetComponentInChildren<Animation>();
-    Debug.Log(openAnimation);
-    if (openAnimation != null)
+    if(openAnimation != null)
     {
       openAnimation.Play();
     }
     yield return new WaitForSeconds(0.6f);
-    Instantiate(particlesGemsPrefab, transform.position, particlesGemsPrefab.transform.rotation);
 
+    // Activa el efecto de particulas y comienza a sumar puntos
+    Instantiate(particlesGemsPrefab, transform.position, particlesGemsPrefab.transform.rotation);
     Destroy(gameObject.GetComponent<Chest>());
   }
 
   void OnTriggerEnter(Collider collider)
   {
-    if (collider.gameObject.tag == "Damage")
+    if(collider.gameObject.tag == "Damage")
     {
       StartCoroutine(OpenChest());
+      GameManager.Instance.player.AddPoints((int)ItemPoints.CHEST);
     }
   }
 }

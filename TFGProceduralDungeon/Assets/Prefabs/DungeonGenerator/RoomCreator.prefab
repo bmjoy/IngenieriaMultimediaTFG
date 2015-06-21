@@ -47,6 +47,7 @@ MonoBehaviour:
   size:
     x: 0
     z: 0
+  randomConnection: 0
   doorPoints: []
 --- !u!1001 &100100000
 Prefab:

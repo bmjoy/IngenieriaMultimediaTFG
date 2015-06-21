@@ -17,6 +17,7 @@ TagManager:
   - Exit
   - Coin
   - Chest
+  - Potion
   - Item
   layers:
   - Default
