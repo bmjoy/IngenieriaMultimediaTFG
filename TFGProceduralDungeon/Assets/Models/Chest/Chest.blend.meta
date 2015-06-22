@@ -8,18 +8,27 @@ ModelImporter:
     100000: //RootNode
     100002: KeyHole
     100004: Lid
+    100006: Chest
+    100008: Cylinder
     400000: //RootNode
     400002: KeyHole
     400004: Lid
+    400006: Chest
+    400008: Cylinder
     2300000: //RootNode
     2300002: KeyHole
     2300004: Lid
+    2300006: Chest
+    2300008: Cylinder
     3300000: //RootNode
     3300002: KeyHole
     3300004: Lid
+    3300006: Chest
+    3300008: Cylinder
     4300000: Chest
     4300002: KeyHole
     4300004: Lid
+    4300006: Cylinder
     7400000: Default Take
     9500000: //RootNode
     11100000: //RootNode
@@ -32,6 +41,10 @@ ModelImporter:
     bakeSimulation: 0
     optimizeGameObjects: 0
     motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
     animationCompression: 1
     animationRotationError: .5
     animationPositionError: .5
