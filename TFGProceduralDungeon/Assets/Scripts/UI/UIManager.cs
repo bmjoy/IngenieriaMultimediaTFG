@@ -9,6 +9,8 @@ public class UIManager : MonoBehaviour
   private GameObject menuTests;
   private GameObject menuMain;
 
+  private bool isCursorLocked = false;
+
   private void Start()
   {
     if(Application.loadedLevel == (int)SceneName.MainMenu)
@@ -26,6 +28,18 @@ public class UIManager : MonoBehaviour
     {
       TogglePause();
     }
+    // Hay un bug en Unity 5 y el bloqueo no se queda fijo
+    // Lo arreglamos haciendolo en cada actualizacion
+    if(isCursorLocked)
+    {
+      Cursor.lockState = CursorLockMode.Locked;
+      Cursor.visible = false;
+    }
+    else
+    {
+      Cursor.lockState = CursorLockMode.Confined;
+      Cursor.visible = true;
+    }
   }
 
   // Activa/desactiva la pausa
@@ -38,16 +52,7 @@ public class UIManager : MonoBehaviour
 
   public void LockMouse(bool locked)
   {
-    if(locked)
-    {
-      Cursor.lockState = CursorLockMode.Locked;
-      Cursor.visible = false;
-    }
-    else
-    {
-      Cursor.lockState = CursorLockMode.Confined;
-      Cursor.visible = true;
-    }
+    isCursorLocked = locked;
   }
 
   // Eventos de boton

@@ -126,11 +126,11 @@ public class Player : MonoBehaviour
       float tSpeed = maxWalkSpeed * 0.5f;
       if(Mathf.Abs(vWalkSpeed) > tSpeed || Mathf.Abs(hWalkSpeed) > tSpeed)
       {
-        animator.Play("BilboWalk");
+        animator.Play("PlayerWalk");
       }
       else
       {
-        animator.Play("BilboIdle");
+        animator.Play("PlayerIdle");
       }
     }
 
