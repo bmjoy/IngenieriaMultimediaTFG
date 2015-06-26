@@ -15,9 +15,14 @@ public class UIManager : MonoBehaviour
   {
     if(Application.loadedLevel == (int)SceneName.MainMenu)
     {
+      LockMouse(false);
       menuMain = GameObject.Find("MenuMain");
       menuTests = GameObject.Find("MenuTests");
       menuTests.SetActive(false);
+    }
+    else if(Application.loadedLevel == (int)SceneName.DungeonLevel)
+    {
+      LockMouse(true);
     }
   }
 
@@ -37,7 +42,7 @@ public class UIManager : MonoBehaviour
     }
     else
     {
-      Cursor.lockState = CursorLockMode.Confined;
+      Cursor.lockState = CursorLockMode.None;
       Cursor.visible = true;
     }
   }
@@ -55,14 +60,10 @@ public class UIManager : MonoBehaviour
     isCursorLocked = locked;
   }
 
-  // Eventos de boton
+  /*********** Eventos de boton ***********/
   public void OnNewGame()
   {
     GameManager.Instance.LoadScene(SceneName.Intro);
-  }
-
-  public void OnSettings()
-  {
   }
 
   public void OnMainMenu()
@@ -74,6 +75,15 @@ public class UIManager : MonoBehaviour
   public void OnBack()
   {
     GameManager.Instance.LoadScene(SceneName.MainMenu);
+  }
+
+  /*********** Otros eventos ***********/
+  // Muestra la pantalla de fin de mazmorra
+  public void OnLevelFinish()
+  {
+    GameManager.Instance.SetPause(true);
+    LockMouse(false);
+    GameObject.Find("CanvasEndScreen").GetComponent<Canvas>().enabled = true;
   }
 
   /*********** TESTS ***********/

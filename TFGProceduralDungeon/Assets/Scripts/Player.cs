@@ -202,7 +202,7 @@ public class Player : MonoBehaviour
     }
     else if(cTag == "Exit")
     {
-      GameManager.Instance.levelManager.LoadNextLevel();
+      GameManager.Instance.levelManager.FinishLevel();
     }
     else if(cTag == "Wall")
     {
@@ -221,7 +221,6 @@ public class Player : MonoBehaviour
     }
     else if(cTag == "Potion")
     {
-      Debug.Log("Pocion");
       SetHealth(MAX_HEALTH);
     }
   }

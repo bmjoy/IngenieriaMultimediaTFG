@@ -104,6 +104,7 @@ public class GameManager : Singleton<GameManager>
     switch(index)
     {
       case (int)SceneName.DungeonLevel:
+        SetPause(false);
         InitLevel();
         break;
     }

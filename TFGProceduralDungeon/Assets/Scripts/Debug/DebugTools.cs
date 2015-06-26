@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
@@ -35,7 +35,7 @@ public class DebugTools : MonoBehaviour
     }
     if (Input.GetKeyDown(KeyCode.N))
     { // Restart level
-      GameManager.Instance.levelManager.LoadNextLevel();
+      GameManager.Instance.levelManager.FinishLevel();
     }
     else if (Input.GetKeyDown(KeyCode.F3)) // Save level to file
     {

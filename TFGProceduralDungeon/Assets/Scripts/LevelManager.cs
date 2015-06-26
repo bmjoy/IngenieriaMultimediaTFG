@@ -15,14 +15,13 @@ public class LevelManager : MonoBehaviour
 
   public void Init()
   {
-
-    dungeonGenerator = Instantiate( prefDungeonGenerator ).GetComponent<DungeonGenerator>();
+    dungeonGenerator = Instantiate(prefDungeonGenerator).GetComponent<DungeonGenerator>();
     dungeonGenerator.transform.parent = this.transform;
 
-    int width = Random.Range( MIN_DUNGEON_DIM + (level * 5), MIN_DUNGEON_DIM + (level * 5) + 5 );
-    int height = Random.Range( MIN_DUNGEON_DIM + (level * 5), MIN_DUNGEON_DIM + (level * 5) + 5 );
-    Debug.Log( "Dungeon dimensions: " + width + "x" + height );
-    dungeonGenerator.GenerateDungeon( width, height );
+    int width = Random.Range(MIN_DUNGEON_DIM + (level * 5), MIN_DUNGEON_DIM + (level * 5) + 5);
+    int height = Random.Range(MIN_DUNGEON_DIM + (level * 5), MIN_DUNGEON_DIM + (level * 5) + 5);
+    Debug.Log("Dungeon dimensions: " + width + "x" + height);
+    dungeonGenerator.GenerateDungeon(width, height);
     // Comienza el temporizador
     timer = 0f;
   }
@@ -32,15 +31,22 @@ public class LevelManager : MonoBehaviour
     timer += Time.deltaTime;
   }
 
+  // Muestra la pantalla final del nivel
+  public void FinishLevel()
+  {
+    GameObject.Find("UIManager").GetComponent<UIManager>().OnLevelFinish();
+  }
+
+  // Carga el siguiente nivel
   public void LoadNextLevel()
   {
     level++;
-    GameManager.Instance.LoadScene( SceneName.DungeonLevel );
+    GameManager.Instance.LoadScene(SceneName.DungeonLevel);
   }
 
   public void SaveToFile()
   {
-    if( dungeonGenerator != null )
+    if(dungeonGenerator != null)
     {
       dungeonGenerator.SaveToFile();
     }
@@ -48,9 +54,9 @@ public class LevelManager : MonoBehaviour
 
   public void Cleanup()
   {
-    if( dungeonGenerator != null )
+    if(dungeonGenerator != null)
     {
-      Destroy( dungeonGenerator.gameObject );
+      Destroy(dungeonGenerator.gameObject);
     }
   }
 }
