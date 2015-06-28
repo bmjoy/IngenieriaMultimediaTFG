@@ -16,11 +16,11 @@ public class DebugTools : MonoBehaviour
   void Awake()
   {
     // Inicializacion de la instancia del singleton
-    if (instance == null)
+    if(instance == null)
     {
       instance = this;
     }
-    else if (instance != this)
+    else if(instance != this)
     {
       Destroy(gameObject);
     }
@@ -29,15 +29,15 @@ public class DebugTools : MonoBehaviour
 
   void Update()
   {
-    if (Input.GetKeyDown(KeyCode.R))
+    if(Input.GetKeyDown(KeyCode.R))
     { // Restart level
       GameManager.Instance.LoadScene(Application.loadedLevel);
     }
-    if (Input.GetKeyDown(KeyCode.N))
-    { // Restart level
+    if(Input.GetKeyDown(KeyCode.N))
+    { // Next level
       GameManager.Instance.levelManager.FinishLevel();
     }
-    else if (Input.GetKeyDown(KeyCode.F3)) // Save level to file
+    else if(Input.GetKeyDown(KeyCode.F3)) // Save level to file
     {
       GameManager.Instance.levelManager.SaveToFile();
     }
@@ -50,12 +50,12 @@ public class DebugTools : MonoBehaviour
     {
       string directory = fileName.Remove(fileName.LastIndexOf(@"/"));
       Directory.CreateDirectory(directory);
-      using (System.IO.StreamWriter file = new System.IO.StreamWriter(fileName))
+      using(System.IO.StreamWriter file = new System.IO.StreamWriter(fileName))
       {
         file.Write(content);
       }
     }
-    catch (Exception ex)
+    catch(Exception ex)
     {
       Debug.Log(ex.ToString());
     }

@@ -13,7 +13,8 @@ public enum ItemPoints
 // Hay que asegurarse que estan bien ordenadas cuando se modifique algo en la build
 public enum SceneName
 {
-  Splash = 0,
+  Preload = 0,
+  Splash,
   MainMenu,
   Intro,
   DungeonLevel,
@@ -24,18 +25,61 @@ public enum SceneName
   TestTraps
 }
 
-public class GameManager : Singleton<GameManager>
+public class GameManager : MonoBehaviour
 {
-  public GameObject prefObjectManager;
-  public ObjectManager objectManager;
-  public GameObject prefLevelManager;
-  public LevelManager levelManager;
+  public GameObject prefDebugTools;
+  [HideInInspector]
+  public GameObject
+    debugTools;
+//  public GameObject prefObjectManager;
+  [HideInInspector]
+  public ObjectManager
+    objectManager;
+//  public GameObject prefLevelManager;
+  [HideInInspector]
+  public LevelManager
+    levelManager;
+
   [HideInInspector]
   public Player
     player; // Referencia al player para que otras clases accedan
 
+  public int level = 0;
+
   private float timeScale = 1.0f;
   private bool paused = false;
+
+  private static GameManager _instance;
+  
+  public static GameManager Instance
+  {
+    get
+    {
+      if(_instance == null)
+      {
+        _instance = GameObject.FindObjectOfType<GameManager>();
+        DontDestroyOnLoad(_instance.gameObject);
+      }
+      
+      return _instance;
+    }
+  }
+  
+  void Awake()
+  {
+    if(_instance == null)
+    {
+      _instance = this;
+      DontDestroyOnLoad(this);
+    }
+    else
+    {
+      if(this != _instance)
+      {
+        DestroyImmediate(this.gameObject);
+      }
+    }
+  }
 
   public bool Paused
   {
@@ -43,38 +87,48 @@ public class GameManager : Singleton<GameManager>
     set { paused = value; }
   }
 
-  protected GameManager()
-  {
-  } // guarantee this will be always a singleton only - can't use the constructor!
-
-  private void Start()
-  {
-    LoadScene(Application.loadedLevel);
-  }
-
   private void Cleanup()
   {
-    if(levelManager != null)
+    //levelManager.Cleanup();
+//    if(levelManager != null)
+//    {
+//      levelManager.Cleanup();
+//    }
+//    if(objectManager != null)
+//    {
+//      Destroy(objectManager.gameObject);
+//      objectManager = null;
+//    }
+    if(debugTools != null)
     {
-      levelManager.Cleanup();
-    }
-    if(objectManager != null)
-    {
-      Destroy(objectManager.gameObject);
+      Destroy(debugTools);
+      objectManager = null;
     }
   }
 
   public void InitLevel()
   {
+    // DebugTools
+    debugTools = Instantiate(prefDebugTools);
+    debugTools.name = "DebugTools";
+    // Player
     player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
-    objectManager = Instantiate(prefObjectManager).GetComponent<ObjectManager>();
-    objectManager.transform.parent = this.transform;
-    if(levelManager == null)
-    {
-      levelManager = Instantiate(prefLevelManager).GetComponent<LevelManager>();
-      levelManager.transform.parent = this.transform;
-    }
+    objectManager = GameObject.Find("ObjectManager").GetComponent<ObjectManager>();
+    levelManager = GameObject.Find("LevelManager").GetComponent<LevelManager>();
     levelManager.Init();
+//    // Player
+//    player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+//    // Object Manager
+//    objectManager = Instantiate(prefObjectManager).GetComponent<ObjectManager>();
+//    objectManager.transform.parent = this.transform;
+//    // LevelManager
+//    if(levelManager == null)
+//    {
+//      levelManager = Instantiate(prefLevelManager).GetComponent<LevelManager>();
+//      levelManager.transform.parent = this.transform;
+//    }
+//    levelManager.Init();
+
   }
 
   public void SetPause(bool pause)
@@ -87,20 +141,26 @@ public class GameManager : Singleton<GameManager>
     }
   }
 
-  // Carga una escena por nombre
-  public void LoadScene(SceneName sceneName)
-  {
-    Application.LoadLevel((int)sceneName);
-  }
-
+  // Carga una escena por indice
   public void LoadScene(int sceneIndex)
   {
+    Cleanup();
+    StartCoroutine(LoadOnKey(sceneIndex));
+    //Application.LoadLevel(sceneIndex);
+  }
+
+  private IEnumerator LoadOnKey(int sceneIndex)
+  {
+    while(!Input.GetKeyDown(KeyCode.K))
+    {
+      yield return null;
+
+    }
     Application.LoadLevel(sceneIndex);
   }
 
   private void OnLevelWasLoaded(int index)
   {
-    Cleanup();
     switch(index)
     {
       case (int)SceneName.DungeonLevel:

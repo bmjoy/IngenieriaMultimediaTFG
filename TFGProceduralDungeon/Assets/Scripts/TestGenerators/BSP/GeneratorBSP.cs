@@ -2,7 +2,8 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-public class GeneratorBSP : MonoBehaviour {
+public class GeneratorBSP : MonoBehaviour
+{
   public static float ROOM_SIZE = 15f;
 
   // Los distintos generadores para los test
@@ -23,26 +24,31 @@ public class GeneratorBSP : MonoBehaviour {
 
   private List<Object> tileObjectList;
 
-  void Start() {
+  void Start()
+  {
     tileObjectList = new List<Object>();
   }
 
   // Setters para los sliders de los test
-  public void SetDungeonWidth(float value) {
+  public void SetDungeonWidth(float value)
+  {
     DUNGEON_WIDTH = (int)value;
   }
 
-  public void SetDungeonHeight(float value) {
+  public void SetDungeonHeight(float value)
+  {
     DUNGEON_HEIGHT = (int)value;
   }
 
   // Genera la mazmorra usando el algoritmo de BSP Tree
-  public void Generate(int width, int height, int seed) {
+  public void Generate(int width, int height, int seed)
+  {
     DUNGEON_WIDTH = width;
     DUNGEON_HEIGHT = height;
     this.seed = seed;
-    if (seed >= 0) {
-      Random.seed = seed;
+    if(seed >= 0)
+    {
+      Random.seed = this.seed;
     }
     // Creamos el cubo inicial
     GameObject rootArea = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -54,8 +60,10 @@ public class GeneratorBSP : MonoBehaviour {
 
     levelGrid = new t_Grid((int)rootArea.transform.localScale.x, (int)rootArea.transform.localScale.z);
 
-    for (int i = 0; i < levelGrid.GetWidth(); i++) {
-      for (int j = 0; j < levelGrid.GetHeight(); j++) {
+    for(int i = 0; i < levelGrid.GetWidth(); i++)
+    {
+      for(int j = 0; j < levelGrid.GetHeight(); j++)
+      {
         levelGrid.SetTile(i, j, 0);
       }
     }
@@ -67,10 +75,13 @@ public class GeneratorBSP : MonoBehaviour {
     routine = StartCoroutine(CreateDungeon());
   }
 
-  private IEnumerator CreateDungeon() {
+  private IEnumerator CreateDungeon()
+  {
     int step = 0;
-    while (step < 7) {
-      if (doNextStep) {
+    while(step < 7)
+    {
+      if(doNextStep)
+      {
         Split(bspTree.Root);
         step++;
         doNextStep = false;
@@ -84,7 +95,8 @@ public class GeneratorBSP : MonoBehaviour {
     EraseLevelObjects();
     DrawLevel();
 
-    while (!doNextStep) {
+    while(!doNextStep)
+    {
       yield return null;
     }
     doNextStep = false;
@@ -94,7 +106,8 @@ public class GeneratorBSP : MonoBehaviour {
     EraseLevelObjects();
     DrawLevel();
 
-    while (!doNextStep) {
+    while(!doNextStep)
+    {
       yield return null;
     }
     doNextStep = false;
@@ -107,57 +120,70 @@ public class GeneratorBSP : MonoBehaviour {
   }
 
   // Limpia los objetos creados
-  public void Cleanup() {
-    if (routine != null) {
+  public void Cleanup()
+  {
+    if(routine != null)
+    {
       StopCoroutine(routine);
     }
     bspTree = null;
     // Eliminamos los cubos base "GenSection"
     GameObject[] objectList = GameObject.FindGameObjectsWithTag("GenSection");
-    for (int i = 0; i < objectList.Length; i++) {
+    for(int i = 0; i < objectList.Length; i++)
+    {
       Destroy(objectList[i].gameObject);
     }
 
     EraseLevelObjects();
 
     objectList = GameObject.FindGameObjectsWithTag("Digger");
-    for (int i = 0; i < objectList.Length; i++) {
+    for(int i = 0; i < objectList.Length; i++)
+    {
       Destroy(objectList[i].gameObject);
     }
     objectList = GameObject.FindGameObjectsWithTag("BaseRoom");
-    for (int i = 0; i < objectList.Length; i++) {
+    for(int i = 0; i < objectList.Length; i++)
+    {
       Destroy(objectList[i].gameObject);
     }
     GameObject floor = GameObject.Find("Floor");
-    if (floor != null) {
+    if(floor != null)
+    {
       Destroy(floor.gameObject);
     }
   }
 
   //split the tree
-  public void Split(t_BSPNode pNode) {
-    if (pNode.GetLeftNode() != null) {
+  public void Split(t_BSPNode pNode)
+  {
+    if(pNode.GetLeftNode() != null)
+    {
       Split(pNode.GetLeftNode());
     }
-    else {
+    else
+    {
       pNode.Cut();
       return;
     }
 
-    if (pNode.GetLeftNode() != null) {
+    if(pNode.GetLeftNode() != null)
+    {
       Split(pNode.GetRightNode());
     }
   }
 
-  public t_Grid GetGrid() {
+  public t_Grid GetGrid()
+  {
     return levelGrid;
   }
 
-  public void SetTile(int x, int y, int value) {
+  public void SetTile(int x, int y, int value)
+  {
     levelGrid.SetTile(x, y, value);
   }
 
-  private void AddRoom(t_BSPNode pNode) {
+  private void AddRoom(t_BSPNode pNode)
+  {
 
     GameObject aObj = pNode.GetCube();
 
@@ -173,50 +199,63 @@ public class GeneratorBSP : MonoBehaviour {
     roomID++;
   }
 
-  private void CreateRooms(t_BSPNode pNode) {
-    if (pNode.GetLeftNode() != null) {
+  private void CreateRooms(t_BSPNode pNode)
+  {
+    if(pNode.GetLeftNode() != null)
+    {
       CreateRooms(pNode.GetLeftNode());
     }
-    else {
+    else
+    {
       AddRoom(pNode);
       return;
     }
 
-    if (pNode.GetRightNode() != null) {
+    if(pNode.GetRightNode() != null)
+    {
       CreateRooms(pNode.GetRightNode());
     }
   }
 
   // Crea los pasillos para conectar las habitaciones
   // Recorre recursivamente el arbol
-  private void ConnectRooms(t_BSPNode pNode) {
+  private void ConnectRooms(t_BSPNode pNode)
+  {
     // Recorrido por los nodos de la parte izquierda
-    if (pNode.GetLeftNode() != null) {
+    if(pNode.GetLeftNode() != null)
+    {
       ConnectRooms(pNode.GetLeftNode());
 
-      if (pNode.GetRoom() != null) {
+      if(pNode.GetRoom() != null)
+      {
         pNode.GetRoom().GetComponent<t_RoomCreator>().Connect();
         return;
       }
 
     }
-    else {
-      if (pNode.GetRoom() != null) {
+    else
+    {
+      if(pNode.GetRoom() != null)
+      {
         pNode.GetRoom().GetComponent<t_RoomCreator>().Connect();
         return;
       }
     }
     // Recorrido por los nodos de la parte derecha
-    if (pNode.GetRightNode() != null) {
+    if(pNode.GetRightNode() != null)
+    {
       ConnectRooms(pNode.GetRightNode());
 
-      if (pNode.GetRoom() != null) {
+      if(pNode.GetRoom() != null)
+      {
         pNode.GetRoom().GetComponent<t_RoomCreator>().Connect();
         return;
       }
     }
-    else {
-      if (pNode.GetRoom() != null) {
+    else
+    {
+      if(pNode.GetRoom() != null)
+      {
         pNode.GetRoom().GetComponent<t_RoomCreator>().Connect();
         return;
       }
@@ -224,15 +263,18 @@ public class GeneratorBSP : MonoBehaviour {
   }
 
   // Limpia los objetos tiles del nivel
-  private void EraseLevelObjects() {
-    for (int i = 0; i < tileObjectList.Count; i++) {
+  private void EraseLevelObjects()
+  {
+    for(int i = 0; i < tileObjectList.Count; i++)
+    {
       Destroy(tileObjectList[i]);
     }
     tileObjectList = new List<Object>();
   }
 
   // Crea las paredes y suelo del nivel
-  private void DrawLevel() {
+  private void DrawLevel()
+  {
     int levelWidth = levelGrid.GetWidth();
     int levelHeight = levelGrid.GetHeight();
 
@@ -244,9 +286,12 @@ public class GeneratorBSP : MonoBehaviour {
     //// Establecemos el tiling del material con respecto a sus dimensiones, un tile por unidad
     //floor.GetComponent<Renderer>().material.mainTextureScale = new Vector2(levelWidth, levelHeight);
 
-    for (int i = 0; i < levelWidth; i++) {
-      for (int j = 0; j < levelHeight; j++) {
-        switch (levelGrid.GetTile(i, j)) {
+    for(int i = 0; i < levelWidth; i++)
+    {
+      for(int j = 0; j < levelHeight; j++)
+      {
+        switch(levelGrid.GetTile(i, j))
+        {
           case 1:
             tileObjectList.Add(Instantiate(floorTile, new Vector3(transform.position.x - (transform.localScale.x / 2) + i, transform.position.y + transform.localScale.y / 2 + 0.1f, transform.position.z - (transform.localScale.z / 2) + j), Quaternion.identity));
             break;
@@ -260,10 +305,14 @@ public class GeneratorBSP : MonoBehaviour {
   }
 
   // Realiza un pase de automata celular para limpiar tiles sueltos o que sobresalen
-  private void CleanLevelGeneration() {
-    for (int k = 0; k < 5; k++) {
-      for (int i = 0; i < levelGrid.GetWidth(); i++) {
-        for (int j = 0; j < levelGrid.GetHeight(); j++) {
+  private void CleanLevelGeneration()
+  {
+    for(int k = 0; k < 5; k++)
+    {
+      for(int i = 0; i < levelGrid.GetWidth(); i++)
+      {
+        for(int j = 0; j < levelGrid.GetHeight(); j++)
+        {
           RemoveSingles(i, j);
         }
       }
@@ -271,39 +320,41 @@ public class GeneratorBSP : MonoBehaviour {
   }
 
   // Automata celular para limpiar
-  private void RemoveSingles(int x, int y) {
+  private void RemoveSingles(int x, int y)
+  {
     int count = 0;
 
-    if (x < levelGrid.GetWidth() - 1 && x > 1 && y > 1 && y < levelGrid.GetHeight() - 1) {
-      if (levelGrid.GetTile(x + 1, y) == 1)
+    if(x < levelGrid.GetWidth() - 1 && x > 1 && y > 1 && y < levelGrid.GetHeight() - 1)
+    {
+      if(levelGrid.GetTile(x + 1, y) == 1)
         count++;
-      if (levelGrid.GetTile(x - 1, y) == 0)
+      if(levelGrid.GetTile(x - 1, y) == 0)
         return;
-      if (levelGrid.GetTile(x + 1, y) == 0)
+      if(levelGrid.GetTile(x + 1, y) == 0)
         return;
-      if (levelGrid.GetTile(x, y + 1) == 0)
+      if(levelGrid.GetTile(x, y + 1) == 0)
         return;
-      if (levelGrid.GetTile(x, y - 1) == 0)
+      if(levelGrid.GetTile(x, y - 1) == 0)
         return;
 
-      if (levelGrid.GetTile(x - 1, y) == 1)
+      if(levelGrid.GetTile(x - 1, y) == 1)
         count++;
-      if (levelGrid.GetTile(x, y + 1) == 1)
+      if(levelGrid.GetTile(x, y + 1) == 1)
         count++;
-      if (levelGrid.GetTile(x, y - 1) == 1)
+      if(levelGrid.GetTile(x, y - 1) == 1)
         count++;
-      if (levelGrid.GetTile(x - 1, y) == 1)
+      if(levelGrid.GetTile(x - 1, y) == 1)
         count++;
-      if (levelGrid.GetTile(x - 1, y - 1) == 1)
+      if(levelGrid.GetTile(x - 1, y - 1) == 1)
         count++;
-      if (levelGrid.GetTile(x + 1, y - 1) == 1)
+      if(levelGrid.GetTile(x + 1, y - 1) == 1)
         count++;
-      if (levelGrid.GetTile(x - 1, y + 1) == 1)
+      if(levelGrid.GetTile(x - 1, y + 1) == 1)
         count++;
-      if (levelGrid.GetTile(x + 1, y + 1) == 1)
+      if(levelGrid.GetTile(x + 1, y + 1) == 1)
         count++;
 
-      if (count >= 5)
+      if(count >= 5)
         levelGrid.SetTile(x, y, 1);
     }
   }

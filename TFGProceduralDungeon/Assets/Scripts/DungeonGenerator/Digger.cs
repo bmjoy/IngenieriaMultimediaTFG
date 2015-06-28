@@ -9,7 +9,7 @@ public class Digger : MonoBehaviour
   private Vector2i digger, end;
 
 
-  Color color;
+  //Color color;
 
   private void Awake()
   {
@@ -41,7 +41,7 @@ public class Digger : MonoBehaviour
   {
     digger = startPos;
     end = targetPos;
-    color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
+    //color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
 
     //Vector3 offset = new Vector3(0.5f, 0.5f, 0.5f);
     //Vector3 p = digger.ToVector3() + offset;
@@ -49,9 +49,9 @@ public class Digger : MonoBehaviour
     //p = end.ToVector3() + offset;
     //GameManager.Instance.objectManager.CreateCube(p, Color.red);
 
-    while (digger.x != end.x)
+    while(digger.x != end.x)
     {
-      if (digger.x < end.x)
+      if(digger.x < end.x)
       {
         digger.x++;
       }
@@ -60,15 +60,15 @@ public class Digger : MonoBehaviour
         digger.x--;
       }
       // El tile final se queda vacio
-      if (digger.x != end.x)
+      if(digger.x != end.x)
       {
         UpdateTile();
       }
     }
 
-    while (digger.z != end.z)
+    while(digger.z != end.z)
     {
-      if (digger.z < end.z)
+      if(digger.z < end.z)
       {
         digger.z++;
       }
@@ -97,19 +97,19 @@ public class Digger : MonoBehaviour
     //  }
     //}
 
-    if (grid.GetTile(x + 1, y) == (int)TileType.EMPTY) // Derecha
+    if(grid.GetTile(x + 1, y) == (int)TileType.EMPTY) // Derecha
     {
       generator.SetTile(x + 1, y, roomId);
     }
-    if (grid.GetTile(x - 1, y) == (int)TileType.EMPTY) // Izquierda
+    if(grid.GetTile(x - 1, y) == (int)TileType.EMPTY) // Izquierda
     {
       generator.SetTile(x - 1, y, roomId);
     }
-    if (grid.GetTile(x, y + 1) == (int)TileType.EMPTY) // Superior
+    if(grid.GetTile(x, y + 1) == (int)TileType.EMPTY) // Superior
     {
       generator.SetTile(x, y + 1, roomId);
     }
-    if (grid.GetTile(x, y - 1) == (int)TileType.EMPTY) // Inferior
+    if(grid.GetTile(x, y - 1) == (int)TileType.EMPTY) // Inferior
     {
       generator.SetTile(x, y - 1, roomId);
     }

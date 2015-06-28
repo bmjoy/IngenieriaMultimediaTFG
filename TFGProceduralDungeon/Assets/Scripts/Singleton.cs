@@ -4,7 +4,8 @@ using System.Collections;
 public class Singleton<T> : MonoBehaviour where T : Component
 {
   [SerializeField]
-  bool _persistent = true;
+  bool
+    _persistent = true;
 
   private static T _instance;
   public static bool IsInstantianted { get { return _instance != null; } }
@@ -13,10 +14,10 @@ public class Singleton<T> : MonoBehaviour where T : Component
   {
     get
     {
-      if (_instance == null)
+      if(_instance == null)
       {
         _instance = (T)FindObjectOfType(typeof(T));
-        if (_instance == null)
+        if(_instance == null)
         {
           T prefab = Resources.Load(typeof(T).Name, typeof(T)) as T;
           _instance = Instantiate(prefab) as T;
@@ -34,14 +35,14 @@ public class Singleton<T> : MonoBehaviour where T : Component
 
   private bool Instantiation()
   {
-    if (IsInstantianted)
+    if(IsInstantianted)
     {
-      Debug.LogWarning("Only one " + typeof(T) + " is allowed, destroying " + gameObject.name + ".");
+      //Debug.LogWarning("Only one " + typeof(T) + " is allowed, destroying " + gameObject.name + ".");
       DestroyImmediate(gameObject);
       return false;
     }
     _instance = FindObjectOfType(typeof(T)) as T;
-    if (_persistent)
+    if(_persistent)
     {
       DontDestroyOnLoad(this);
     }

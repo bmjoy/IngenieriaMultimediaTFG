@@ -39,12 +39,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e10917ff88364b045b89d2c8e20bad13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _persistent: 1
-  prefObjectManager: {fileID: 117646, guid: d7ab9b956f2475348bff412e038d0744, type: 2}
   objectManager: {fileID: 0}
-  prefLevelManager: {fileID: 100420, guid: 4646dc6feb010c642b428e5ed2bd64c7, type: 2}
   levelManager: {fileID: 0}
   player: {fileID: 0}
+  level: 0
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

@@ -13,7 +13,7 @@ public class ObjectAutodestroy : MonoBehaviour
   private void AutoDestroy()
   {
     Destroy(this.gameObject);
-    if (particleEffect != null)
+    if(particleEffect != null)
     {
       Instantiate(particleEffect, transform.position, Quaternion.identity);
     }
@@ -27,7 +27,7 @@ public class ObjectAutodestroy : MonoBehaviour
 
   void Start()
   {
-    if (useTime)
+    if(useTime)
     {
       StartCoroutine(SetTimer());
     }
@@ -36,9 +36,21 @@ public class ObjectAutodestroy : MonoBehaviour
   void OnCollisionEnter(Collision collision)
   {
     string cTag = collision.gameObject.tag;
-    for (int i = 0; i < deadlyTags.Length; i++)
+    for(int i = 0; i < deadlyTags.Length; i++)
     {
-      if (cTag == deadlyTags[i])
+      if(cTag == deadlyTags[i])
+      {
+        AutoDestroy();
+      }
+    }
+  }
+
+  void OnTriggerEnter(Collider collider)
+  {
+    string cTag = collider.gameObject.tag;
+    for(int i = 0; i < deadlyTags.Length; i++)
+    {
+      if(cTag == deadlyTags[i])
       {
         AutoDestroy();
       }

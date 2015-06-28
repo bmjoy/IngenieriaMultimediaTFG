@@ -18,7 +18,6 @@ public class ItemAnimation : MonoBehaviour
     }
 
     target = targetObject.transform.position;
-    Vector3 scale = transform.localScale;
     while(Vector3.Distance(target, transform.position) > 0.4f)
     {
       if(transform.localScale.x > 0.1f)

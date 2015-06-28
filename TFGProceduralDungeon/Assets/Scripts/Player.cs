@@ -32,7 +32,6 @@ public class Player : MonoBehaviour
   private Rigidbody rigidBody; // Al que aplicar fuerza para salto
 
   private Camera cameraMain;
-  private CameraShake cameraShaker; // Vibracion de la camara
   private CameraLookAt cameraLookAt; // Camara que sigue al jugador
 
 
@@ -51,7 +50,6 @@ public class Player : MonoBehaviour
     animator = sprite.GetComponent<Animator>();
     rigidBody = GetComponent<Rigidbody>();
     cameraMain = Camera.main;
-    cameraShaker = cameraMain.GetComponent<CameraShake>();
     cameraLookAt = cameraMain.GetComponent<CameraLookAt>();
     hud = gameObject.GetComponent<Hud>();
 
@@ -215,7 +213,11 @@ public class Player : MonoBehaviour
   private void OnTriggerEnter(Collider collider)
   {
     string cTag = collider.gameObject.tag;
-    if(cTag == "Coin")
+    if(cTag == "Enemy" && !invincible)
+    {
+      StartCoroutine(OnPlayerDamaged());
+    }
+    else if(cTag == "Coin")
     {
       AddPoints((int)ItemPoints.COIN);
     }

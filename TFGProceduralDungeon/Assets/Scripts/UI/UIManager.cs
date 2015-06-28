@@ -63,18 +63,18 @@ public class UIManager : MonoBehaviour
   /*********** Eventos de boton ***********/
   public void OnNewGame()
   {
-    GameManager.Instance.LoadScene(SceneName.Intro);
+    GameManager.Instance.LoadScene((int)SceneName.Intro);
   }
 
   public void OnMainMenu()
   {
     Time.timeScale = 1.0f - Time.timeScale;
-    GameManager.Instance.LoadScene(SceneName.MainMenu);
+    GameManager.Instance.LoadScene((int)SceneName.MainMenu);
   }
 
   public void OnBack()
   {
-    GameManager.Instance.LoadScene(SceneName.MainMenu);
+    GameManager.Instance.LoadScene((int)SceneName.MainMenu);
   }
 
   /*********** Otros eventos ***********/
@@ -95,11 +95,11 @@ public class UIManager : MonoBehaviour
 
   public void OnTestLevelGeneration()
   {
-    GameManager.Instance.LoadScene(SceneName.TestLevelGeneration);
+    GameManager.Instance.LoadScene((int)SceneName.TestLevelGeneration);
   }
 
   public void OnTestEnemies()
   {
-    GameManager.Instance.LoadScene(SceneName.TestEnemies);
+    GameManager.Instance.LoadScene((int)SceneName.TestEnemies);
   }
 }

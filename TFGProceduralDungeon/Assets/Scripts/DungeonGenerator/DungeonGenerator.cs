@@ -79,20 +79,24 @@ public class DungeonGenerator : MonoBehaviour
     nextId;
   [HideInInspector]
   public int
-    numRooms = 0; // Total de habitaciones (no pasillos) generadas
+    lastRoomId = 0; // Ultimo id perteneciente a una habitacion (no pasillo)
   [HideInInspector]
   public BSPTree
     bspTree;
   private List<Room> rooms = new List<Room>(); // Lista de habitaciones (no pasillos) para acceso rapido
-  private int level; // Numero de numero para escoger el numero de iteraciones
+  private int level; // Numero de nivel para escoger las particiones bsp
 
   // ESTADISTICAS DE OBJETOS, ENEMIGOS...
-  private int coinProbability = 60;
-  private int chestProbability = 20;
-  private int potionProbability = 20;
   private int numEnemigo = 0;
   private int numPociones = 0;
-  private int dificultad = 0;
+  private int difficulty = 0;
+
+  // Objetos padres para agrupar los componentes de la mazmorra en el editor de Unity
+  private GameObject parentScenery;
+  private GameObject parentRooms;
+  private GameObject parentItems;
+  private GameObject parentTraps;
+  private GameObject parentEnemies;
 
   // Setters para los sliders de los test
   public void SetDungeonWidth(float value)
@@ -109,14 +113,26 @@ public class DungeonGenerator : MonoBehaviour
   // Genera la mazmorra usando el algoritmo de BSP Tree
   public void GenerateDungeon(int width, int height)
   {
+    // Crea los parents
+    parentScenery = new GameObject();
+    parentScenery.name = "Scenery";
+    parentRooms = new GameObject();
+    parentRooms.name = "Rooms";
+    parentItems = new GameObject();
+    parentItems.name = "Items";
+    parentTraps = new GameObject();
+    parentTraps.name = "Traps";
+    parentEnemies = new GameObject();
+    parentEnemies.name = "Enemies";
+
     objectManager = GameManager.Instance.objectManager;
-    level = GameManager.Instance.levelManager.level;
+    level = GameManager.Instance.level;
     DUNGEON_WIDTH = width;
     DUNGEON_HEIGHT = height;
     levelGrid = new Grid(DUNGEON_WIDTH, DUNGEON_HEIGHT);
     objectsGrid = new Grid(DUNGEON_WIDTH, DUNGEON_HEIGHT);
     nextId = 0;
-    numRooms = nextId;
+    lastRoomId = nextId;
     // Inicializamos los tiles a vacio
     for(int i = 0; i < levelGrid.GetWidth(); i++)
     {
@@ -179,8 +195,13 @@ public class DungeonGenerator : MonoBehaviour
     PopulateDungeon(bspTree.Root);
     PopulatePassages();
     DrawLevel();
-    dificultad = numEnemigo * 10 - numPociones * 5;
-    Debug.Log("Dificultad: " + dificultad);
+    difficulty = numEnemigo * 10 - numPociones * 5;
+
+    // Info de debug
+    string info = "Dungeon dimensions: " + DUNGEON_WIDTH + "x" + DUNGEON_HEIGHT;
+    info += "\nLevel: " + level;
+    info += "\nDifficulty: " + difficulty;
+    GameObject.Find("DebugTools").GetComponent<DebugInfo>().AddInfo(info);
   }
 
   private void SetStartEndPoints()
@@ -195,7 +216,10 @@ public class DungeonGenerator : MonoBehaviour
     // Entrance
     for(int i = 0; i < rooms.Count; i++)
     {
-      Debug.Log(rooms[i].GetNode());
+      if(rooms[i].GetNode() == null)
+      {
+        continue;
+      }
       if(rooms[i].GetNode().branch == Branch.LEFT)
       {
         entrance = rooms[i];
@@ -349,7 +373,6 @@ public class DungeonGenerator : MonoBehaviour
   // Situa ememigos dentro de la habitacion
   private void PlaceItems(Room room)
   {
-    Vector3 position = room.transform.position;
     // Actualiza el grid de objetos
     Vector2i coord = GetRandomCoordinateInRoom(room);
     if(coord.x == -1)
@@ -381,6 +404,59 @@ public class DungeonGenerator : MonoBehaviour
     }
   }
 
+  private void SorroundChestWithTraps(Vector2i chestPosition, TileType selectedTrap)
+  {
+
+    if(selectedTrap == TileType.TRAP_SPIKES_FLOOR)
+    {// Rodea el cofre con suelo de pinchos
+      for(int x = chestPosition.x - 1; x <= chestPosition.x + 1; x++)
+      {
+        for(int z = chestPosition.z - 1; z <= chestPosition.z + 1; z++)
+        {
+          if(!(x == chestPosition.x && z == chestPosition.z))
+          { // No a si mismo
+            if(levelGrid.GetTile(x, z) == (int)TileType.FLOOR)
+            { // El espacio del escenario es suelo
+              objectsGrid.SetTile(x, z, (int)TileType.TRAP_SPIKES_FLOOR);
+            }
+          }
+        }
+      }
+    }
+    else
+    { // Coloca flechas en las paredes cerca del cofre
+      int steps = 0;
+      bool isTrapPlaced = false;
+      Vector2i[] vDirections = { new Vector2i(1, 0), new Vector2i(-1, 0),
+                                  new Vector2i(0, 1), new Vector2i(0, -1) };
+      // Vamos a poner un offset sobre la posicion del cofre para que los
+      // dispensadores de flechas disparen hacia los lados de este
+      Vector2i currentPosition = chestPosition;
+      for(int i = 0; i < vDirections.Length; i++)
+      {
+        steps = 0;
+        currentPosition = chestPosition + new Vector2i(-1, -1);
+        while(steps < 5)
+        {
+          currentPosition += vDirections[i];
+          steps++;
+          if(levelGrid.GetTile(currentPosition.x, currentPosition.z) >= (int)TileType.ROOM_ID)
+          {
+            isTrapPlaced = true;
+            objectsGrid.SetTile(currentPosition.x, currentPosition.z, (int)TileType.TRAP_ARROWS);
+            break;
+          }
+        }
+      }
+      // Como salvaguarda, si no se ha podido colocar ninguna trampa
+      // rodeamos el cofre con pinchos
+      if(!isTrapPlaced)
+      {
+        SorroundChestWithTraps(chestPosition, TileType.TRAP_SPIKES_FLOOR);
+      }
+    }
+  }
+
   // Coloca trampas en la habitacion
   private void PlaceTraps(Room room)
   {
@@ -396,20 +472,15 @@ public class DungeonGenerator : MonoBehaviour
         switch(objectsGrid.GetTile(i, j))
         {
           case (int)TileType.CHEST:
-            // Recorremos las celdas adyacentes colocando trampas
-            for(int x = i - 1; x <= i + 1; x++)
+            int randomTrap = Random.Range(0, 2);
+            Vector2i chestPosition = new Vector2i(i, j);
+            TileType trap = TileType.TRAP_SPIKES_FLOOR;
+            if(randomTrap == 1)
             {
-              for(int z = j - 1; z <= j + 1; z++)
-              {
-                if(!(x == i && z == j))
-                { // No a si mismo
-                  if(levelGrid.GetTile(x, z) == (int)TileType.FLOOR)
-                  { // El espacio del escenario es suelo
-                    objectsGrid.SetTile(x, z, (int)TileType.TRAP_SPIKES_FLOOR);
-                  }
-                }
-              }
+              trap = TileType.TRAP_ARROWS;
             }
+            SorroundChestWithTraps(chestPosition, trap);
+
             break;
           case (int)TileType.COIN:
             // Si la moneda esta cerca de una pared, colocamos una trampa en ese tile de pared
@@ -435,34 +506,54 @@ public class DungeonGenerator : MonoBehaviour
     }
   }
 
+  // Agrega trampas a pasillos
   private void PopulatePassages()
   {
-    // Segunda pasada para rellenar pasillos
+    // Pasillos visitados que ya no se van a comprobar
     List<int> visitedPassages = new List<int>();
+    // Tiles del pasillo actual
+    List<Vector2i> passageTiles = new List<Vector2i>();
     int cellCount = 0;
     for(int i = 0; i < DUNGEON_WIDTH; i++)
     {
       for(int j = 0; j < DUNGEON_HEIGHT; j++)
       {
         int tile = levelGrid.GetTile(i, j);
-        int currentTile = tile;
+        int currentPassage = tile;
         // Encuentra tile de pasillo no visitado
-        if(tile >= numRooms && visitedPassages.FindIndex(item => item == tile) == -1)
+        if(tile > lastRoomId && visitedPassages.FindIndex(item => item == tile) == -1)
         {
           // Recorrido horizontal
-          for(int x = j; tile == currentTile && x < DUNGEON_HEIGHT; x++)
+          for(int x = j; tile == currentPassage && x < DUNGEON_HEIGHT; x++)
           {
+            passageTiles.Add(new Vector2i(i, x));
             cellCount++;
             tile = levelGrid.GetTile(i, x);
           }
-
-          visitedPassages.Add(currentTile);
+          // ROCK
+          if(cellCount >= 10) // Se puede poner una roca rodante
+          {
+            objectsGrid.SetTile(i + 2, j, (int)TileType.TRAP_ROCK);
+          }
+          // ARROWS. Volvemos a recorrer el pasillo poniendo flechas
+          else if(cellCount >= 5)
+          {
+            // Tiles intermedios del pasillo
+            for(int c = 1; c < passageTiles.Count - 1; c++)
+            {
+              Vector2i position = passageTiles[c];
+              int placement = Random.Range(0, 2);
+              if(placement == 0 && levelGrid.GetTile(position.x + 4, position.z) > lastRoomId)
+              {
+                position.x += 4;
+              }
+              objectsGrid.SetTile(position.x, position.z, (int)TileType.TRAP_ARROWS);
+            }
+          }
+          cellCount = 0;
+          visitedPassages.Add(currentPassage);
+          passageTiles.Clear();
         }
-        if(cellCount >= 10) // Se puede poner una roca rodante
-        {
-          objectsGrid.SetTile(i + 2, j, (int)TileType.TRAP_ROCK);
-        }
-        cellCount = 0;
       }
     }
   }
@@ -470,7 +561,6 @@ public class DungeonGenerator : MonoBehaviour
   // Coloca enemigos en la habitacion
   private void PlaceEnemies(Room room)
   {
-    Vector3 position = room.transform.position;
     Vector2i coord = GetRandomCoordinateInRoom(room);
     if(coord.x == -1)
     {
@@ -567,12 +657,13 @@ public class DungeonGenerator : MonoBehaviour
     aRoom.transform.localScale = new Vector3((int)(Random.Range(NODE_MIN_SIZE / 2, node.size.x - ROOM_MARGIN)),
                                              aRoom.transform.localScale.y,
                                              (int)(Random.Range(NODE_MIN_SIZE / 2, node.size.y - ROOM_MARGIN)));
+    aRoom.transform.parent = parentRooms.transform;
     // Configuracion de la habitacion
     Room roomScript = aRoom.GetComponent<Room>();
     // Id unico
     roomScript.SetID((int)TileType.ROOM_ID + nextId);
+    lastRoomId = (int)TileType.ROOM_ID + nextId;
     nextId++;
-    numRooms = (int)TileType.ROOM_ID + nextId;
     roomScript.type = RoomType.DEFAULT;
     aRoom.name = node.GetBranchName() + "-" + node.level.ToString();
     // Escribe en el grid la estructura de la habitacion
@@ -764,6 +855,7 @@ public class DungeonGenerator : MonoBehaviour
     floor.transform.localScale = new Vector3(DUNGEON_WIDTH, DUNGEON_HEIGHT, 1);
     // Establecemos el tiling del material con respecto a sus dimensiones, un tile por unidad
     floor.GetComponent<Renderer>().material.mainTextureScale = new Vector2(DUNGEON_WIDTH, DUNGEON_HEIGHT);
+    floor.transform.parent = parentScenery.transform;
 
     // PAREDES
     List<Vector2i> wallCoordinates = new List<Vector2i>();
@@ -836,21 +928,24 @@ public class DungeonGenerator : MonoBehaviour
         switch(cell)
         {
           case (int)TileType.COIN:
-            objectManager.Create(ObjectName.Coin, position);
+            tempObject = objectManager.Create(ObjectName.Coin, position);
+            tempObject.transform.parent = parentItems.transform;
             break;
           case (int)TileType.CHEST:
             // Los cofres cerca de una pared se giran sobre esta
-            GameObject chest = objectManager.Create(ObjectName.Chest, position);
+            tempObject = objectManager.Create(ObjectName.Chest, position);
             Vector3 direction = GetAdyacentWallDirection(r, c, 1).ToVector3();
             direction.x *= -1f;
-            chest.transform.LookAt(position + direction);
+            tempObject.transform.LookAt(position + direction);
+            tempObject.transform.parent = parentItems.transform;
             break;
           case (int)TileType.POTION_HEALTH:
-            objectManager.Create(ObjectName.PotionHealth, position);
+            tempObject = objectManager.Create(ObjectName.PotionHealth, position);
+            tempObject.transform.parent = parentItems.transform;
             break;
           case (int)TileType.TRAP_SPIKES_WALL:
           case (int)TileType.TRAP_ARROWS:
-            position = new Vector3(r, TILE_UNIT, c);
+            position = new Vector3(r, TILE_UNIT / 1.5f, c);
             Direction orientation = CalculateTrapDirection(new Vector2i(r, c));
             if(orientation != Direction.NONE)
             {
@@ -880,8 +975,9 @@ public class DungeonGenerator : MonoBehaviour
             
               ObjectName objectName = (cell == (int)TileType.TRAP_SPIKES_WALL) ? ObjectName.TrapSpikeWall : ObjectName.TrapArrows;
 
-              GameObject trap = objectManager.Create(objectName, position);
-              trap.transform.eulerAngles = rotation;
+              tempObject = objectManager.Create(objectName, position);
+              tempObject.transform.eulerAngles = rotation;
+              tempObject.transform.parent = parentTraps.transform;
             }
             else
             {
@@ -891,20 +987,24 @@ public class DungeonGenerator : MonoBehaviour
 
             break;
           case (int)TileType.TRAP_SPIKES_FLOOR:
-            objectManager.Create(ObjectName.TrapSpikeFloor, position);
+            tempObject = objectManager.Create(ObjectName.TrapSpikeFloor, position);
+            tempObject.transform.parent = parentTraps.transform;
             break;
           case (int)TileType.TRAP_ROCK:
-            objectManager.Create(ObjectName.TrapRock, position);
+            tempObject = objectManager.Create(ObjectName.TrapRock, position);
+            tempObject.transform.parent = parentTraps.transform;
             break;
           case (int)TileType.ENEMY_CRAB:
             position.y += TILE_UNIT;
             tempObject = objectManager.Create(ObjectName.EnemyCrab, position);
             tempObject.GetComponent<Enemy>().SetPatrolCenter(position);
+            tempObject.transform.parent = parentEnemies.transform;
             break;
           case (int)TileType.ENEMY_GOBLIN:
             position.y += TILE_UNIT;
             tempObject = objectManager.Create(ObjectName.EnemyGobling, position);
             tempObject.GetComponent<Enemy>().SetPatrolCenter(position);
+            tempObject.transform.parent = parentEnemies.transform;
             break;
           case (int)TileType.EXIT:
             objectManager.Create(ObjectName.Portal, position);
@@ -1008,6 +1108,8 @@ public class DungeonGenerator : MonoBehaviour
     fileName = "bsp_" + fileName;
     string content = "Dungeon Generator (BSP)";
     //content += "\nSeed: " + seed;
+    content += "\nLevel: " + level;
+    content += "\nDificulty: " + difficulty;
     content += "\nDimensions: " + DUNGEON_WIDTH + "x" + DUNGEON_HEIGHT;
     content += "\nRoom min size: " + NODE_MIN_SIZE / 2;
     content += "\n2 caracteres = 1 celda";

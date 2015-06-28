@@ -119,8 +119,8 @@ public class Room : MonoBehaviour
         // mas interior y asi evitar que al conectarlas por un pasillo, este corte otra habitacion
         else
         {
-          Vector2 center = new Vector2(GameManager.Instance.levelManager.dungeonGenerator.DUNGEON_WIDTH / 2,
-                                      GameManager.Instance.levelManager.dungeonGenerator.DUNGEON_HEIGHT / 2);
+          Vector2 center = new Vector2(GameManager.Instance.levelManager.dungeonGenerator.GetComponent<DungeonGenerator>().DUNGEON_WIDTH / 2,
+                                       GameManager.Instance.levelManager.dungeonGenerator.GetComponent<DungeonGenerator>().DUNGEON_HEIGHT / 2);
           if(Vector2.Distance(center, this.parentNode.position) <= Vector2.Distance(center, siblingRoom.parentNode.position))
           {
             parentNode.SetRoom(this.gameObject);

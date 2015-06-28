@@ -13,7 +13,7 @@ public class CameraShake : MonoBehaviour
   void Update()
   {
     // Comprueba si la camara esta en modo de vibracion
-    if (this.shakeValue > 0f)
+    if(this.shakeValue > 0f)
     {
       // Vibra la camara
       transform.localPosition = transform.localPosition + (Random.insideUnitSphere * this.shakeAmount * this.shakeValue);
@@ -22,10 +22,10 @@ public class CameraShake : MonoBehaviour
       shakeValue -= Time.deltaTime * decreaseFactor;
 
       // Si se ha parado entonces lo detenemos completamente
-      if (shakeValue <= 0f)
+      if(shakeValue <= 0f)
       {
         shakeValue = 0f;
-        //this.transform.localPosition = this.cameraPos;
+        this.transform.localPosition = this.cameraPos;
       }
     }
   }
@@ -33,7 +33,7 @@ public class CameraShake : MonoBehaviour
   // Activa la vibracion de la camara, si no estaba ya activa
   public void Shake(float amount)
   {
-    if (shakeValue <= 0.0f)
+    if(shakeValue <= 0.0f)
     {
       cameraPos = transform.position;
     }

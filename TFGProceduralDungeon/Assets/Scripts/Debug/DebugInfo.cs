@@ -4,22 +4,31 @@ using UnityEngine.UI;
 
 public class DebugInfo : MonoBehaviour
 {
-  float fpsCount;
-  bool active = true;
-  GameObject canvasDebugInfo = null;
-  Text fpsText;
+  public Text prefabDebugText;
+
+  private float fpsCount;
+  private bool active = false;
+  private GameObject panelDebugInfo = null;
+  private Text fpsText;
+  private float yPosition; // Ultima posicion
 
   void Awake()
   {
-    canvasDebugInfo = GameObject.Find("CanvasDebugInfo");
-    fpsText = GameObject.Find("FpsCounter").GetComponent<Text>();
+    // Recogemos la instancia antes de ocultarlo
+    panelDebugInfo = GameObject.Find("PanelDebugInfo");
+    panelDebugInfo.SetActive(false);
+    fpsText = Instantiate(prefabDebugText);
+    fpsText.transform.SetParent(panelDebugInfo.transform, false);
+    RectTransform rt = fpsText.GetComponent<RectTransform>();
+    yPosition = rt.position.y;
+    StartCoroutine(UpdateFPS());
   }
 
-  IEnumerator Start()
+  private IEnumerator UpdateFPS()
   {
     while(true)
     {
-      if(Time.timeScale == 1)
+      if(Time.timeScale != 0f)
       {
         yield return new WaitForSeconds(0.1f);
         fpsCount = (1 / Time.deltaTime);
@@ -33,12 +42,24 @@ public class DebugInfo : MonoBehaviour
     }
   }
 
+  public void AddInfo(string content)
+  {
+    Text newInfo = Instantiate(prefabDebugText);
+    newInfo.transform.SetParent(panelDebugInfo.transform, false);
+    RectTransform rt = newInfo.GetComponent<RectTransform>();
+    Vector3 pos = rt.position;
+    pos.y -= (yPosition + 20f);
+    yPosition = pos.y;
+    rt.position = pos;
+    newInfo.text = content;
+  }
+
   void Update()
   {
     if(Input.GetKeyDown(KeyCode.F2))
     {
       active = !active;
-      canvasDebugInfo.SetActive(active);
+      panelDebugInfo.SetActive(active);
     }
   }
 }
