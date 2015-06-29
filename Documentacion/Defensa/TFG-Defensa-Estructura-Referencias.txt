@@ -1,14 +1,18 @@
 ESTRUCTURA GENERAL
 ==================
 15 minutos
-
-0 - 5
-5 - 10
-10 - 15
+0 - 4 --> Introducción, motivación, estado del arte
+4 - 8 --> Algoritmos para mazmorras, tests
+8 - 15 --> Presentacion y desarrollo del videojuego
 
 Enlace a aplicación
 Bibliografía/Referencias
 Deck.js o software utilizado para la defensa
+
+IDEAS
+=====
+- Mostrar muchas imagenes de distintas generaciones juntas en uno o varios slides para que se puedan comparar resultados.
+- Imágenes aéreas de generación completa de mazmorra.
 
 HERRAMIENTAS/REFERENCIAS
 ========================

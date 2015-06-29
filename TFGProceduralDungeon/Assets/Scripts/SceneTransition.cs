@@ -14,7 +14,7 @@ public class SceneTransition : MonoBehaviour
   void Start()
   {
     canvas = gameObject.GetComponent<CanvasGroup>();
-    canvas.alpha = 0f; // Asi podemos terminar cuando sea 0 o menos
+    canvas.alpha = 0.01f; // Asi podemos terminar cuando sea 0 o menos
     StartCoroutine(AnimateAlpha());
   }
 
@@ -25,18 +25,17 @@ public class SceneTransition : MonoBehaviour
 
     WaitForSeconds delay = new WaitForSeconds(delayTime);
     // Modificamos el alpha mientras este en proceso (> 0)
-    while(canvas.alpha >= 0f && !Input.anyKeyDown)
+    while(canvas.alpha > 0f && !Input.anyKeyDown)
     {
       canvas.alpha += changeFactor;
       // Si llega a 1 invertimos el proceso despues de una pausa
-      if(canvas.alpha > 1f)
+      if(canvas.alpha >= 1f)
       {
         canvas.alpha = 1f;
         yield return delay;
         // Continuamos hacia abajo
         changeFactor *= -1;
       }
-
       yield return null;
     }
     // Al finalizar cargamos la escena de menu principal

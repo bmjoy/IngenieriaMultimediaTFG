@@ -18,7 +18,6 @@ public enum SceneName
   MainMenu,
   Intro,
   DungeonLevel,
-  Ending,
   // Tests
   TestLevelGeneration,
   TestEnemies,

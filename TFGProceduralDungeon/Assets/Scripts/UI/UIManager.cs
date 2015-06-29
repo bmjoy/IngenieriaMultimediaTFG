@@ -78,18 +78,31 @@ public class UIManager : MonoBehaviour
   /*********** Eventos de boton ***********/
   public void OnNewGame()
   {
-    GameManager.Instance.LoadScene((int)SceneName.Intro);
+    StartCoroutine(WaitOnSceneLoad((int)SceneName.Intro));
   }
 
   public void OnMainMenu()
   {
-    Time.timeScale = 1.0f - Time.timeScale;
-    GameManager.Instance.LoadScene((int)SceneName.MainMenu);
+    GameManager.Instance.SetPause(false);
+    StartCoroutine(WaitOnSceneLoad((int)SceneName.MainMenu));
   }
 
   public void OnBack()
   {
-    GameManager.Instance.LoadScene((int)SceneName.MainMenu);
+    StartCoroutine(WaitOnSceneLoad((int)SceneName.MainMenu));
+  }
+
+  public void OnExit()
+  {
+    Application.Quit();
+  }
+
+  // Espera un poco despues de pulsar un boton, esto permite escuchar
+  // el sonido de pulsado y no parece tan brusco
+  private IEnumerator WaitOnSceneLoad(int scene)
+  {
+    yield return new WaitForSeconds(1f);
+    GameManager.Instance.LoadScene(scene);
   }
   
   /*********** Otros eventos ***********/
@@ -130,11 +143,11 @@ public class UIManager : MonoBehaviour
 
   public void OnTestLevelGeneration()
   {
-    GameManager.Instance.LoadScene((int)SceneName.TestLevelGeneration);
+    StartCoroutine(WaitOnSceneLoad((int)SceneName.TestLevelGeneration));
   }
 
   public void OnTestEnemies()
   {
-    GameManager.Instance.LoadScene((int)SceneName.TestEnemies);
+    StartCoroutine(WaitOnSceneLoad((int)SceneName.TestEnemies));
   }
 }

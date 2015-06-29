@@ -92,18 +92,17 @@ public class AudioManager : MonoBehaviour
 
   private void OnLevelWasLoaded(int index)
   {
-    switch(index)
+    if(GameManager.Instance.lastScene != index)
     {
-      case (int)SceneName.MainMenu:
-        PlayClip(AudioList.MusicMenu);
-        break;
-      case (int)SceneName.DungeonLevel:
-        // La musica se mantiene entre escenas de juego
-        if(GameManager.Instance.lastScene != index)
-        {
+      switch(index)
+      {
+        case (int)SceneName.MainMenu:
+          PlayClip(AudioList.MusicMenu);
+          break;
+        case (int)SceneName.DungeonLevel:
           PlayClip(AudioList.MusicLevel);
-        }
-        break;
+          break;
+      }
     }
   }
 }
