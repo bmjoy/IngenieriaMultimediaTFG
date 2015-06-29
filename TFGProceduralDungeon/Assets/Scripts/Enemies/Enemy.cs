@@ -48,7 +48,7 @@ public class Enemy : MonoBehaviour
   void Update()
   {
     MakeDecision();
-    switch (state)
+    switch(state)
     {
       case AIState.Idle:
         Wait();
@@ -90,20 +90,20 @@ public class Enemy : MonoBehaviour
 
   private void MakeDecision()
   {
-    if (state != AIState.Dead && state != AIState.Attacking)
+    if(state != AIState.Dead && state != AIState.Attacking)
     {
-      if (player == null)
+      if(player == null)
       {
         player = GameManager.Instance.player;
       }
       else
       {
         float distance = Vector3.Distance(player.transform.position, this.transform.position);
-        if (state == AIState.Chasing)
+        if(state == AIState.Chasing)
         {
-          if (distance > sightRadius)
+          if(distance > sightRadius)
           {
-            if (routine != null)
+            if(routine != null)
             {
               StopCoroutine(routine);
             }
@@ -116,7 +116,7 @@ public class Enemy : MonoBehaviour
         }
         else
         {
-          if (distance <= sightRadius)
+          if(distance <= sightRadius)
           {
             SetState(AIState.Chasing);
           }
@@ -145,10 +145,10 @@ public class Enemy : MonoBehaviour
 
   private void GetNextTarget()
   {
-    if (reverse)
+    if(reverse)
     {
       patrolIterator--;
-      if (patrolIterator < 0)
+      if(patrolIterator < 0)
       {
         patrolIterator = patrolPoints.Length - 1;
       }
@@ -156,7 +156,7 @@ public class Enemy : MonoBehaviour
     else
     {
       patrolIterator++;
-      if (patrolIterator >= patrolPoints.Length)
+      if(patrolIterator >= patrolPoints.Length)
       {
         patrolIterator = 0;
       }
@@ -176,7 +176,7 @@ public class Enemy : MonoBehaviour
   private void Patrol()
   {
     MoveToTarget(speed);
-    if (Vector3.Distance(transform.position, target) < 0.1f)
+    if(Vector3.Distance(transform.position, target) < 0.1f)
     {
       // Obtiene el siguiente punto de la zona de patrulla
       GetNextTarget();
@@ -201,8 +201,8 @@ public class Enemy : MonoBehaviour
   // Animacion de muerte, se aplica sobre el sprite ya que es el que gira segun la camara
   private void DeadAnimation()
   {
-    if (sprite.transform.localScale.x > 0.1f &&
-        sprite.transform.localScale.y > 0.1f)
+    if(sprite.transform.localScale.x > 0.1f &&
+      sprite.transform.localScale.y > 0.1f)
     {
       sprite.transform.localScale -= new Vector3(0.1f, 0.1f, 0f);
     }
@@ -229,11 +229,11 @@ public class Enemy : MonoBehaviour
   {
     reverse = !reverse;
     string cTag = collision.gameObject.tag;
-    if (cTag == "Wall") // Si choca con pared busca el siguiente target
+    if(cTag == "Wall") // Si choca con pared busca el siguiente target
     {
       GetNextTarget();
     }
-    if (cTag == "Player") // Ataque
+    if(cTag == "Player") // Ataque
     {
       StartCoroutine(Attack());
     }
@@ -241,7 +241,7 @@ public class Enemy : MonoBehaviour
 
   void OnTriggerStay(Collider collider)
   {
-    if (collider.gameObject.tag == "Damage") // Ataque
+    if(collider.gameObject.tag == "Damage") // Ataque
     {
       StartCoroutine(Die());
     }

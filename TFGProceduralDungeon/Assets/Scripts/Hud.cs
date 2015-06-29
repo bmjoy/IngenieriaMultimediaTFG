@@ -46,14 +46,15 @@ public class Hud : MonoBehaviour
       pointsText.text = currentPoints.ToString();
     }
     // Temporizador
-    UpdateTimer();
+    timerText.text = GetFormatedTime(levelManager.timer);
   }
 
-  private void UpdateTimer()
+  private string GetFormatedTime(float time)
   {
-    string minutes = Mathf.Floor(levelManager.timer / 60).ToString("00");
-    string seconds = Mathf.Floor(levelManager.timer % 60).ToString("00");
-    timerText.text = minutes + ":" + seconds;
+    string str =
+      Mathf.Floor(time / 60f).ToString("00") + ":" +
+      Mathf.Floor(time % 60f).ToString("00");
+    return str;
   }
 
   public void OnPointsChanged(int points)

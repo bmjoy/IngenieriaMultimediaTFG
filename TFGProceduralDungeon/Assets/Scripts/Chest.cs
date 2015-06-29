@@ -16,6 +16,7 @@ public class Chest : MonoBehaviour
 
     // Activa el efecto de particulas y comienza a sumar puntos
     Instantiate(particlesGemsPrefab, transform.position, particlesGemsPrefab.transform.rotation);
+    GameManager.Instance.audioManager.PlayFX(AudioList.Chest, true);
     Destroy(gameObject.GetComponent<Chest>());
   }
 

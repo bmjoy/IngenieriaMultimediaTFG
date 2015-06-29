@@ -35,7 +35,7 @@ public class DebugTools : MonoBehaviour
     }
     if(Input.GetKeyDown(KeyCode.N))
     { // Next level
-      GameManager.Instance.levelManager.FinishLevel();
+      GameManager.Instance.FinishLevel();
     }
     else if(Input.GetKeyDown(KeyCode.F3)) // Save level to file
     {

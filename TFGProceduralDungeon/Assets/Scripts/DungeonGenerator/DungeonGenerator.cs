@@ -59,7 +59,7 @@ public class DungeonGenerator : MonoBehaviour
   private Coroutine routine;
 
   // Margen dentro del espacio del nodo. Hay que tener en cuenta que sera el doble
-  private const float ROOM_MARGIN = 4f;
+  private const float NODE_MARGIN = 4f;
   // Unidad base de los tiles/celdas del mapa. Corresponde a unidades del grid de Unity
   private const float TILE_UNIT = 1f;
   // ROOM
@@ -87,8 +87,15 @@ public class DungeonGenerator : MonoBehaviour
   private int level; // Numero de nivel para escoger las particiones bsp
 
   // ESTADISTICAS DE OBJETOS, ENEMIGOS...
-  private int numEnemigo = 0;
-  private int numPociones = 0;
+  // Probabilidades
+  private int probCoin = 80;
+  private int probPotion = 20;
+  private int probChest = 30;
+  // Cantidad
+  private int numEnemies = 0;
+  private int numPotions = 0;
+  private int numChests = 0;
+  // Dificultad de la mazmorra
   private int difficulty = 0;
 
   // Objetos padres para agrupar los componentes de la mazmorra en el editor de Unity
@@ -126,7 +133,7 @@ public class DungeonGenerator : MonoBehaviour
     parentEnemies.name = "Enemies";
 
     objectManager = GameManager.Instance.objectManager;
-    level = GameManager.Instance.level;
+    level = GameManager.Instance.GetLevel();
     DUNGEON_WIDTH = width;
     DUNGEON_HEIGHT = height;
     levelGrid = new Grid(DUNGEON_WIDTH, DUNGEON_HEIGHT);
@@ -195,7 +202,7 @@ public class DungeonGenerator : MonoBehaviour
     PopulateDungeon(bspTree.Root);
     PopulatePassages();
     DrawLevel();
-    difficulty = numEnemigo * 10 - numPociones * 5;
+    difficulty = numEnemies * 10 - numPotions * 5;
 
     // Info de debug
     string info = "Dungeon dimensions: " + DUNGEON_WIDTH + "x" + DUNGEON_HEIGHT;
@@ -208,11 +215,14 @@ public class DungeonGenerator : MonoBehaviour
   {
     Room entrance = null;
     Room exit = null;
-    //Debug.Log(rooms.Count);
-    //for (int i = 0; i < rooms.Count; i++)
-    //{
-    //  Debug.Log(i + " -- " + rooms[i].GetNode());
-    //}
+//    for(int i = 0; i < rooms.Count; i++)
+//    {
+//      Debug.Log(i + " -- " + rooms[i].GetNode());
+//      if(rooms[i].GetNode() == null)
+//      {
+//        Debug.Log("NULL");
+//      }
+//    }
     // Entrance
     for(int i = 0; i < rooms.Count; i++)
     {
@@ -223,7 +233,7 @@ public class DungeonGenerator : MonoBehaviour
       if(rooms[i].GetNode().branch == Branch.LEFT)
       {
         entrance = rooms[i];
-        entrance.type = RoomType.ENTRANCE;
+        entrance.role = RoomRole.ENTRANCE;
         break;
       }
     }
@@ -245,7 +255,7 @@ public class DungeonGenerator : MonoBehaviour
           }
         }
       }
-      exit.type = RoomType.EXIT;
+      exit.role = RoomRole.EXIT;
     }
     else
     {
@@ -308,8 +318,8 @@ public class DungeonGenerator : MonoBehaviour
   {
     bool found = false;
     int tries = 0;
-    int rx = room.position.x + 1;
-    int rz = room.position.z + 1;
+    int rx = room.position.x;
+    int rz = room.position.z;
     int depth = 2;
     while(!found && tries < 20)
     {
@@ -382,25 +392,47 @@ public class DungeonGenerator : MonoBehaviour
 
     int r = Random.Range(0, 100);
     // Crea un item segun su probabilidad
-    if(r >= 0 && r < 60) // Coin = 50%
-    {
-      int coins = Random.Range(1, 6);
+
+    // Las monedas siempre pueden aparecer
+    if(r >= 0 && r < probCoin)
+    { // Coin
+      int coins = Random.Range(2, 7);
       // Pueden aparecer mas de una moneda
       for(int i = 0; i < coins; i++)
       { // Probabilidad igual
+        if(coord.x == -1)
+        {
+          continue;
+        }
         objectsGrid.SetTile(coord.x, coord.z, (int)TileType.COIN);
         coord = GetRandomCoordinateInRoom(room);
       }
     }
-    r = Random.Range(0, 100);
-    if(r >= 60 && r < 80) // Potion
+
+    if(coord.x == -1)
     {
-      objectsGrid.SetTile(coord.x, coord.z, (int)TileType.POTION_HEALTH);
-      numPociones++;
+      return;
     }
-    else if(r >= 80 && r < 100) // Chest
-    {
+    // Tambien puede aparecer una pocion o un cofre
+    r = Random.Range(0, 100);
+    // Pociones solo en la segunda mitad de la mazmorra
+    if(room.GetNode() != null && room.GetNode().branch == Branch.RIGHT && r >= 0 && r < probPotion)
+    { // Potion
+      objectsGrid.SetTile(coord.x, coord.z, (int)TileType.POTION_HEALTH);
+      numPotions++;
+      if(probPotion > 0)
+      {
+        probPotion -= 10;
+      }
+    }
+    else if(r >= probPotion && r < probPotion + probChest)
+    { // Chest
       objectsGrid.SetTile(coord.x, coord.z, (int)TileType.CHEST);
+      numChests++;
+      if(probChest > 0)
+      {
+        probChest -= 10;
+      }
     }
   }
 
@@ -493,8 +525,8 @@ public class DungeonGenerator : MonoBehaviour
                 if(!(x == xLimits.x && z == zLimits.x) && !(x == xLimits.x && z == zLimits.z) &&
                   !(x == xLimits.z && z == zLimits.x) && !(x == xLimits.z && z == zLimits.z))
                 {
-                  if(levelGrid.GetTile(x, z) >= (int)TileType.ROOM_ID) // Pared
-                  {
+                  if(levelGrid.GetTile(x, z) >= (int)TileType.ROOM_ID)
+                  { // Pared
                     objectsGrid.SetTile(x, z, (int)TileType.TRAP_SPIKES_WALL);
                   }
                 }
@@ -531,8 +563,8 @@ public class DungeonGenerator : MonoBehaviour
             tile = levelGrid.GetTile(i, x);
           }
           // ROCK
-          if(cellCount >= 10) // Se puede poner una roca rodante
-          {
+          if(cellCount >= 10)
+          { // Se puede poner una roca rodante
             objectsGrid.SetTile(i + 2, j, (int)TileType.TRAP_ROCK);
           }
           // ARROWS. Volvemos a recorrer el pasillo poniendo flechas
@@ -561,23 +593,34 @@ public class DungeonGenerator : MonoBehaviour
   // Coloca enemigos en la habitacion
   private void PlaceEnemies(Room room)
   {
-    Vector2i coord = GetRandomCoordinateInRoom(room);
-    if(coord.x == -1)
+    int enemiesToCreate = 1;
+    // Dimensiones de una habitacion que se considera grande 80% del maximo
+    float bigRoomSize = 0.9f * (NODE_MIN_SIZE - NODE_MARGIN);
+    if(room.size.x > bigRoomSize || room.size.z > bigRoomSize)
     {
-      return;
+      enemiesToCreate = 4;
     }
-    int r = Random.Range(0, 2);
 
-    switch(r)
+    for(int i = 0; i < enemiesToCreate; i++)
     {
-      case 0: // Crab
-        objectsGrid.SetTile(coord.x, coord.z, (int)TileType.ENEMY_CRAB);
-        break;
-      case 1: // Goblin
-        objectsGrid.SetTile(coord.x, coord.z, (int)TileType.ENEMY_GOBLIN);
-        break;
+      Vector2i coord = GetRandomCoordinateInRoom(room);
+      if(coord.x == -1)
+      {
+        return;
+      }
+
+      int r = Random.Range(0, 2);
+      switch(r)
+      {
+        case 0: // Crab
+          objectsGrid.SetTile(coord.x, coord.z, (int)TileType.ENEMY_CRAB);
+          break;
+        case 1: // Goblin
+          objectsGrid.SetTile(coord.x, coord.z, (int)TileType.ENEMY_GOBLIN);
+          break;
+      }
+      numEnemies++;
     }
-    numEnemigo++;
   }
 
   private void PopulateDungeon(BSPNode node)
@@ -591,24 +634,21 @@ public class DungeonGenerator : MonoBehaviour
     {// Hoja con habitacion
       Room room = node.GetRoom().GetComponent<Room>();
 
-      switch(room.type)
+      if(room.role == RoomRole.ENTRANCE)
       {
-        case RoomType.DEFAULT:
-          PlaceItems(room);
-          PlaceTraps(room);
-          PlaceEnemies(room);
-          break;
-        case RoomType.PASSAGE:
-          break;
-        case RoomType.ENTRANCE:
-          PlacePlayer(room);
-          break;
-        case RoomType.EXIT:
-          PlaceExit(room);
-          break;
-        default:
-          break;
+        PlacePlayer(room);
       }
+      else
+      {
+        PlaceItems(room);
+        PlaceTraps(room);
+        PlaceEnemies(room);
+        if(room.role == RoomRole.EXIT)
+        {
+          PlaceExit(room);
+        }
+      }
+
       return;
     }
     if(node.GetRightNode() != null)
@@ -654,9 +694,9 @@ public class DungeonGenerator : MonoBehaviour
     // Las dimensiones maximas seran NODE_MIN_SIZE - ROOM_MARGIN
     Vector3 roomPosition = new Vector3(node.position.x, 0f, node.position.y);
     GameObject aRoom = (GameObject)Instantiate(BaseRoom, roomPosition, Quaternion.identity);
-    aRoom.transform.localScale = new Vector3((int)(Random.Range(NODE_MIN_SIZE / 2, node.size.x - ROOM_MARGIN)),
+    aRoom.transform.localScale = new Vector3((int)(Random.Range(NODE_MIN_SIZE / 2, node.size.x - NODE_MARGIN)),
                                              aRoom.transform.localScale.y,
-                                             (int)(Random.Range(NODE_MIN_SIZE / 2, node.size.y - ROOM_MARGIN)));
+                                             (int)(Random.Range(NODE_MIN_SIZE / 2, node.size.y - NODE_MARGIN)));
     aRoom.transform.parent = parentRooms.transform;
     // Configuracion de la habitacion
     Room roomScript = aRoom.GetComponent<Room>();
@@ -664,11 +704,11 @@ public class DungeonGenerator : MonoBehaviour
     roomScript.SetID((int)TileType.ROOM_ID + nextId);
     lastRoomId = (int)TileType.ROOM_ID + nextId;
     nextId++;
-    roomScript.type = RoomType.DEFAULT;
+    roomScript.role = RoomRole.DEFAULT;
     aRoom.name = node.GetBranchName() + "-" + node.level.ToString();
     // Escribe en el grid la estructura de la habitacion
     levelGrid = roomScript.Setup(levelGrid);
-    roomScript.SetParentNode(node);
+    roomScript.SetNode(node);
     node.SetRoom(aRoom);
 
     return roomScript;
@@ -706,16 +746,18 @@ public class DungeonGenerator : MonoBehaviour
 
   private void CreateRooms(BSPNode node)
   {
+    if(node == null)
+    {
+      return;
+    }
     if(node.GetLeftNode() != null)
     {
       CreateRooms(node.GetLeftNode());
     }
-    else
+    if(node.GetLeftNode() == null && node.GetLeftNode() == null)
     {
       rooms.Add(AddRoom(node));
-      return;
     }
-
     if(node.GetRightNode() != null)
     {
       CreateRooms(node.GetRightNode());
@@ -798,8 +840,8 @@ public class DungeonGenerator : MonoBehaviour
     float halfUnit = TILE_UNIT / 2;
     float gap = 0.02f;
     Vector3 position = new Vector3(coordinates[0].x + halfUnit, 0f, coordinates[0].z + halfUnit); // En el centro de la celda
-    if(coordinates.Count == 1)// Celdas solitarias
-    {
+    if(coordinates.Count == 1)
+    {// Celdas solitarias
       if(axis == 'x')
       {
         wall = objectManager.Create(ObjectName.TileWall, new Vector3(position.x, 1f, position.z));
@@ -882,8 +924,8 @@ public class DungeonGenerator : MonoBehaviour
           }
           if(wallCoordinates.Count > 1)
           {
-            for(int i = 0; i < wallCoordinates.Count; i++) // Borra la pared del mapa temporal
-            {
+            for(int i = 0; i < wallCoordinates.Count; i++)
+            { // Borra la pared del mapa temporal
               tempGrid.SetTile(wallCoordinates[i].x, wallCoordinates[i].z, 0);
             }
           }
@@ -908,8 +950,8 @@ public class DungeonGenerator : MonoBehaviour
           {
             tempObject.transform.parent = floor.transform.parent;
           }
-          for(int i = 0; i < wallCoordinates.Count; i++) // Borra la pared del mapa temporal
-          {
+          for(int i = 0; i < wallCoordinates.Count; i++)
+          { // Borra la pared del mapa temporal
             tempGrid.SetTile(wallCoordinates[i].x, wallCoordinates[i].z, 0);
           }
           wallCoordinates = new List<Vector2i>();
@@ -1053,8 +1095,8 @@ public class DungeonGenerator : MonoBehaviour
     {
       orientation = candidates[0];
     }
-    else if(candidates.Count > 1) // Escoge una direccion aleatoriamente
-    {
+    else if(candidates.Count > 1)
+    { // Escoge una direccion aleatoriamente
       orientation = candidates[Random.Range(0, candidates.Count)];
     }
 
@@ -1118,10 +1160,10 @@ public class DungeonGenerator : MonoBehaviour
     string temp;
     int tile;
     // Layout de las habitaciones y pasillos
-    for(int x = 0; x < DUNGEON_WIDTH; x++) // alto = filas
-    {
-      for(int z = 0; z < DUNGEON_HEIGHT; z++) // ancho = columnas
-      {
+    for(int x = 0; x < DUNGEON_WIDTH; x++)
+    { // alto = filas
+      for(int z = 0; z < DUNGEON_HEIGHT; z++)
+      { // ancho = columnas
         if(levelGrid.GetTile(x, z) == 0)
         {
           content += "--";
@@ -1146,15 +1188,15 @@ public class DungeonGenerator : MonoBehaviour
 
 
     // Habitaciones + objetos/trampas
-    for(int x = 0; x < DUNGEON_WIDTH; x++) // alto = filas
-    {
-      for(int z = 0; z < DUNGEON_HEIGHT; z++) // ancho = columnas
-      {
+    for(int x = 0; x < DUNGEON_WIDTH; x++)
+    { // alto = filas
+      for(int z = 0; z < DUNGEON_HEIGHT; z++)
+      { // ancho = columnas
         if(objectsGrid.GetTile(x, z) == 0)
         {
           if(levelGrid.GetTile(x, z) == 0)
           {
-            content += "#";
+            content += "##";
           }
           else
           {

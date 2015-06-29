@@ -4,12 +4,20 @@ using System.Collections;
 
 public class UIManager : MonoBehaviour
 {
-  public GameObject pauseCanvas;
+  private Canvas pauseCanvas;
 
   private GameObject menuTests;
   private GameObject menuMain;
 
   private bool isCursorLocked = false;
+
+  private string GetFormatedTime(float time)
+  {
+    string str =
+      Mathf.Floor(time / 60f).ToString("00") + ":" +
+      Mathf.Floor(time % 60f).ToString("00");
+    return str;
+  }
 
   private void Start()
   {
@@ -23,6 +31,13 @@ public class UIManager : MonoBehaviour
     else if(Application.loadedLevel == (int)SceneName.DungeonLevel)
     {
       LockMouse(true);
+    }
+
+    GameObject cpm = GameObject.Find("CanvasPauseMenu");
+
+    if(cpm != null)
+    {
+      pauseCanvas = cpm.GetComponent<Canvas>();
     }
   }
 
@@ -50,7 +65,7 @@ public class UIManager : MonoBehaviour
   // Activa/desactiva la pausa
   public void TogglePause()
   {
-    pauseCanvas.SetActive(!pauseCanvas.activeSelf);
+    pauseCanvas.enabled = !pauseCanvas.enabled;
     GameManager.Instance.SetPause(!GameManager.Instance.Paused);
     LockMouse(!GameManager.Instance.Paused);
   }
@@ -76,14 +91,34 @@ public class UIManager : MonoBehaviour
   {
     GameManager.Instance.LoadScene((int)SceneName.MainMenu);
   }
-
+  
   /*********** Otros eventos ***********/
   // Muestra la pantalla de fin de mazmorra
   public void OnLevelFinish()
   {
     GameManager.Instance.SetPause(true);
     LockMouse(false);
+    GameManager gm = GameManager.Instance;
     GameObject.Find("CanvasEndScreen").GetComponent<Canvas>().enabled = true;
+    GameObject.Find("TextLevelCompleted").GetComponent<Text>().text = "LEVEL " + GameManager.Instance.GetLevel() + " COMPLETED!";
+    int points = gm.player.GetPoints();
+    GameObject.Find("TextFinalPoints").GetComponent<Text>().text = points.ToString();
+    GameObject.Find("TextFinalTimer").GetComponent<Text>().text = GetFormatedTime(gm.levelManager.timer);
+    gm.AddPoints(points);
+    GameObject.Find("CountTotalTreasure").GetComponent<Text>().text = gm.GetPoints().ToString();
+  }
+
+  // Muestra la pantalla de fin de juego
+  public void OnGameOver()
+  {
+    GameManager.Instance.SetPause(true);
+    LockMouse(false);
+    GameManager gm = GameManager.Instance;
+    GameObject.Find("CanvasGameOver").GetComponent<Canvas>().enabled = true;
+    int points = gm.player.GetPoints();
+    GameObject.Find("TextGameOverPoints").GetComponent<Text>().text = points.ToString();
+    gm.AddPoints(points);
+    GameObject.Find("GameOverTotalPoints").GetComponent<Text>().text = gm.GetPoints().ToString();
   }
 
   /*********** TESTS ***********/

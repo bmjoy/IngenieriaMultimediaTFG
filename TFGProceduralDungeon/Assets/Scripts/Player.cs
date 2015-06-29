@@ -41,6 +41,10 @@ public class Player : MonoBehaviour
     this.points += points;
     hud.OnPointsChanged(this.points);
   }
+  public int GetPoints()
+  {
+    return this.points;
+  }
 
   void Start()
   {
@@ -119,23 +123,23 @@ public class Player : MonoBehaviour
 
     // ANIMACIONES
     // Threshold speed for walk/idle animation
-    if(!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerAttack"))
+    if(!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerBilboAttack"))
     {
       float tSpeed = maxWalkSpeed * 0.5f;
       if(Mathf.Abs(vWalkSpeed) > tSpeed || Mathf.Abs(hWalkSpeed) > tSpeed)
       {
-        animator.Play("PlayerWalk");
+        animator.Play("PlayerBilboWalk");
       }
       else
       {
-        animator.Play("PlayerIdle");
+        animator.Play("PlayerBilboIdle");
       }
     }
 
     // Attack
     if(Input.GetKeyDown(KeyCode.Z) || Input.GetKey(KeyCode.Mouse0))
     {
-      animator.Play("PlayerAttack");
+      animator.Play("PlayerBilboAttack");
       if(!attacking)
       {
         StartCoroutine(Attack());
@@ -148,8 +152,14 @@ public class Player : MonoBehaviour
     }
   }
 
+  private void PlaySound(AudioList sound)
+  {
+    GameManager.Instance.audioManager.PlayClip(this.GetComponent<AudioSource>(), sound, true);
+  }
+
   private IEnumerator Attack()
   {
+    PlaySound(AudioList.PlayerAttack);
     attacking = true;
     cameraLookAt.locked = true;
     // El length a una animacion no cambia al modificar su speed en el editor
@@ -158,6 +168,7 @@ public class Player : MonoBehaviour
     float animationLength = animator.GetCurrentAnimatorStateInfo(0).length;
     float animationTime = animationLength / 3f;
     yield return new WaitForSeconds(animationTime * 0.4f);
+    PlaySound(AudioList.PlayerHit);
     // Instanciamos la caja de daño al lado del Player
     Vector3 start = this.transform.position;
     start.y -= 0.1f;
@@ -172,7 +183,6 @@ public class Player : MonoBehaviour
       // Debug.Log(position);
       yield return null;
     }
-
     yield return new WaitForSeconds(animationTime * 0.6f);
     Destroy(playerAttackInstance);
     attacking = false;
@@ -186,6 +196,7 @@ public class Player : MonoBehaviour
       startJump = false;
       rigidBody.velocity *= 0;
       rigidBody.AddForce(Vector3.up * jumpForce);
+      PlaySound(AudioList.PlayerJump);
     }
   }
 
@@ -200,7 +211,7 @@ public class Player : MonoBehaviour
     }
     else if(cTag == "Exit")
     {
-      GameManager.Instance.levelManager.FinishLevel();
+      GameManager.Instance.FinishLevel();
     }
     else if(cTag == "Wall")
     {
@@ -219,6 +230,7 @@ public class Player : MonoBehaviour
     }
     else if(cTag == "Coin")
     {
+      PlaySound(AudioList.Coin);
       AddPoints((int)ItemPoints.COIN);
     }
     else if(cTag == "Potion")
@@ -236,26 +248,29 @@ public class Player : MonoBehaviour
   private void SetHealth(int health)
   {
     this.health = health;
-    if(this.health <= 0)
-    {
-      this.health = MAX_HEALTH;
-    }
     hud.SetHealthMeter(this.health);
   }
 
   // Espera un tiempo de gracia durante el cual el 
   IEnumerator OnPlayerDamaged()
   {
+    PlaySound(AudioList.PlayerDamage);
     SetHealth(health - 1);
-
-    invincible = true;
-    // Activa el parpadeo del sprite durante el tiempo de gracia
-    // Parpadeo de sprite cuando es invencible
-    InvokeRepeating("BlinkSprite", 0f, 0.1f);
-    yield return new WaitForSeconds(hitGraceTime);
-    // Restaura
-    CancelInvoke(); // ATENCION: Detiene todos los InvokeRepeating
-    spriteRenderer.enabled = true;
-    invincible = false;
+    if(health <= 0)
+    {
+      GameManager.Instance.GameOver();
+    }
+    else
+    {
+      invincible = true;
+      // Activa el parpadeo del sprite durante el tiempo de gracia
+      // Parpadeo de sprite cuando es invencible
+      InvokeRepeating("BlinkSprite", 0f, 0.1f);
+      yield return new WaitForSeconds(hitGraceTime);
+      // Restaura
+      CancelInvoke(); // ATENCION: Detiene todos los InvokeRepeating
+      spriteRenderer.enabled = true;
+      invincible = false;
+    }
   }
 }

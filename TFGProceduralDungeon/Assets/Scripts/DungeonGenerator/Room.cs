@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 // Tipos de habitaciones
-public enum RoomType
+public enum RoomRole
 {
   DEFAULT,
   ENTRANCE, // Habitacion inicial donde comienza el jugador
@@ -14,27 +14,41 @@ public enum RoomType
 public class Room : MonoBehaviour
 {
   public GameObject prefabDigger;
-  public RoomType type;
+  public RoomRole role;
   // Posicion y dimensiones en enteros. Son unidades de grid.
   public Vector2i position;
   public Vector2i size;
   // Indica si se debe escoger aleatoriamente cuando se asigna una habitacion a un nodo
   // padre para realizar las conexiones mediante pasillos
-  // Cuando es false se escoge la habitaciones por cercania al centro
-  public bool randomConnection = true;
+  // Cuando es false se escogen la habitaciones por cercania al centro
+  public bool randomConnection = false;
   public List<Vector2i> doorPoints; // Puntos de puertas hacia pasillos
   private int roomId;
   private BSPNode parentNode;
   private GameObject sibling;
 
-  public BSPNode GetNode()
+  public void SetID(int aID)
   {
-    return parentNode;
+    roomId = aID;
   }
 
   public int GetId()
   {
     return roomId;
+  }
+
+  public void SetNode(BSPNode aNode)
+  {
+    if(aNode == null)
+    {
+      Debug.Log("Setting node to null in room " + GetId());
+    }
+    parentNode = aNode;
+  }
+
+  public BSPNode GetNode()
+  {
+    return parentNode;
   }
 
   // Establece la geometria de la habitacion sobre el grid
@@ -70,20 +84,9 @@ public class Room : MonoBehaviour
     return grid;
   }
 
-  public void SetID(int aID)
-  {
-    roomId = aID;
-  }
-
-  public void SetParentNode(BSPNode aNode)
-  {
-    parentNode = aNode;
-  }
-
   public void Connect()
   {
     DungeonGenerator generator = GameObject.FindObjectOfType<DungeonGenerator>();
-
     // Recoge el nodo hermano
     GetSibiling();
     if(sibling != null)
@@ -102,6 +105,7 @@ public class Room : MonoBehaviour
       parentNode = FindRoomlessParent(parentNode);
       if(parentNode != null)
       {
+        randomConnection = Random.Range(0, 2) == 0 ? true : false;
         // La habitacion se escoge aleatoriamente entre los dos nodos hijos
         if(randomConnection)
         {
@@ -130,7 +134,7 @@ public class Room : MonoBehaviour
             parentNode.SetRoom(sibling.gameObject);
           }
         }
-        siblingRoom.SetParentNode(parentNode);
+        siblingRoom.SetNode(parentNode);
       }
       Destroy(digger);
     }

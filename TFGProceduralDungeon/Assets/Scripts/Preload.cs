@@ -7,9 +7,12 @@ using System.Collections;
 // que pueden dar problemas porque no mueren hasta final de frame y pueden ejecutar cosas
 public class Preload : MonoBehaviour
 {
+  public GameObject prefabGameManager;
   public SceneName sceneToLoad;
   void Start()
   {
-    Application.LoadLevel((int)sceneToLoad);
+    GameManager gm = Instantiate(prefabGameManager).GetComponent<GameManager>();
+    gm.Initialize();
+    gm.LoadScene((int)sceneToLoad);
   }
 }
