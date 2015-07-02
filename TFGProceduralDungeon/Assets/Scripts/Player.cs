@@ -17,8 +17,8 @@ public class Player : MonoBehaviour
   private Hud hud;
 
   private int hitGraceTime = 1; // Segundos invencible despues de ser golpeado
-  private float maxWalkSpeed = 3.0f;
-  private float maxRunSpeed = 5.0f;
+  private float maxWalkSpeed = 4.0f;
+  private float maxRunSpeed = 6.0f;
   private float jumpForce = 200f;
   private bool running = false;
   private bool attacking = false;
@@ -31,7 +31,7 @@ public class Player : MonoBehaviour
   private Animator animator;
   private Rigidbody rigidBody; // Al que aplicar fuerza para salto
 
-  private Camera cameraMain;
+  private CameraSwitcher cameraSwitcher;
   private CameraLookAt cameraLookAt; // Camara que sigue al jugador
 
 
@@ -53,37 +53,57 @@ public class Player : MonoBehaviour
     spriteRenderer = sprite.GetComponent<SpriteRenderer>();
     animator = sprite.GetComponent<Animator>();
     rigidBody = GetComponent<Rigidbody>();
-    cameraMain = Camera.main;
-    cameraLookAt = cameraMain.GetComponent<CameraLookAt>();
+    cameraSwitcher = Camera.main.GetComponent<CameraSwitcher>();
+    cameraLookAt = Camera.main.GetComponent<CameraLookAt>();
     hud = gameObject.GetComponent<Hud>();
 
   }
 
   void Update()
   {
-    // Input
+    float speed = 0f;
+    bool setAttack = false;
+
+    // INPUT
+    // =====
     // Cuando esta atacando no se puede mover
-    if(attacking)
+    if(!attacking && cameraSwitcher.mode == CameraMode.LookAt)
     {
-      return;
+      // Si se pulsa Shift la velocidad cambia
+      if(Input.GetKeyDown(KeyCode.LeftShift))
+      {
+        running = true;
+      }
+      if(Input.GetKeyUp(KeyCode.LeftShift))
+      {
+        running = false;
+      }
+      setAttack = (Input.GetKeyDown(KeyCode.Z) || Input.GetKey(KeyCode.Mouse0));
+      speed = maxWalkSpeed;
+      if(running)
+      {
+        speed = maxRunSpeed;
+      }
+      // SALTO. Solo cuando esta en el suelo
+      if(onGround && (Input.GetKeyDown(KeyCode.Space) || Input.GetKey(KeyCode.Mouse1)))
+      {
+        // Activamos el flag y la fisica se hace en FixedUpdate
+        startJump = true;
+        onGround = false;
+      }
+    }
+    // Activa/desactiva el modo invencible
+    if(Input.GetKeyUp(KeyCode.I))
+    {
+      invincible = !invincible;
+      if(invincible)
+      {
+        PlaySound(AudioList.Coin);
+      }
     }
 
-    // Si se pulsa Shift la velocidad cambia
-    if(Input.GetKeyDown(KeyCode.LeftShift))
-    {
-      running = true;
-    }
-    if(Input.GetKeyUp(KeyCode.LeftShift))
-    {
-      running = false;
-    }
-
-    float speed = maxWalkSpeed;
-    if(running)
-    {
-      speed = maxRunSpeed;
-    }
-
+    // MOVIMIENTO
+    // ==========
     // Get the horizontal and vertical axis.
     // By default they are mapped to the arrow keys.
     // The value is in the range -1 to 1
@@ -113,31 +133,30 @@ public class Player : MonoBehaviour
       }
     }
 
-    // SALTO. Solo cuando esta en el suelo
-    if(onGround && (Input.GetKeyDown(KeyCode.Space) || Input.GetKey(KeyCode.Mouse1)))
-    {
-      // Activamos el flag y la fisica se hace en FixedUpdate
-      startJump = true;
-      onGround = false;
-    }
-
     // ANIMACIONES
+    // ===========
     // Threshold speed for walk/idle animation
     if(!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerBilboAttack"))
     {
       float tSpeed = maxWalkSpeed * 0.5f;
       if(Mathf.Abs(vWalkSpeed) > tSpeed || Mathf.Abs(hWalkSpeed) > tSpeed)
       {
-        animator.Play("PlayerBilboWalk");
+        if(running)
+        {
+          animator.Play("PlayerBilboRun");
+        }
+        else
+        {
+          animator.Play("PlayerBilboWalk");
+        }
       }
       else
       {
         animator.Play("PlayerBilboIdle");
       }
     }
-
     // Attack
-    if(Input.GetKeyDown(KeyCode.Z) || Input.GetKey(KeyCode.Mouse0))
+    if(setAttack)
     {
       animator.Play("PlayerBilboAttack");
       if(!attacking)
@@ -145,7 +164,7 @@ public class Player : MonoBehaviour
         StartCoroutine(Attack());
       }
     }
-
+    // Recoloca la caja de golpe al lado derecho del jugador
     if(playerAttackInstance != null)
     {
       playerAttackInstance.transform.position = this.transform.position + (direction * this.transform.right * 0.8f);
@@ -166,15 +185,14 @@ public class Player : MonoBehaviour
     // por lo que tenemos que tomar el valor de length y dividirlo entre la speed
     // que le hemos dado a la animacion en el editor
     float animationLength = animator.GetCurrentAnimatorStateInfo(0).length;
-    float animationTime = animationLength / 3f;
-    yield return new WaitForSeconds(animationTime * 0.4f);
-    PlaySound(AudioList.PlayerHit);
+    float animationTime = animationLength / 1.5f;
+    yield return new WaitForSeconds(animationTime * 0.6f);
     // Instanciamos la caja de daño al lado del Player
     Vector3 start = this.transform.position;
     start.y -= 0.1f;
-    Vector3 end = start + direction * this.transform.right * 0.7f;
+    Vector3 end = start + direction * this.transform.right * 0.5f;
     playerAttackInstance = (GameObject)Instantiate(playerAttack, start, this.transform.rotation);
-    playerAttackInstance.transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y, 1);
+    //playerAttackInstance.transform.localScale = new Vector3(playerAttack.transform.localScale.x, playerAttack.transform.localScale.y, playerAttack.transform.localScale.z);
     Vector3 position = start;
     while(Vector3.Distance(position, end) > 0.1f)
     {
@@ -183,7 +201,8 @@ public class Player : MonoBehaviour
       // Debug.Log(position);
       yield return null;
     }
-    yield return new WaitForSeconds(animationTime * 0.6f);
+    //PlaySound(AudioList.PlayerHit);
+    yield return new WaitForSeconds(animationTime * 0.4f);
     Destroy(playerAttackInstance);
     attacking = false;
     cameraLookAt.locked = false;
@@ -220,7 +239,6 @@ public class Player : MonoBehaviour
     }
   }
  
-
   private void OnTriggerEnter(Collider collider)
   {
     string cTag = collider.gameObject.tag;

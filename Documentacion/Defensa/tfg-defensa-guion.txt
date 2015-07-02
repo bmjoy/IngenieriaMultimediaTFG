@@ -1,0 +1,78 @@
+# 00:00 min. Presentación
+Hola, muy buenas, mi nombre es Rubén Martínez Vilar y les vengo a presentar mi trabajo de fin de grado sobre la generación procedimental de contenido en videojuegos.
+
+# 00:30 min. Introducción al proyecto y objetivos
+
+[AQUI FALTA MOTIVACION O ALGO ASI]
+
+Para ello se establecieron unos claros objetivos.
+
+Por un lado realizar un estudio de la **definición** de generación procedimental de contenido en el sector de los videojuegos y hacer un repaso a los distintos tipos de generación de contenido que podemos encontrar en diversas generaciones de videojuegos.
+
+Por otro lado se planteó el desarrollo de un videojuego que, de alguna manera, hiciera uso de estas técnicas de generación de contenido. Más concretamente se propuso un videojuego de estilo rogue-like, que consisten en el recorrido de mazmorras recogiendo tesoros, luchando contra enemigos y sorteando trampas. Para ello, previamente, se hizo un estudio más a fondo de varias técnicas de generación de mazmorras, para después determinar cuales eran las adecuadas para el videojuego a desarrollar.
+
+## Requisitos funcionales del videojuego
+
+Como ya he dicho, el estilo del videojuego que nos interesa es de tipo "rogue-like", término que proviene del videojuego Rogue, de 1980, en el que el jugador toma el papel de un aventurero, recorriendo los diferentes niveles de una mazmorra mientras lucha con enemigos y toma pociones y comida para sobrevivir. El objetivo es llegar al último piso de esta y recoger un amuleto.
+
+Las características importantes de este tipo de juego son:
+- El contenido se genera de manera procedimental. Las habitaciones y pasillos se generan automáticamente en cada nueva partida mediante un algoritmo.
+- La muerte permanente. Esto quiere decir que cada vez que el jugador muere, debe comenzar el juego de nuevo, generándose una nueva mazmorra, no puede repetir la misma mazmorra.
+
+Estos dos aspectos agregan 
+
+[EXPLICAR PORQUE ES INTERESANTE ESTO DE GENERAR CONTENIDO ALEATORIO
+IMPORTANTE AHORA EN LA ERA DE LOS SMARTPHONES]
+
+[DIAPOSITIVA CON UN GRID DE IMAGENES DE JUEGOS QUE USAN ESTE TIPO DE GENERACION]
+
+[EXPLICAR EL VIDEOJUEGO, SENCILLO, ESQUEMATICO, CON IMAGENES]
+
+# 05:00 min. Algoritmos para la generación contenido
+
+Una vez establecidas las características del videojuego, me puse a estudiar diversos algoritmos para la generación de mazmorras y su contenido para ver cuales eran los más adecuados o interesantes. Vamos a ver por un lado como generamos la estructura de la mazmorra, la disposición de las habitaciones y pasillos, y a continuación veremos como podemos poblar la mazomrra con objetos, enemigos y trampas.
+
+[EMPEZANDO POR GROWING TREE]
+
+## Autómata celular
+Pasando a otro tipo de algoritmos más orientados a mazmorras, tenemos el del Autómata Celular. Este algoritmo se basa en la aplicación que hizo John Conway del modelo matemático del autómata celular de John Neumann en su "Juego de la vida".
+
+https://upload.wikimedia.org/wikipedia/commons/e/e5/Gospers_glider_gun.gif
+
+El algoritmo consiste en una serie de células, que se representan por estos píxeles y que iteractúan con sus vecinos para crear otras células o desaparecer.
+
+Pero como aplicamos esto para generar mazmorras. Pues comenzamos con una rejilla en blanco sobre la que generamos ruido aleatorio. La generación de este ruido se basa en una probabilidad de que una casilla se rellene.
+
+[IMAGEN DEL RUIDO BLANCO]
+
+Una vez tenemos esta rejilla inicializada con ruido lo que hacemos es realizar uno o varios pases, casilla a casilla aplicando las siguientes reglas.
+
+[IMAGEN CON LAS REGLAS. EXPLICACION.]
+
+Al final obtenemos una especie de mazmorra o cueva.
+
+[EXPLICAR PORQUE ES MEJOR PARA SISTEMAS NATURALES. CONECTIVIDAD. ETC.]
+
+Por esto, en un principio este algoritmo lo descarte, para el juego quería tener una distinción más clara de las habitaciones y los pasillos, asegurar la conectividad y obtener un más regularidad en la forma de habitaciones y pasillos para poder introducir ítems y trampas más fácilmente. Pero como veremos ahora después, conseguí encontrarle otra aplicación.
+
+## Posicionamiento aleatorio
+Como hemos visto necesitamos que el algoritmo nos proporcione más control sobre la forma de las habitaciones y pasillos.
+
+Este método de posicionamiento aleatorio, por llamarlo de alguna manera, trata simplemente de crear habitaciones en posiciones y con dimensiones al azar, y redistribuirlas sobre el espacio del mapa para que no se solapen.
+
+Para redistribuirlas, pues tenemos que guardarnos de alguna manera la información de cada habitación, como la posición y las dimensiones, para después moverla de lugar.
+
+Para unir las habitaciones hacemos uso de la técnica vista a la hora de crear laberintos, el Drunken Walk. Recorremos las habitaciones, escogiendo una pared y creando una puerta en un punto de esta. Desde esta puerta vamos creando pasillo hasta que no se pueda avanzar. Si se ha tocado a otra habitacion se puede conectar el pasillo con esa pared, si se llega a un punto muerto se escoge otra dirección mediante Drunken Walk y se continua mientras haya direcciones que recorrer.
+
+Finalmente se puede hacer una limpieza de pasillos, haciendo un recorriedo por estos y eliminando los que no tengan salida y cortos.
+
+[CAPTURA DE GENERACIONES DE ESTE ALGORITMO. REFERENCIA A PIE DE DIAPOSITIVA HACIA EL GENERADOR ONLINE.]
+
+[CONCLUSIONES]
+
+## BST Tree
+
+
+
+# 15:00 min. Conclusiones, valoración final y futuros estudios/desarrollos
+

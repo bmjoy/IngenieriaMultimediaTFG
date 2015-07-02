@@ -1,0 +1,115 @@
+Videojuego basado en la generacion procedimental de mundos o niveles
+
+# CONSEJOS TUTORES
+- Ir directamente a lo que he realizado, como lo he implementado para el caso del videojuego concreto.
+- Presentar de lo primero la idea del videojuego para saber que es lo que se intenta solucionar.
+- Al poner un vídeo que dure más o menos lo mismo que la explicación, para que no se esté repitiendo mucho o tenga que esperar a que termine.
+- Vestimenta decente (30º pfff...)
+- Para terminar simplemente decir algo como "me pongo a disposición del tribunal". No pedir preguntas. Cuando comenten algo darles la razón y si acaso decir que había pensado en eso pero al final no se hizo por tal y cual.
+
+# ESTRUCTURA GENERAL
+15 minutos
+0 - 4 --> Introducción, motivación, estado del arte
+4 - 9 --> Algoritmos para mazmorras, tests
+9 - 15 --> Presentacion y desarrollo del videojuego
+
+100-150 palabras por minuto
+1500-2000 palabras en 15 minutos
+
+# SECCIONES
+## 1 - Titulo
+Trabajo de fin de grado
+Videojuego basado en la generacion procedimental de mundos o niveles
+
+Rubén Martínez Vilar
+Grado en ingeniería multimedia
+2014-2015
+
+## 2 - Motivación
+Introducción al proyecto y motivación
+
+## 3 - Objetivos
+Objetivos concretos del proyecto:
+- **Estudio de la definición de generación procedimental** de contenido dentro del sector de los videojuegos como herramienta que contribuye a la jugabilidad de este.
+- **Estudio de distintos videojuegos** que utilizan técnicas de generación procedimental de contenido.
+- **Estudio de distintos algoritmos de generación de mazmorras** y del contenido de estas. Implementación visual de algunos de estos algoritmos orientados a la generación de mazmorras, pudiendo modificar algunos parámetros desde una interfaz gráfica.
+- **Diseño y desarrollo de un videojuego** sencillo de estilo rogue-like, haciendo uso justificado de alguno de los algoritmos estudiados para la generación del contenido.
+
+## 4 - Generación de contenido
+- Qué es la generación procedimental de contenido
+- Por qué generar contenido de esta manera
+- Qué papel tiene en los videojuegos
+- Propiedades deseadas de la generación
+
+## 5 - Generación de contenido en videojuegos
+Repaso a diversos videojuegos, explicando para qué se utiliza la generación de contenido y en qué consisten algunas de estas técnicas.
+
+## 6 - Algoritmos de generación de mazmorras
+
+### 6.1 - Generación de habitaciones y pasillos
+- Clasificación
+- Laberintos. Growing Tree.
+  + Vídeos/gif mostrando 
+- Cuevas. **Autómata celular**.
+  + Descripción del algoritmo
+    * Conway's Game Of Life
+    * Transición de imágenes donde se aplican las reglas como en la figura 4.7
+  + Muestra de distintas generaciones creadas a partir del test del proyecto.
+  + Conclusiones.
+- Mazmorras. **Método aleatorio**.
+  + Descripción del algoritmo.
+  + Muestras de mapas generados.
+  + Conclusiones.
+- Mazmorras. **Particionado BSP**.
+  + Descrición del algoritmo paso a paso con imágenes.
+  + Muestras de varios mapas generados.
+  + Conclusiones.
+
+### 6.2 - Generación del contenido
+Explicación breve de los algoritmos para poblar la mazmorra.
+
+## 7 - Desarrollo de un videojuego
+- Descripción y objetivos del videojuego.
+- Herramientas.
+- Generación de las mazmorras.
+  + Elección justificada de algoritmo. BSP.
+  + Generación del árbol.
+  + Creación de las habitaciones.
+  + Conectando las habitaciones.
+    * Animación para ver como se unen los nodos padre a las habitaciones existentes.
+    * Tipos de conexión. Aleatoria o por cercanía al centro. Muestras de resultados con cada técnica.
+  + Autómata celular para la limpieza. Imágenes mostrando las diferencias.
+
+- Generación del contenido.
+  + Elección de entrada y salida.
+  + Generación de objetos.
+    * Tablas de probabilidades
+    * Imágenes en el contexto del juego.
+  + Generación de trampas.
+    * Tablas de probabilidades.
+    * Imágenes en el contexto del juego.
+  + Generación de enemigos.
+    * Tablas de probabilidades.
+    * Imágenes en el contexto del juego.
+  + Dificultad de la mazmorra.
+  + Métricas.
+
+- Otros detalles del juego.
+  + Billboards.
+  + Tiling de texturas.
+  + Inteligencia artificial de los enemigos.
+  + Cámaras. Transparencia de paredes.
+- Problemas encontrados durante el desarrollo.
+
+## 8 - Conclusiones del proyecto
+Futuros desarrollos
+
+## 9 - Referencias, herramientas.
+Enlace a aplicación
+Bibliografía/Referencias
+Deck.js o software utilizado para la defensa
+
+GifCam - Permite grabar “vídeos” gif en el escritorio.
+http://blog.bahraniapps.com/gifcam/
+Pequeña presentacion sobre algoritmos de generacion, puede servir para la primera/segunda parte de la presentacion
+https://www.youtube.com/watch?v=VGSHsh83_ns

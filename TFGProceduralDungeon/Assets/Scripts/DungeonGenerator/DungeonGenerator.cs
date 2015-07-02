@@ -346,7 +346,7 @@ public class DungeonGenerator : MonoBehaviour
   private void PlacePlayer(Room room)
   {
     Vector3 position = room.transform.position;
-    position.y += 0.1f;
+    position.y += 2f;
     GameObject.FindGameObjectWithTag("Player").transform.position = position;
   }
 
@@ -595,7 +595,7 @@ public class DungeonGenerator : MonoBehaviour
   {
     int enemiesToCreate = 1;
     // Dimensiones de una habitacion que se considera grande 80% del maximo
-    float bigRoomSize = 0.9f * (NODE_MIN_SIZE - NODE_MARGIN);
+    float bigRoomSize = 0.98f * (NODE_MIN_SIZE - NODE_MARGIN);
     if(room.size.x > bigRoomSize || room.size.z > bigRoomSize)
     {
       enemiesToCreate = 4;
@@ -844,7 +844,7 @@ public class DungeonGenerator : MonoBehaviour
     {// Celdas solitarias
       if(axis == 'x')
       {
-        wall = objectManager.Create(ObjectName.TileWall, new Vector3(position.x, 1f, position.z));
+        wall = objectManager.Create(ObjectName.TileWall, new Vector3(position.x, 0f, position.z));
         Vector3 wallScale = wall.transform.localScale;
         wallScale.x += gap;
         wallScale.z += gap;
@@ -856,7 +856,7 @@ public class DungeonGenerator : MonoBehaviour
     { // Agrupar tiles en un pared
       Vector3 midPoint = coordinates[coordinates.Count / 2].ToVector3();
       int wallWidth = coordinates.Count;
-      wall = objectManager.Create(ObjectName.TileWall, new Vector3(midPoint.x, 1f, midPoint.z));
+      wall = objectManager.Create(ObjectName.TileWall, new Vector3(midPoint.x, 0f, midPoint.z));
       // Al escalar tenemo en cuenta que vamos a hacer tiling de la textura
       // por lo que en vez de escalar en z (columnas, c) que es por donde estamos uniendo tiles
       // vamos a escalar en x y luego rotar, así el retiling de la textura se aplica sobre la coordenada correcta
@@ -891,13 +891,23 @@ public class DungeonGenerator : MonoBehaviour
   private void DrawLevel()
   {
     GameObject tempObject;
+    // SUELO
     // Instanciamos el prefab del suelo y lo escalamos
     Vector3 position = new Vector3(transform.position.x + DUNGEON_WIDTH / 2, 0f, transform.position.z + DUNGEON_HEIGHT / 2);
-    GameObject floor = objectManager.Create(ObjectName.TileFloor, position);
-    floor.transform.localScale = new Vector3(DUNGEON_WIDTH, DUNGEON_HEIGHT, 1);
+    tempObject = objectManager.Create(ObjectName.TileFloor, position);
+    tempObject.transform.localScale = new Vector3(DUNGEON_WIDTH, DUNGEON_HEIGHT, 1);
     // Establecemos el tiling del material con respecto a sus dimensiones, un tile por unidad
-    floor.GetComponent<Renderer>().material.mainTextureScale = new Vector2(DUNGEON_WIDTH, DUNGEON_HEIGHT);
-    floor.transform.parent = parentScenery.transform;
+    tempObject.GetComponent<Renderer>().material.mainTextureScale = new Vector2(DUNGEON_WIDTH, DUNGEON_HEIGHT);
+    tempObject.transform.parent = parentScenery.transform;
+    // TECHO
+    // Instanciamos el prefab del techo y lo escalamos
+    position = new Vector3(transform.position.x + DUNGEON_WIDTH / 2, 5f, transform.position.z + DUNGEON_HEIGHT / 2);
+    tempObject = objectManager.Create(ObjectName.TileCeiling, position);
+    tempObject.transform.localScale = new Vector3(DUNGEON_WIDTH, 1f, DUNGEON_HEIGHT);
+    // Establecemos el tiling del material con respecto a sus dimensiones, un tile por unidad
+    //tempObject.GetComponent<Renderer>().material.mainTextureScale = new Vector2(DUNGEON_WIDTH, DUNGEON_HEIGHT);
+    tempObject.transform.parent = parentScenery.transform;
+    tempObject.GetComponent<TextureTiling>().ReTiling();
 
     // PAREDES
     List<Vector2i> wallCoordinates = new List<Vector2i>();
@@ -920,7 +930,7 @@ public class DungeonGenerator : MonoBehaviour
           tempObject = CreateWall(wallCoordinates, 'z');
           if(tempObject != null)
           {
-            tempObject.transform.parent = floor.transform.parent;
+            tempObject.transform.parent = tempObject.transform.parent;
           }
           if(wallCoordinates.Count > 1)
           {
@@ -948,7 +958,7 @@ public class DungeonGenerator : MonoBehaviour
           tempObject = CreateWall(wallCoordinates, 'x');
           if(tempObject != null)
           {
-            tempObject.transform.parent = floor.transform.parent;
+            tempObject.transform.parent = tempObject.transform.parent;
           }
           for(int i = 0; i < wallCoordinates.Count; i++)
           { // Borra la pared del mapa temporal

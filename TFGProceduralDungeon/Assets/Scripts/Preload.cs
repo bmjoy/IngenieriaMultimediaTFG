@@ -8,11 +8,21 @@ using System.Collections;
 public class Preload : MonoBehaviour
 {
   public GameObject prefabGameManager;
+  private GameManager gameManager;
   public SceneName sceneToLoad;
+  public bool continueToScene = true;
+
   void Start()
   {
-    GameManager gm = Instantiate(prefabGameManager).GetComponent<GameManager>();
-    gm.Initialize();
-    gm.LoadScene((int)sceneToLoad);
+    gameManager = Instantiate(prefabGameManager).GetComponent<GameManager>();
+    gameManager.Initialize();
+  }
+
+  void Update()
+  {
+    if(continueToScene)
+    {
+      gameManager.LoadScene((int)sceneToLoad);
+    }
   }
 }

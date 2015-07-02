@@ -16,12 +16,11 @@ public class ObjectLookAtCamera : MonoBehaviour
 
   void Update()
   {
-    //Vector3 rotationDir = transform.position - cameraInstance.transform.position;
-    //rotationDir.y = 0f;
-    //Quaternion newRotation = Quaternion.LookRotation(rotationDir, Vector3.up);
-    //transform.rotation = newRotation;
     Vector3 forwardDirection = cameraInstance.transform.forward;
     forwardDirection.y = 0; // No queremos que miren hacia arriba/abajo
-    transform.forward = forwardDirection;
+    if(forwardDirection != Vector3.zero)
+    {
+      transform.forward = forwardDirection;
+    }
   }
 }

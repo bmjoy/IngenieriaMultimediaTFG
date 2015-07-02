@@ -197,7 +197,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0, g: 0, b: 0, a: .0196078438}
+  m_BackGroundColor: {r: .13333334, g: .172549024, b: .219607845, a: 1}
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -246,3 +246,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefabGameManager: {fileID: 157184, guid: 5a4c6177ab3bef94ea5b3936f8e27741, type: 2}
   sceneToLoad: 1
+  continueToScene: 1
