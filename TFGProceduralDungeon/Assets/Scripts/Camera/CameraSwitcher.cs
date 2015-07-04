@@ -29,7 +29,7 @@ public class CameraSwitcher : MonoBehaviour
   // Update is called once per frame
   void Update()
   {
-    if(Input.GetKeyDown(KeyCode.C))
+    if(Input.GetKeyDown(KeyCode.C)) // Camara lookat <--> libre
     {
       cameraLookAt.enabled = !cameraLookAt.enabled;
       cameraClearVision.enabled = !cameraClearVision.enabled;
@@ -44,6 +44,10 @@ public class CameraSwitcher : MonoBehaviour
       {
         mode = CameraMode.Free;
       }
+    }
+    else if(Input.GetKeyDown(KeyCode.O))// Camara perspectiva <--> ortho
+    {
+      cameraLookAt.ToggleProjection();
     }
   }
 }

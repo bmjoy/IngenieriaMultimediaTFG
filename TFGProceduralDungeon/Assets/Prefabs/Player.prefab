@@ -45,7 +45,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 170824}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: .481999993, z: 0}
   m_LocalScale: {x: 5, y: 5, z: 1}
   m_Children:
   - {fileID: 435408}
@@ -58,7 +58,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 169554}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -.0958999991, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 419698}
@@ -88,7 +88,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: .100000001, y: .200000003, z: .300000012}
+  m_Size: {x: .100000001, y: .189999998, z: .300000012}
   m_Center: {x: -0, y: 0, z: 0}
 --- !u!82 &8205500
 AudioSource:
@@ -189,6 +189,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerAttack: {fileID: 115848, guid: 2f5a2c2457776bf49ac8e7b3b72560cc, type: 2}
   invincible: 0
+  isDead: 0
+  spriteJumpingUp: {fileID: 21300046, guid: aefbccb91c84a9e4c9d455e3c46716e1, type: 3}
+  spriteJumpingDown: {fileID: 21300048, guid: aefbccb91c84a9e4c9d455e3c46716e1, type: 3}
 --- !u!114 &11419136
 MonoBehaviour:
   m_ObjectHideFlags: 1

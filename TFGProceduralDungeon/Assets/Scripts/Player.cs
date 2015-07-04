@@ -16,6 +16,7 @@ public class Player : MonoBehaviour
   // HUD
   private Hud hud;
 
+  public bool isDead = false;
   private int hitGraceTime = 1; // Segundos invencible despues de ser golpeado
   private float maxWalkSpeed = 4.0f;
   private float maxRunSpeed = 6.0f;
@@ -27,6 +28,9 @@ public class Player : MonoBehaviour
   private bool startJump = false; // Pasa que el FixedUpdate aplique la fuerza
   private bool onGround = true; // Indica si el jugador esta en le suelo y se puede realizar un salto
 
+  public Sprite spriteJumpingUp;
+  public Sprite spriteJumpingDown;
+  private GameObject sprite;
   private SpriteRenderer spriteRenderer; // Para aplicar efectos directamente
   private Animator animator;
   private Rigidbody rigidBody; // Al que aplicar fuerza para salto
@@ -48,8 +52,9 @@ public class Player : MonoBehaviour
 
   void Start()
   {
+    isDead = false;
     health = MAX_HEALTH;
-    GameObject sprite = GameObject.Find("PlayerSprite");
+    sprite = GameObject.Find("PlayerSprite");
     spriteRenderer = sprite.GetComponent<SpriteRenderer>();
     animator = sprite.GetComponent<Animator>();
     rigidBody = GetComponent<Rigidbody>();
@@ -62,12 +67,19 @@ public class Player : MonoBehaviour
   void Update()
   {
     float speed = 0f;
+    float velocity = Mathf.Abs(rigidBody.velocity.y);
     bool setAttack = false;
+
+    if(isDead)
+    {
+      return;
+    }
 
     // INPUT
     // =====
-    // Cuando esta atacando no se puede mover
-    if(!attacking && cameraSwitcher.mode == CameraMode.LookAt)
+    // Cuando esta atacando no se puede moverç
+    bool blockMove = (attacking && velocity < 0.1f);
+    if(!blockMove && cameraSwitcher.mode == CameraMode.LookAt)
     {
       // Si se pulsa Shift la velocidad cambia
       if(Input.GetKeyDown(KeyCode.LeftShift))
@@ -92,6 +104,7 @@ public class Player : MonoBehaviour
         onGround = false;
       }
     }
+
     // Activa/desactiva el modo invencible
     if(Input.GetKeyUp(KeyCode.I))
     {
@@ -133,10 +146,23 @@ public class Player : MonoBehaviour
       }
     }
 
+    animator.enabled = true; 
     // ANIMACIONES
     // ===========
+    if(!setAttack && velocity > 0.1f)
+    {
+      animator.enabled = false;
+      if(rigidBody.velocity.y > 0) // Subiendo
+      {
+        spriteRenderer.sprite = spriteJumpingUp;
+      }
+      else // Bajando
+      {
+        spriteRenderer.sprite = spriteJumpingDown;
+      }
+    }
     // Threshold speed for walk/idle animation
-    if(!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerBilboAttack"))
+    else if(!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerBilboAttack"))
     {
       float tSpeed = maxWalkSpeed * 0.5f;
       if(Mathf.Abs(vWalkSpeed) > tSpeed || Mathf.Abs(hWalkSpeed) > tSpeed)
@@ -180,13 +206,16 @@ public class Player : MonoBehaviour
   {
     PlaySound(AudioList.PlayerAttack);
     attacking = true;
-    cameraLookAt.locked = true;
+    if(Mathf.Abs(rigidBody.velocity.y) < 0.1f)
+    {// Solo bloquea la camara cuando se ataca desde el suelo
+      cameraLookAt.locked = true;
+    }
     // El length a una animacion no cambia al modificar su speed en el editor
     // por lo que tenemos que tomar el valor de length y dividirlo entre la speed
     // que le hemos dado a la animacion en el editor
     float animationLength = animator.GetCurrentAnimatorStateInfo(0).length;
     float animationTime = animationLength / 1.5f;
-    yield return new WaitForSeconds(animationTime * 0.6f);
+    yield return new WaitForSeconds(animationTime * 0.4f);
     // Instanciamos la caja de daño al lado del Player
     Vector3 start = this.transform.position;
     start.y -= 0.1f;
@@ -202,7 +231,7 @@ public class Player : MonoBehaviour
       yield return null;
     }
     //PlaySound(AudioList.PlayerHit);
-    yield return new WaitForSeconds(animationTime * 0.4f);
+    yield return new WaitForSeconds(animationTime * 0.6f);
     Destroy(playerAttackInstance);
     attacking = false;
     cameraLookAt.locked = false;
@@ -276,6 +305,12 @@ public class Player : MonoBehaviour
     SetHealth(health - 1);
     if(health <= 0)
     {
+      isDead = true;
+      cameraLookAt.locked = true;
+      GetComponent<Rigidbody>().isKinematic = true;
+      GetComponent<BoxCollider>().enabled = false;
+      animator.Play("PlayerBilboDead");
+      yield return new WaitForSeconds(3f); // Dejamos tiempo para que se vea la animacion
       GameManager.Instance.GameOver();
     }
     else

@@ -1049,6 +1049,18 @@ Prefab:
       propertyPath: m_CullingMask.m_Bits
       value: 768
       objectReference: {fileID: 0}
+    - target: {fileID: 458956, guid: df5531f0c9e96fe4ab9d1dad66ca56ca, type: 2}
+      propertyPath: m_LocalScale.x
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 458956, guid: df5531f0c9e96fe4ab9d1dad66ca56ca, type: 2}
+      propertyPath: m_LocalScale.y
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 458956, guid: df5531f0c9e96fe4ab9d1dad66ca56ca, type: 2}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: df5531f0c9e96fe4ab9d1dad66ca56ca, type: 2}
   m_IsPrefabParent: 0

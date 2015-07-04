@@ -4,6 +4,7 @@ using System.Collections;
 public class Chest : MonoBehaviour
 {
   public GameObject particlesGemsPrefab;
+  public GameObject particlesDiamondsPrefab;
 
   private IEnumerator OpenChest()
   {
@@ -15,7 +16,9 @@ public class Chest : MonoBehaviour
     yield return new WaitForSeconds(0.6f);
 
     // Activa el efecto de particulas y comienza a sumar puntos
+
     Instantiate(particlesGemsPrefab, transform.position, particlesGemsPrefab.transform.rotation);
+    Instantiate(particlesDiamondsPrefab, transform.position, particlesGemsPrefab.transform.rotation);
     GameManager.Instance.audioManager.PlayFX(AudioList.Chest, true);
     Destroy(gameObject.GetComponent<Chest>());
   }

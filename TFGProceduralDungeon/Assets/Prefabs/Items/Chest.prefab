@@ -267,7 +267,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ee6a533e4f1e2641ac1f8968e912ba2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  particlesGemsPrefab: {fileID: 186706, guid: 2ac666f56f58e794ea7ba84f3e397947, type: 2}
+  particlesGemsPrefab: {fileID: 164704, guid: 2ac666f56f58e794ea7ba84f3e397947, type: 2}
+  particlesDiamondsPrefab: {fileID: 149420, guid: 4cb17a4910452064386ea7d219034f14,
+    type: 2}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

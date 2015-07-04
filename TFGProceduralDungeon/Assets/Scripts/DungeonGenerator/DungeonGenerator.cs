@@ -593,10 +593,10 @@ public class DungeonGenerator : MonoBehaviour
   // Coloca enemigos en la habitacion
   private void PlaceEnemies(Room room)
   {
-    int enemiesToCreate = 1;
+    int enemiesToCreate = Random.Range(0, 1) + 1;
     // Dimensiones de una habitacion que se considera grande 80% del maximo
-    float bigRoomSize = 0.98f * (NODE_MIN_SIZE - NODE_MARGIN);
-    if(room.size.x > bigRoomSize || room.size.z > bigRoomSize)
+    float bigRoomSize = NODE_MIN_SIZE - NODE_MARGIN;
+    if(level > 5 && (room.size.x > bigRoomSize || room.size.z > bigRoomSize))
     {
       enemiesToCreate = 4;
     }
@@ -930,7 +930,7 @@ public class DungeonGenerator : MonoBehaviour
           tempObject = CreateWall(wallCoordinates, 'z');
           if(tempObject != null)
           {
-            tempObject.transform.parent = tempObject.transform.parent;
+            tempObject.transform.parent = parentScenery.transform;
           }
           if(wallCoordinates.Count > 1)
           {
@@ -958,7 +958,7 @@ public class DungeonGenerator : MonoBehaviour
           tempObject = CreateWall(wallCoordinates, 'x');
           if(tempObject != null)
           {
-            tempObject.transform.parent = tempObject.transform.parent;
+            tempObject.transform.parent = parentScenery.transform;
           }
           for(int i = 0; i < wallCoordinates.Count; i++)
           { // Borra la pared del mapa temporal

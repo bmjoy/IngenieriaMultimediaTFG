@@ -31,7 +31,7 @@ public class ObjectManager : MonoBehaviour
     // Las paredes se colocan 
     if(name == ObjectName.TileWall)
     {
-      position.y += objectPrefab.transform.localScale.y / 2;
+      position.y += objectPrefab.transform.localScale.y / 2 - 0.1f;
     }
 
     objectInstance = (GameObject)Instantiate(objectPrefab, position, objectPrefab.transform.rotation);

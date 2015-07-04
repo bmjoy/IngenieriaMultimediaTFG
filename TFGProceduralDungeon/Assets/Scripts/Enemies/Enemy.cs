@@ -101,7 +101,7 @@ public class Enemy : MonoBehaviour
         float distance = Vector3.Distance(player.transform.position, this.transform.position);
         if(state == AIState.Chasing)
         {
-          if(distance > sightRadius)
+          if(player.isDead || distance > sightRadius)
           {
             if(routine != null)
             {
@@ -116,7 +116,7 @@ public class Enemy : MonoBehaviour
         }
         else
         {
-          if(distance <= sightRadius)
+          if(!player.isDead && distance <= sightRadius)
           {
             SetState(AIState.Chasing);
           }

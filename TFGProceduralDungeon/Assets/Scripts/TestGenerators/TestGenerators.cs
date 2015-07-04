@@ -20,7 +20,7 @@ public class TestGenerators : MonoBehaviour
                                        new Vector3(-1f, 15f, -2f), // Posicion para Growing Tree
                                        new Vector3(90f, 0f, 0f), // Rotacion para Growing Tree
                                        new Vector3(20f, 55f, 12f), // Posicion para el resto
-                                       new Vector3(80f, 0f, 0f) // Rotacion para el resto
+                                       new Vector3(90f, 0f, 0f) // Rotacion para el resto
                                      };
 
   // OPCIONES DE LOS TEST
@@ -96,16 +96,16 @@ public class TestGenerators : MonoBehaviour
   private void Start()
   {
     cameraInstance = Camera.main.gameObject;
-    stepButton = GameObject.Find( "ButtonStep" ).GetComponent<Button>();
-    settingsGT.SetActive( true );
-    settingsCA.SetActive( false );
-    settingsBSP.SetActive( false );
-    settingsSeed.SetActive( false );
+    stepButton = GameObject.Find("ButtonStep").GetComponent<Button>();
+    settingsGT.SetActive(true);
+    settingsCA.SetActive(false);
+    settingsBSP.SetActive(false);
+    settingsSeed.SetActive(false);
   }
 
   private void Update()
   {
-    if ( Input.GetKeyDown( KeyCode.P ) )
+    if(Input.GetKeyDown(KeyCode.P))
     {
       OnStep();
     }
@@ -116,32 +116,32 @@ public class TestGenerators : MonoBehaviour
   {
     selectedAlg = (int)selection;
 
-    settingsSize.SetActive( false );
-    settingsGT.SetActive( false );
-    settingsCA.SetActive( false );
-    settingsBSP.SetActive( false );
-    settingsSeed.SetActive( false );
-    switch ( selectedAlg )
+    settingsSize.SetActive(false);
+    settingsGT.SetActive(false);
+    settingsCA.SetActive(false);
+    settingsBSP.SetActive(false);
+    settingsSeed.SetActive(false);
+    switch(selectedAlg)
     {
       case 0: // Growing Tree
-        settingsGT.SetActive( true );
+        settingsGT.SetActive(true);
         break;
       case 1: // Cellular Automata
-        settingsCA.SetActive( true );
-        settingsSize.SetActive( true );
-        settingsSeed.SetActive( true );
+        settingsCA.SetActive(true);
+        settingsSize.SetActive(true);
+        settingsSeed.SetActive(true);
         break;
       case 2: // BSP Tree
-        settingsBSP.SetActive( true );
-        settingsSize.SetActive( true );
-        settingsSeed.SetActive( true );
+        settingsBSP.SetActive(true);
+        settingsSize.SetActive(true);
+        settingsSeed.SetActive(true);
         break;
     }
   }
   // Boton de comenzar a ejecutar el algoritmo
   public void OnRun()
   {
-    switch ( selectedAlg )
+    switch(selectedAlg)
     {
       case 0: // Growing Tree
         stepButton.interactable = false;
@@ -163,7 +163,7 @@ public class TestGenerators : MonoBehaviour
 
   private void SetCamera()
   {
-    switch ( selectedAlg )
+    switch(selectedAlg)
     {
       case 0:
         cameraInstance.transform.position = cameraDefaults[0];
@@ -181,7 +181,7 @@ public class TestGenerators : MonoBehaviour
 
   public void OnStep()
   {
-    switch ( selectedAlg )
+    switch(selectedAlg)
     {
       case 1: // Cellular Automata
         instanceGeneratorCA.doNextStep = true;
@@ -194,22 +194,22 @@ public class TestGenerators : MonoBehaviour
 
   public void Cleanup()
   {
-    if ( instanceGeneratorGT != null )
+    if(instanceGeneratorGT != null)
     {
       instanceGeneratorGT.Cleanup();
-      Destroy( instanceGeneratorGT.gameObject );
+      Destroy(instanceGeneratorGT.gameObject);
     }
 
-    if ( instanceGeneratorCA != null )
+    if(instanceGeneratorCA != null)
     {
       instanceGeneratorCA.Cleanup();
-      Destroy( instanceGeneratorCA.gameObject );
+      Destroy(instanceGeneratorCA.gameObject);
     }
 
-    if ( instanceGeneratorBSP != null )
+    if(instanceGeneratorBSP != null)
     {
       instanceGeneratorBSP.Cleanup();
-      Destroy( instanceGeneratorBSP.gameObject );
+      Destroy(instanceGeneratorBSP.gameObject);
     }
   }
 
@@ -217,20 +217,20 @@ public class TestGenerators : MonoBehaviour
   private void GenerateDungeonGrowingTree()
   {
     Cleanup();
-    instanceGeneratorGT = Instantiate( prefabGeneratorGT );
+    instanceGeneratorGT = Instantiate(prefabGeneratorGT);
     instanceGeneratorGT.name = "GeneratorGrowingTree";
-    instanceGeneratorGT.Generate( delay, random );
+    instanceGeneratorGT.Generate(delay, random);
   }
 
   private void SetSeed()
   {
-    if ( useSeed )
+    if(useSeed)
     {
-      Text input = GameObject.Find( "TextSeed" ).GetComponent<Text>();
-      bool result = int.TryParse( input.text, out seed );
-      if ( !result ) // No se puede parsear el entero, cancelamos la semilla
+      Text input = GameObject.Find("TextSeed").GetComponent<Text>();
+      bool result = int.TryParse(input.text, out seed);
+      if(!result) // No se puede parsear el entero, cancelamos la semilla
       {
-        Debug.Log( "Unable to convert input string to int" );
+        Debug.Log("Unable to convert input string to int");
         input.text = "";
         seed = -1;
         useSeed = false;
@@ -246,19 +246,19 @@ public class TestGenerators : MonoBehaviour
   private void GenerateDungeonCA()
   {
     Cleanup();
-    instanceGeneratorCA = Instantiate( prefabGeneratorCA );
+    instanceGeneratorCA = Instantiate(prefabGeneratorCA);
     instanceGeneratorCA.name = "GeneratorCA";
     SetSeed();
-    instanceGeneratorCA.Generate( DUNGEON_WIDTH, DUNGEON_HEIGHT, cellularAutomataPasses, wallProbability, seed );
+    instanceGeneratorCA.Generate(DUNGEON_WIDTH, DUNGEON_HEIGHT, cellularAutomataPasses, wallProbability, seed);
   }
 
   // Genera la mazmorra usando el algoritmo de BSP Tree
   private void GenerateDungeonBSP()
   {
     Cleanup();
-    instanceGeneratorBSP = Instantiate( prefabGeneratorBSP );
+    instanceGeneratorBSP = Instantiate(prefabGeneratorBSP);
     instanceGeneratorBSP.name = "GeneratorBSP";
     SetSeed();
-    instanceGeneratorBSP.Generate( DUNGEON_WIDTH, DUNGEON_HEIGHT, seed );
+    instanceGeneratorBSP.Generate(DUNGEON_WIDTH, DUNGEON_HEIGHT, seed);
   }
 }
