@@ -27,7 +27,7 @@ public class CameraFree : MonoBehaviour
   void Update()
   {
     // Con boton derecho de raton orientamos la camara
-    if (Input.GetKey(KeyCode.Mouse1))
+    if(Input.GetKey(KeyCode.Mouse1))
     {
       rotationX += Input.GetAxis("Mouse X") * cameraSensitivity * Time.deltaTime;
       rotationY += Input.GetAxis("Mouse Y") * cameraSensitivity * Time.deltaTime;
@@ -37,20 +37,20 @@ public class CameraFree : MonoBehaviour
       transform.localRotation *= Quaternion.AngleAxis(rotationY, Vector3.left);
     }
 
-    float moveFactor = 1f;
+    float moveFactor = 0.25f;
 
     // Shift aumenta la velocidad de movimiento
-    if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+    if(Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
     {
       moveFactor = fastMoveFactor;
     }
     // Control disminuye la velocidad de movimiento
-    else if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+    else if(Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
     {
       moveFactor = slowMoveFactor;
     }
 
-    if (cameraInstance.orthographic)
+    if(cameraInstance.orthographic)
     {
       cameraInstance.orthographicSize -= Input.GetAxis("Vertical") * moveFactor * orthoZoomSpeed * Time.deltaTime;
     }
@@ -61,12 +61,12 @@ public class CameraFree : MonoBehaviour
     transform.position += transform.right * normalMoveSpeed * moveFactor * Input.GetAxis("Horizontal") * Time.deltaTime;
 
     // Mueve la camara en direccion superior con respecto a ella misma
-    if (Input.GetKey(KeyCode.Q))
+    if(Input.GetKey(KeyCode.Q))
     {
       transform.position += transform.up * climbSpeed * moveFactor * Time.deltaTime;
     }
     // Mueve la camara en direccion inferior con respecto a ella misma
-    if (Input.GetKey(KeyCode.E))
+    if(Input.GetKey(KeyCode.E))
     {
       transform.position -= transform.up * climbSpeed * moveFactor * Time.deltaTime;
     }

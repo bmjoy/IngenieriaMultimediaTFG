@@ -215,7 +215,7 @@ public class Player : MonoBehaviour
     // que le hemos dado a la animacion en el editor
     float animationLength = animator.GetCurrentAnimatorStateInfo(0).length;
     float animationTime = animationLength / 1.5f;
-    yield return new WaitForSeconds(animationTime * 0.4f);
+    yield return new WaitForSeconds(animationTime * 0.2f);
     // Instanciamos la caja de daño al lado del Player
     Vector3 start = this.transform.position;
     start.y -= 0.1f;
@@ -233,8 +233,13 @@ public class Player : MonoBehaviour
     //PlaySound(AudioList.PlayerHit);
     yield return new WaitForSeconds(animationTime * 0.6f);
     Destroy(playerAttackInstance);
+    yield return new WaitForSeconds(animationTime * 0.2f);
     attacking = false;
-    cameraLookAt.locked = false;
+
+    if(!isDead)
+    {
+      cameraLookAt.locked = false;
+    }
   }
 
   void FixedUpdate()

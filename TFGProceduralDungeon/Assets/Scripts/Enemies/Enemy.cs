@@ -28,7 +28,7 @@ public class Enemy : MonoBehaviour
   private int patrolIterator = 0; // Indica el target del array
   private Vector3 target;
   private bool reverse = false; // Recorre los targets al reves
-
+  private bool goingRight = true;
   private Player player;
   private Coroutine routine;
   private EnemyAnimator animator;
@@ -69,6 +69,8 @@ public class Enemy : MonoBehaviour
         Wait();
         break;
     }
+
+    ReorientSprite();
   }
 
   public void SetPatrolCenter(Vector3 position)
@@ -165,6 +167,26 @@ public class Enemy : MonoBehaviour
     target.y = transform.position.y;
   }
 
+  private void ReorientSprite()
+  {
+    Vector3 direction = target - this.transform.position;
+    if(sprite.transform.rotation.y > 0 && sprite.transform.rotation.y < 180)
+    {
+      direction *= -1;
+    }
+    if(goingRight && (direction.x < 0))
+    {
+      // Escalamos para mirar hacia la izquierda
+      sprite.transform.localScale = Vector3.Scale(sprite.transform.localScale, new Vector3(-1, 1, 1));
+      goingRight = false;
+    }
+    else if(!goingRight && (direction.x > 0))
+    {
+      sprite.transform.localScale = Vector3.Scale(sprite.transform.localScale, new Vector3(-1, 1, 1));
+      goingRight = true;
+    }
+  }
+
   private void MoveToTarget(float _speed)
   {
     target.y = transform.position.y; // Siempre a la altura del enemigo
@@ -229,13 +251,13 @@ public class Enemy : MonoBehaviour
   {
     reverse = !reverse;
     string cTag = collision.gameObject.tag;
-    if(cTag == "Wall") // Si choca con pared busca el siguiente target
-    {
-      GetNextTarget();
-    }
     if(cTag == "Player") // Ataque
     {
       StartCoroutine(Attack());
+    }
+    else if(cTag != "Floor" && cTag != "Trap") // Si choca con algun objeto busca el siguiente target
+    {
+      GetNextTarget();
     }
   }
 

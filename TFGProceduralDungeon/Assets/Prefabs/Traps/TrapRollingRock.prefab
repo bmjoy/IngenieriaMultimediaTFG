@@ -206,8 +206,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   particleEffect: {fileID: 176786, guid: dae3910d284fc3948ae537345efa771d, type: 2}
   deadlyTags:
-  - Wall
-  - Player
+  - All
   useTime: 0
   lifeTime: 0
 --- !u!135 &13568450

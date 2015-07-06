@@ -19,6 +19,7 @@ TagManager:
   - Chest
   - Potion
   - Item
+  - Trap
   layers:
   - Default
   - TransparentFX

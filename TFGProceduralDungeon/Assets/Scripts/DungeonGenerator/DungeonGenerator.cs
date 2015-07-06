@@ -49,6 +49,16 @@ public static class Tools
 
 public class DungeonGenerator : MonoBehaviour
 {
+  private struct EnemyInfo
+  {
+    public TileType type;
+    public bool patrol;
+    public Vector2i position;
+    public Vector2i patrolPoint;
+  }
+
+  private List<EnemyInfo> enemyList;
+
   // Dimensiones
   public int DUNGEON_WIDTH;
   public int DUNGEON_HEIGHT;
@@ -90,13 +100,15 @@ public class DungeonGenerator : MonoBehaviour
   // Probabilidades
   private int probCoin = 80;
   private int probPotion = 20;
-  private int probChest = 30;
+  private int probChest = 20;
   // Cantidad
   private int numEnemies = 0;
   private int numPotions = 0;
   private int numChests = 0;
   // Dificultad de la mazmorra
   private int difficulty = 0;
+
+  private Vector3 playerStartPosition;
 
   // Objetos padres para agrupar los componentes de la mazmorra en el editor de Unity
   private GameObject parentScenery;
@@ -140,6 +152,7 @@ public class DungeonGenerator : MonoBehaviour
     objectsGrid = new Grid(DUNGEON_WIDTH, DUNGEON_HEIGHT);
     nextId = 0;
     lastRoomId = nextId;
+    enemyList = new List<EnemyInfo>();
     // Inicializamos los tiles a vacio
     for(int i = 0; i < levelGrid.GetWidth(); i++)
     {
@@ -169,7 +182,7 @@ public class DungeonGenerator : MonoBehaviour
     //Random.seed = 3;
 
     int step = 0;
-    int maxSteps = 8 + level;
+    int maxSteps = 10 + level;
     while(step < maxSteps)
     {
       Split(bspTree.Root);
@@ -202,8 +215,11 @@ public class DungeonGenerator : MonoBehaviour
     PopulateDungeon(bspTree.Root);
     PopulatePassages();
     DrawLevel();
-    difficulty = numEnemies * 10 - numPotions * 5;
 
+    // Situa al jugador
+    GameObject.FindGameObjectWithTag("Player").transform.position = playerStartPosition;
+
+    difficulty = numEnemies * 10 - numPotions * 5;
     // Info de debug
     string info = "Dungeon dimensions: " + DUNGEON_WIDTH + "x" + DUNGEON_HEIGHT;
     info += "\nLevel: " + level;
@@ -234,6 +250,8 @@ public class DungeonGenerator : MonoBehaviour
       {
         entrance = rooms[i];
         entrance.role = RoomRole.ENTRANCE;
+        playerStartPosition = entrance.transform.position;
+        playerStartPosition.y += 2f;
         break;
       }
     }
@@ -393,10 +411,21 @@ public class DungeonGenerator : MonoBehaviour
     int r = Random.Range(0, 100);
     // Crea un item segun su probabilidad
 
+    bool isBigRoom = false;
+    float bigRoomSize = NODE_MIN_SIZE - NODE_MARGIN / 2;
+    if((room.size.x > bigRoomSize || room.size.z > bigRoomSize))
+    {
+      isBigRoom = true;
+    }
+
     // Las monedas siempre pueden aparecer
     if(r >= 0 && r < probCoin)
     { // Coin
-      int coins = Random.Range(2, 7);
+      int coins = Random.Range(2, 5);
+      if(isBigRoom)
+      {
+        coins = Random.Range(4, 7);
+      }
       // Pueden aparecer mas de una moneda
       for(int i = 0; i < coins; i++)
       { // Probabilidad igual
@@ -431,7 +460,7 @@ public class DungeonGenerator : MonoBehaviour
       numChests++;
       if(probChest > 0)
       {
-        probChest -= 10;
+        probChest -= 5;
       }
     }
   }
@@ -526,8 +555,14 @@ public class DungeonGenerator : MonoBehaviour
                   !(x == xLimits.z && z == zLimits.x) && !(x == xLimits.z && z == zLimits.z))
                 {
                   if(levelGrid.GetTile(x, z) >= (int)TileType.ROOM_ID)
-                  { // Pared
-                    objectsGrid.SetTile(x, z, (int)TileType.TRAP_SPIKES_WALL);
+                  { // Evitamos dos paredes pinchos en una misma esquina
+                    if(objectsGrid.GetTile(x - 1, z - 1) != (int)TileType.TRAP_SPIKES_WALL &&
+                      objectsGrid.GetTile(x - 1, z + 1) != (int)TileType.TRAP_SPIKES_WALL &&
+                      objectsGrid.GetTile(x + 1, z - 1) != (int)TileType.TRAP_SPIKES_WALL &&
+                      objectsGrid.GetTile(x + 1, z + 1) != (int)TileType.TRAP_SPIKES_WALL)
+                    {
+                      objectsGrid.SetTile(x, z, (int)TileType.TRAP_SPIKES_WALL);
+                    }
                   }
                 }
               }
@@ -593,33 +628,105 @@ public class DungeonGenerator : MonoBehaviour
   // Coloca enemigos en la habitacion
   private void PlaceEnemies(Room room)
   {
-    int enemiesToCreate = Random.Range(0, 1) + 1;
-    // Dimensiones de una habitacion que se considera grande 80% del maximo
-    float bigRoomSize = NODE_MIN_SIZE - NODE_MARGIN;
-    if(level > 5 && (room.size.x > bigRoomSize || room.size.z > bigRoomSize))
+    bool isBigRoom = false;
+    float bigRoomSize = NODE_MIN_SIZE - NODE_MARGIN / 2;
+    if((room.size.x > bigRoomSize || room.size.z > bigRoomSize))
     {
-      enemiesToCreate = 4;
+      isBigRoom = true;
     }
 
-    for(int i = 0; i < enemiesToCreate; i++)
+    // Buscamos cofres o monedas en la habitacion
+    Vector2i start = room.position;
+    Vector2i end = room.position + room.size;
+    int countCoins = 0;
+    Vector2i chestPosition = new Vector2i();
+    for(int i = start.x; i < end.x; i++)
     {
+      for(int j = start.z; j < end.z; j++)
+      {
+        switch(objectsGrid.GetTile(i, j))
+        {
+          case (int)TileType.CHEST:
+            chestPosition = new Vector2i(i, j);
+            break;
+          case (int)TileType.COIN:
+            countCoins++;
+            break;
+        }
+      }
+    }
+
+    if(chestPosition.x != 0) // Cofre protegido
+    {
+      int r = Random.Range(0, 3);// 33.3% de probabilidad
+      if(r < 2)
+      {
+        // Crea goblin patrullando cofre
+        EnemyInfo info = new EnemyInfo();
+        info.type = TileType.ENEMY_GOBLIN;
+        info.patrol = true;
+        info.position = new Vector2i(chestPosition.x + 1, chestPosition.z + 1);
+        info.patrolPoint = chestPosition;
+        enemyList.Add(info);
+        numEnemies++;
+      }
+    }
+
+    if(level >= 4 && isBigRoom) // Habitacion grande
+    {
+      int enemiesToCreate = Random.Range(2, 5);
+      for(int i = 0; i < enemiesToCreate; i++)
+      {
+        Vector2i coord = GetRandomCoordinateInRoom(room);
+        if(coord.x == -1)
+        {
+          continue;
+        }
+        int r = Random.Range(0, 3);
+        EnemyInfo info = new EnemyInfo();
+        switch(r)
+        {
+          case 0: // Crab
+          case 1:
+            objectsGrid.SetTile(coord.x, coord.z, (int)TileType.ENEMY_CRAB);
+            info.type = TileType.ENEMY_CRAB;
+            info.patrol = true;
+            info.position = new Vector2i(coord.x, coord.z);
+            info.patrolPoint = coord;
+            enemyList.Add(info);
+            break;
+          case 2: // Goblin
+            objectsGrid.SetTile(coord.x, coord.z, (int)TileType.ENEMY_GOBLIN);
+            info.type = TileType.ENEMY_GOBLIN;
+            info.patrol = true;
+            info.position = new Vector2i(coord.x, coord.z);
+            info.patrolPoint = coord;
+            enemyList.Add(info);
+            break;
+        }
+        numEnemies++;
+      }
+    }
+    else if(countCoins >= 4 && Random.Range(0, 3) < 2)
+    {
+      bool found = true;
       Vector2i coord = GetRandomCoordinateInRoom(room);
       if(coord.x == -1)
       {
-        return;
+        found = false;
       }
-
-      int r = Random.Range(0, 2);
-      switch(r)
+      if(found)
       {
-        case 0: // Crab
-          objectsGrid.SetTile(coord.x, coord.z, (int)TileType.ENEMY_CRAB);
-          break;
-        case 1: // Goblin
-          objectsGrid.SetTile(coord.x, coord.z, (int)TileType.ENEMY_GOBLIN);
-          break;
+        // Crea goblin patrullando monedas
+        objectsGrid.SetTile(coord.x, coord.z, (int)TileType.ENEMY_GOBLIN);
+        EnemyInfo info = new EnemyInfo();
+        info.type = TileType.ENEMY_GOBLIN;
+        info.patrol = true;
+        info.position = new Vector2i(coord.x, coord.z);
+        info.patrolPoint = coord;
+        enemyList.Add(info);
+        numEnemies++;
       }
-      numEnemies++;
     }
   }
 
@@ -634,11 +741,7 @@ public class DungeonGenerator : MonoBehaviour
     {// Hoja con habitacion
       Room room = node.GetRoom().GetComponent<Room>();
 
-      if(room.role == RoomRole.ENTRANCE)
-      {
-        PlacePlayer(room);
-      }
-      else
+      if(room.role != RoomRole.ENTRANCE)
       {
         PlaceItems(room);
         PlaceTraps(room);
@@ -969,6 +1072,8 @@ public class DungeonGenerator : MonoBehaviour
       }
     }
 
+    float startDelay = 0f; // Para trampas
+
     // OBJETOS
     for(int r = 0; r < DUNGEON_WIDTH; r++)
     { //x
@@ -1030,6 +1135,17 @@ public class DungeonGenerator : MonoBehaviour
               tempObject = objectManager.Create(objectName, position);
               tempObject.transform.eulerAngles = rotation;
               tempObject.transform.parent = parentTraps.transform;
+
+
+              if(objectName == ObjectName.TrapSpikeWall)
+              {
+                tempObject.GetComponentInChildren<TrapAnimation>().startDelay = startDelay;
+                startDelay += 0.5f;
+                if(startDelay > 2f)
+                {
+                  startDelay = 0f;
+                }
+              }
             }
             else
             {
@@ -1041,22 +1157,17 @@ public class DungeonGenerator : MonoBehaviour
           case (int)TileType.TRAP_SPIKES_FLOOR:
             tempObject = objectManager.Create(ObjectName.TrapSpikeFloor, position);
             tempObject.transform.parent = parentTraps.transform;
+
+            tempObject.GetComponentInChildren<TrapAnimation>().startDelay = startDelay;
+            startDelay += 0.5f;
+            if(startDelay > 2f)
+            {
+              startDelay = 0f;
+            }
             break;
           case (int)TileType.TRAP_ROCK:
             tempObject = objectManager.Create(ObjectName.TrapRock, position);
             tempObject.transform.parent = parentTraps.transform;
-            break;
-          case (int)TileType.ENEMY_CRAB:
-            position.y += TILE_UNIT;
-            tempObject = objectManager.Create(ObjectName.EnemyCrab, position);
-            tempObject.GetComponent<Enemy>().SetPatrolCenter(position);
-            tempObject.transform.parent = parentEnemies.transform;
-            break;
-          case (int)TileType.ENEMY_GOBLIN:
-            position.y += TILE_UNIT;
-            tempObject = objectManager.Create(ObjectName.EnemyGobling, position);
-            tempObject.GetComponent<Enemy>().SetPatrolCenter(position);
-            tempObject.transform.parent = parentEnemies.transform;
             break;
           case (int)TileType.EXIT:
             objectManager.Create(ObjectName.Portal, position);
@@ -1064,6 +1175,31 @@ public class DungeonGenerator : MonoBehaviour
         }
       }
     }
+
+    // ENEMIGOS
+    for(int i = 0; i < enemyList.Count; i++)
+    {
+//      case (int)TileType.ENEMY_CRAB:
+//      position.y += TILE_UNIT;
+//      tempObject = objectManager.Create(ObjectName.EnemyCrab, position);
+//      tempObject.GetComponent<Enemy>().SetPatrolCenter(position);
+//      tempObject.transform.parent = parentEnemies.transform;
+//      break;
+//      case (int)TileType.ENEMY_GOBLIN:
+//      position.y += TILE_UNIT;
+//      tempObject = objectManager.Create(ObjectName.EnemyGobling, position);
+//      tempObject.GetComponent<Enemy>().SetPatrolCenter(position);
+//      tempObject.transform.parent = parentEnemies.transform;
+//      break;
+      ObjectName objName = enemyList[i].type == TileType.ENEMY_GOBLIN ? ObjectName.EnemyGobling : ObjectName.EnemyCrab;
+      position = enemyList[i].position.ToVector3();
+      position.y += TILE_UNIT;
+      tempObject = objectManager.Create(objName, position);
+      tempObject.GetComponent<Enemy>().SetPatrolCenter(enemyList[i].patrolPoint.ToVector3());
+      tempObject.transform.parent = parentEnemies.transform;
+
+    }
+
   }
 
   // Mira los alrededores de la posicion de la trampa para orientarla hacia el lado correcto

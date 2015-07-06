@@ -78,7 +78,7 @@ public class UIManager : MonoBehaviour
   /*********** Eventos de boton ***********/
   public void OnNewGame()
   {
-    StartCoroutine(WaitOnSceneLoad((int)SceneName.Intro));
+    StartCoroutine(WaitOnSceneLoad((int)SceneName.DungeonLevel));
   }
 
   public void OnMainMenu()

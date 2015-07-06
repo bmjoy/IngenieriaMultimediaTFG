@@ -36,11 +36,18 @@ public class ObjectAutodestroy : MonoBehaviour
   void OnCollisionEnter(Collision collision)
   {
     string cTag = collision.gameObject.tag;
-    for(int i = 0; i < deadlyTags.Length; i++)
+    if(deadlyTags[0] == "All" && cTag != "Floor")
     {
-      if(cTag == deadlyTags[i])
+      AutoDestroy();
+    }
+    else
+    {
+      for(int i = 0; i < deadlyTags.Length; i++)
       {
-        AutoDestroy();
+        if(cTag == deadlyTags[i])
+        {
+          AutoDestroy();
+        }
       }
     }
   }
@@ -48,11 +55,18 @@ public class ObjectAutodestroy : MonoBehaviour
   void OnTriggerEnter(Collider collider)
   {
     string cTag = collider.gameObject.tag;
-    for(int i = 0; i < deadlyTags.Length; i++)
+    if(deadlyTags[0] == "All" && cTag != "Floor")
     {
-      if(cTag == deadlyTags[i])
+      AutoDestroy();
+    }
+    else
+    {
+      for(int i = 0; i < deadlyTags.Length; i++)
       {
-        AutoDestroy();
+        if(cTag == deadlyTags[i])
+        {
+          AutoDestroy();
+        }
       }
     }
   }

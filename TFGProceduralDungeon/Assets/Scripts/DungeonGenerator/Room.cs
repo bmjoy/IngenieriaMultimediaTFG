@@ -96,6 +96,18 @@ public class Room : MonoBehaviour
       Vector2i startPos = new Vector2i(this.position.x + this.size.x / 2, this.position.z + this.size.z / 2);
       Vector2i endPos = new Vector2i(siblingRoom.position.x + siblingRoom.size.x / 2, siblingRoom.position.z + siblingRoom.size.z / 2);
 
+      if(startPos.x == endPos.x || startPos.z == endPos.z)
+      {
+        if(startPos.x != endPos.x)
+        {
+          startPos.z = Random.Range(startPos.z - this.size.z / 2, startPos.z + this.size.z / 2);
+        }
+        else if(startPos.z != endPos.z)
+        {
+          startPos.x = Random.Range(startPos.x - this.size.x / 2, startPos.x + this.size.x / 2);
+        }
+      }
+
       GameObject digger = (GameObject)Instantiate(prefabDigger, this.transform.position, Quaternion.identity);
       digger.GetComponent<Digger>().roomId = (int)TileType.ROOM_ID + generator.nextId;
       generator.nextId++;

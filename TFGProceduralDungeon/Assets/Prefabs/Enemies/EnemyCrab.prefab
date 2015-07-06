@@ -139,7 +139,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bf719dd9098e3c49beec0ac313a1875, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 2
+  speed: 1
   state: 1
   deathEffectPrefab: {fileID: 172266, guid: 20642e8c8dc9d704a8e88d138ff9841d, type: 2}
   sightRadius: 3

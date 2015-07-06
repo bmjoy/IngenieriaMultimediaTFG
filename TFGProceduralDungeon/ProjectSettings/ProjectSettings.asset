@@ -139,7 +139,7 @@ PlayerSettings:
       m_Size: 128
   m_BuildTargetBatching: []
   m_BuildTargetGraphicsAPIs: []
-  webPlayerTemplate: APPLICATION:Default
+  webPlayerTemplate: APPLICATION:Black Background
   m_TemplateCustomTags: {}
   actionOnDotNetUnhandledException: 1
   enableInternalProfiler: 0
