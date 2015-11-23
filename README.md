@@ -12,7 +12,7 @@ Con este trabajo me propuse diversos **objetivos**:
 * Diseño y desarrollo de un videojuego sencillo de estilo rogue-like, haciendo uso justificado de alguno de los algoritmos estudiados para la generación del contenido.
 
 ## Memoria del proyecto
-La documentación del proyecto desarrolla estos objetivos de manera teórica e incluye el documento de diseño (conocido en inglés como GDD). Se puede encontrar en formato PDF en el directorio de documentación del repositorio o directamente [desde aquí]().
+La documentación del proyecto desarrolla estos objetivos de manera teórica e incluye el documento de diseño (conocido en inglés como GDD). Se puede encontrar en formato PDF en el directorio de documentación del repositorio o directamente [desde aquí](https://raw.githubusercontent.com/rubenmv/IngenieriaMultimediaTFG/master/Documentacion/Memoria%20-%20Videojuego%20basado%20en%20la%20generacion%20procedimental%20de%20mundos%20o%20niveles.pdf?token=AAD6fe59R2qcmUyw2ch0qLsHltNePjzyks5WXK5FwA%3D%3D).
 
 ## Como abrir el proyecto  
 El proyecto puede ser abierto mediante la herramienta/editor [Unity](https://unity3d.com/), simplemente abrir la carpeta __TreasureHunter__. Para probar el juego desde el editor primero se debe abrir la escena __Preload__ que sirve como punto de entrada de las distintas escenas del juego. Si se intenta abrir desde cualquier otra escena es probable que no funcione correctamente.
