@@ -20,6 +20,9 @@ El proyecto puede ser abierto mediante la herramienta/editor [Unity](https://uni
 ## A tener en cuenta
 Esto es un proyecto de estudio en el que uno de los objetivos era realizar un pequeño videojuego para probar la teoría, por lo que este no esta totalmente terminado y mucho menos pulido, habiéndose quedado muchas cosas pendientes que podrían aportar mucho a la jugabilidad y diversión. En cualquier caso lo comparto para que sirva de ayuda a futuros estudiantes.  
 
+![Chest](https://raw.githubusercontent.com/rubenmv/IngenieriaMultimediaTFG/master/img/chest.gif)
+![Arrow traps](https://raw.githubusercontent.com/rubenmv/IngenieriaMultimediaTFG/master/img/arrows.gif)
+![Boulder trap](https://raw.githubusercontent.com/rubenmv/IngenieriaMultimediaTFG/master/img/boulder-2.gif)
 
 
 ## Recursos  
